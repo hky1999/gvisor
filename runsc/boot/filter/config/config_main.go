@@ -124,6 +124,14 @@ var allowedSyscalls = seccomp.MakeSyscallRules(map[uintptr]seccomp.SyscallRule{
 			seccomp.EqualTo(linux.FIONREAD),
 			seccomp.AnyValue{}, /* int* */
 		},
+		// Needed to take reflink snapshots of the writable-layer filestore
+		// backing files inside the checkpoint's freeze window
+		// (--filestore-snapshot-dir).
+		seccomp.PerArg{
+			seccomp.NonNegativeFD{},         /* fd (snapshot destination) */
+			seccomp.EqualTo(linux.FICLONE),
+			seccomp.NonNegativeFD{}, /* fd (filestore source) */
+		},
 		// These commands are needed for terminal support, but we only allow
 		// setting/getting termios and winsize.
 		seccomp.PerArg{
@@ -267,7 +275,12 @@ var allowedSyscalls = seccomp.MakeSyscallRules(map[uintptr]seccomp.SyscallRule{
 	unix.SYS_PWRITEV:  seccomp.MatchAll{},
 	unix.SYS_PWRITEV2: seccomp.MatchAll{},
 	unix.SYS_READ:     seccomp.MatchAll{},
-	unix.SYS_READV:    seccomp.MatchAll{}, // Used by TAP/TUN fdbased links.
+	// The sandbox dataplane may receive an externally-passed non-socket FD
+	// (e.g. a TAP device injected through containerManager.SetNetworkArgs).
+	// Non-socket FDs always use the readv() inbound dispatcher (see
+	// fdbased.createInboundDispatcher), so readv must be permitted in the
+	// sandbox filter and not only in the hostinet one.
+	unix.SYS_READV:    seccomp.MatchAll{},
 	unix.SYS_RECVMSG: seccomp.Or{
 		seccomp.PerArg{
 			seccomp.AnyValue{},

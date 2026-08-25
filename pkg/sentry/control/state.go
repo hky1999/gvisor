@@ -67,6 +67,17 @@ type State struct {
 	Watchdog *watchdog.Watchdog
 }
 
+// FilestoreSnapshotTarget identifies one filestore snapshot destination for
+// the Save RPC's FilePayload.
+type FilestoreSnapshotTarget struct {
+	ResourceID checkpoint.ResourceID `json:"resource_id"`
+	// Name is the artifact file name the destination will get in the
+	// snapshot directory (e.g. "filestore-0"); it is recorded in the
+	// filestores.json sidecar.
+	Name    string `json:"name"`
+	FDIndex int    `json:"fd_index"`
+}
+
 // SaveOpts contains options for the Save RPC call.
 type SaveOpts struct {
 	// Key is used to enable state integrity check.
@@ -79,6 +90,25 @@ type SaveOpts struct {
 	// pgalloc.SaveOpts.ExcludeCommittedZeroPages for the application memory
 	// file.
 	AppMFExcludeCommittedZeroPages bool `json:"app_mf_exclude_committed_zero_pages"`
+
+	// PrivateMFExternalContent is the value of
+	// pgalloc.SaveOpts.ExternalContent for private (disk-backed) MemoryFiles.
+	// If true, their page contents are not saved into the checkpoint; the
+	// backing host files (gofer filestore files) must be captured out-of-band
+	// and provided for adoption on restore.
+	PrivateMFExternalContent bool `json:"private_mf_external_content"`
+
+	// FilestoreSnapshot specifies in-freeze-window filestore snapshots: each
+	// private MemoryFile matching a target's ResourceID is FICLONE'd to the
+	// target's donated destination FD after the kernel pauses and before
+	// memory-file metadata is serialized, so the snapshot and the saved
+	// metadata describe the same instant (valid with Resume/leave-running).
+	FilestoreSnapshot []FilestoreSnapshotTarget `json:"filestore_snapshot,omitempty"`
+
+	// FilestoreSidecarFDIndex is the index into FilePayload.Files of the
+	// donated file that receives the filestores.json artifact manifest
+	// during the save window. Only meaningful with FilestoreSnapshot.
+	FilestoreSidecarFDIndex int `json:"filestore_sidecar_fd_index,omitempty"`
 
 	// HavePagesFile indicates whether the pages file and its corresponding
 	// metadata file is provided.
@@ -108,14 +138,6 @@ type SaveOpts struct {
 	// CudaCheckpointSequential indicates whether cuda-checkpoint should be run
 	// sequentially (rather than in parallel).
 	CudaCheckpointSequential bool `json:"cuda_checkpoint_sequential"`
-
-	// SplitFSCheckpointPaths is the list of paths to include in the filesystem
-	// for split checkpoint. If non-empty, split filesystem checkpoint is enabled.
-	// For capturing all of tmpfs, the value should be "all-tmpfs".
-	SplitFSCheckpointPaths []checkpoint.ResourceID `json:"split_fs_checkpoint_paths"`
-
-	// RunscVersion is the runsc binary version.
-	RunscVersion string `json:"runsc_version"`
 }
 
 // SaveRestoreExecOpts contains options for executing a binary
@@ -140,6 +162,7 @@ func ConvertToStateSaveOpts(o *SaveOpts) (*state.SaveOpts, error) {
 		Key:                            o.Key,
 		Metadata:                       o.Metadata,
 		AppMFExcludeCommittedZeroPages: o.AppMFExcludeCommittedZeroPages,
+		PrivateMFExternalContent:       o.PrivateMFExternalContent,
 		Resume:                         o.Resume,
 		CudaCheckpointPath:             o.CudaCheckpointPath,
 		CudaCheckpointSequential:       o.CudaCheckpointSequential,
@@ -152,10 +175,6 @@ func ConvertToStateSaveOpts(o *SaveOpts) (*state.SaveOpts, error) {
 }
 
 func setSaveOpts(o *SaveOpts, saveOpts *state.SaveOpts) error {
-	// TODO(b/541219576): Support checkpoint gofer with split checkpoint.
-	if len(o.SplitFSCheckpointPaths) > 0 && o.UseCheckpointGofer {
-		return fmt.Errorf("split filesystem checkpoint is not supported with checkpoint gofer")
-	}
 	if o.UseCheckpointGofer {
 		return setSaveOptsForCheckpointGofer(o, saveOpts)
 	}
@@ -167,9 +186,10 @@ func setSaveOptsForLocalCheckpointFiles(o *SaveOpts, saveOpts *state.SaveOpts) e
 	if o.HavePagesFile {
 		wantFiles += 2
 	}
-	fsFilesStart := wantFiles
-	if len(o.SplitFSCheckpointPaths) > 0 {
-		wantFiles += 4
+	// In-window filestore snapshot destinations and the sidecar manifest file.
+	wantFiles += len(o.FilestoreSnapshot)
+	if len(o.FilestoreSnapshot) > 0 {
+		wantFiles++ // sidecar
 	}
 	if gotFiles := len(o.FilePayload.Files); gotFiles != wantFiles {
 		return fmt.Errorf("got %d files, wanted %d", gotFiles, wantFiles)
@@ -200,34 +220,24 @@ func setSaveOptsForLocalCheckpointFiles(o *SaveOpts, saveOpts *state.SaveOpts) e
 		}
 		saveOpts.PagesFile = stateio.NewPagesFileFDWriterDefault(int32(pagesFileFD))
 	}
-
-	if len(o.SplitFSCheckpointPaths) > 0 {
-		manifestFile, err := o.ReleaseFD(fsFilesStart)
+	for i := range o.FilestoreSnapshot {
+		t := &o.FilestoreSnapshot[i]
+		dest, err := o.ReleaseFD(t.FDIndex)
 		if err != nil {
 			return err
 		}
-		multiTarFile, err := o.ReleaseFD(fsFilesStart + 1)
+		saveOpts.FilestoreSnapshots = append(saveOpts.FilestoreSnapshots, checkpoint.FilestoreSnapshot{
+			ID:   t.ResourceID,
+			Name: t.Name,
+			Dest: dest.ReleaseToFile("filestore snapshot dest"),
+		})
+	}
+	if len(o.FilestoreSnapshot) > 0 {
+		sidecar, err := o.ReleaseFD(o.FilestoreSidecarFDIndex)
 		if err != nil {
 			return err
 		}
-		pagesMetadataFile, err := o.ReleaseFD(fsFilesStart + 2)
-		if err != nil {
-			return err
-		}
-		pagesFileFD, err := unix.Dup(int(o.Files[fsFilesStart+3].Fd()))
-		if err != nil {
-			return err
-		}
-		pagesFile := stateio.NewPagesFileFDWriterDefault(int32(pagesFileFD))
-
-		saveOpts.FSSaveOpts = &kernel.FSSaveOpts{
-			ManifestFile:      manifestFile,
-			MultiTarFile:      multiTarFile,
-			PagesMetadataFile: pagesMetadataFile,
-			PagesFile:         pagesFile,
-			RunscVersion:      o.RunscVersion,
-			Paths:             o.SplitFSCheckpointPaths,
-		}
+		saveOpts.FilestoreSidecar = sidecar.ReleaseToFile("filestore sidecar")
 	}
 	return nil
 }

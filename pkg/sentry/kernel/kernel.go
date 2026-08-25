@@ -710,11 +710,43 @@ func savePrivateMFs(ctx context.Context, w io.Writer, mfsToSave map[checkpoint.R
 	return nil
 }
 
+// SaveOpts contains options for Kernel.SaveTo().
+type SaveOpts struct {
+	// AppMFExcludeCommittedZeroPages is the value of
+	// pgalloc.SaveOpts.ExcludeCommittedZeroPages for the application
+	// MemoryFile. It is expected to reflect application memory usage
+	// behavior, but not necessarily usage of private MemoryFiles.
+	AppMFExcludeCommittedZeroPages bool
+
+	// PrivateMFExternalContent is the value of
+	// pgalloc.SaveOpts.ExternalContent for private (disk-backed) MemoryFiles.
+	// If true, they only save segment metadata; their contents are expected
+	// to be captured out-of-band (the backing host files are preserved or
+	// snapshotted separately) and adopted on restore.
+	PrivateMFExternalContent bool
+
+	// FilestoreSnapshots, if non-empty, requests in-freeze-window snapshots
+	// of the private MemoryFiles: after the kernel pauses and before
+	// memory-file metadata is serialized, each MemoryFile identified by ID
+	// has its backing file FICLONE'd (reflink-cloned) to Dest, so the
+	// snapshot and the saved metadata describe the same instant (valid with
+	// Resume/leave-running).
+	FilestoreSnapshots []checkpoint.FilestoreSnapshot
+
+	// FilestoreSidecar, if non-nil, receives a JSON manifest describing the
+	// FilestoreSnapshots artifacts (names, resource IDs, sizes, sampled
+	// fingerprints) written during the freeze window.
+	FilestoreSidecar io.Writer
+
+	// Resume indicates if the statefile is used for save-resume.
+	Resume bool
+}
+
 // SaveTo saves the state of k to stateFile. It takes ownership of stateFile,
 // pagesMetadata, and pagesFile, even if it returns a non-nil error.
 //
 // Preconditions: The kernel must be paused throughout the call to SaveTo.
-func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCloser, pagesFile stateio.AsyncWriter, appMFExcludeCommittedZeroPages, resume bool, fsOpts *FSSaveOpts) error {
+func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCloser, pagesFile stateio.AsyncWriter, opts *SaveOpts) error {
 	if hostarch.PageSize != 4096 {
 		return fmt.Errorf("save is not supported with %dK page size", hostarch.PageSize/1024)
 	}
@@ -732,31 +764,6 @@ func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCl
 		})
 	}
 	defer pagesCleanup.Clean()
-
-	var fsCleanup cleanup.Cleanup
-	if fsOpts != nil {
-		fsCleanup.Add(func() {
-			if fsOpts.ManifestFile != nil {
-				fsOpts.ManifestFile.Close()
-				fsOpts.ManifestFile = nil
-			}
-			if fsOpts.MultiTarFile != nil {
-				fsOpts.MultiTarFile.Close()
-				fsOpts.MultiTarFile = nil
-			}
-			if fsOpts.PagesMetadataFile != nil {
-				fsOpts.PagesMetadataFile.Close()
-				fsOpts.PagesMetadataFile = nil
-			}
-			if fsOpts.PagesFile != nil {
-				fsOpts.PagesFile.Close()
-				fsOpts.PagesFile = nil
-			}
-		})
-	}
-	defer fsCleanup.Clean()
-
-	splitFS := fsOpts != nil
 
 	return k.quiescePausedAnd(ctx, func() error {
 		// Discard unsavable mappings, such as those for host file descriptors.
@@ -779,6 +786,34 @@ func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCl
 			mf.MarkSavable()
 		}
 
+		// Start a fresh save window on every private MemoryFile: snapshot
+		// credentials stashed by a previous window's SnapshotToFd() must not
+		// leak into this save's ExternalContent metadata (a plain
+		// --skip-filestore-pages save following a --filestore-snapshot-dir
+		// one must describe the backing file's current contents).
+		for _, mf := range mfsToSave {
+			mf.BeginSaveWindow()
+		}
+
+		// Take in-window filestore snapshots (--filestore-snapshot-dir): the
+		// kernel is paused, so there are no writers to the backing files; the
+		// snapshot therefore describes exactly the instant the metadata
+		// below will describe. Snapshots are recorded (size + sampled
+		// fingerprint) on the MemoryFiles so that their ExternalContent save
+		// embeds values describing the snapshot rather than the original
+		// file, which may diverge after the window (leave-running).
+		if len(opts.FilestoreSnapshots) > 0 {
+			entries, err := k.snapshotFilestores(mfsToSave, opts.FilestoreSnapshots)
+			if err != nil {
+				return err
+			}
+			if opts.FilestoreSidecar != nil {
+				if err := checkpoint.WriteFilestoreSidecar(opts.FilestoreSidecar, entries); err != nil {
+					return fmt.Errorf("failed to write filestores.json sidecar: %w", err)
+				}
+			}
+		}
+
 		var (
 			mfSaveWg  sync.WaitGroup
 			mfSaveErr error
@@ -788,11 +823,7 @@ func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCl
 			mfSaveWg.Add(1)
 			go func() {
 				defer mfSaveWg.Done()
-				mfsToSaveActual := mfsToSave
-				if splitFS {
-					mfsToSaveActual = filterMFsToSave(mfsToSave, fsOpts)
-				}
-				mfSaveErr = k.saveMemoryFiles(ctx, nil, pagesMetadata, pagesFile, mfsToSaveActual, appMFExcludeCommittedZeroPages) // transfers ownership
+				mfSaveErr = k.saveMemoryFiles(ctx, nil, pagesMetadata, pagesFile, mfsToSave, opts) // transfers ownership
 			}()
 			pagesCleanup.Release()
 			// Defer a Wait() so we wait for k.saveMemoryFiles() to complete even if we
@@ -817,7 +848,7 @@ func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCl
 			// Pause the network stack.
 			netstackPauseStart := time.Now()
 			// Stack.removeConf should be true when resume=false and vice versa.
-			k.rootNetworkNamespace.Stack().SetRemoveConf(!resume)
+			k.rootNetworkNamespace.Stack().SetRemoveConf(!opts.Resume)
 			log.Infof("Pausing root network namespace")
 			k.rootNetworkNamespace.Stack().Pause()
 			defer k.rootNetworkNamespace.Stack().Resume()
@@ -833,15 +864,6 @@ func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCl
 		log.Infof("Kernel save stats: %s", stats.String())
 		log.Infof("Kernel save took [%s].", time.Since(kernelStart))
 
-		if fsOpts != nil {
-			fsSaveStart := time.Now()
-			if err := k.fsSaveLocked(ctx, fsOpts); err != nil {
-				return fmt.Errorf("failed to save split filesystem: %w", err)
-			}
-			log.Infof("Split filesystem save took [%s].", time.Since(fsSaveStart))
-			fsCleanup.Release()
-		}
-
 		if parallelMFSave {
 			// Close stateFile while MemoryFile saving is in progress to overlap
 			// their latencies.
@@ -855,11 +877,7 @@ func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCl
 				return mfSaveErr
 			}
 		} else {
-			mfsToSaveActual := mfsToSave
-			if splitFS {
-				mfsToSaveActual = filterMFsToSave(mfsToSave, fsOpts)
-			}
-			mfSaveErr = k.saveMemoryFiles(ctx, stateFile, nil, nil, mfsToSaveActual, appMFExcludeCommittedZeroPages)
+			mfSaveErr = k.saveMemoryFiles(ctx, stateFile, nil, nil, mfsToSave, opts)
 			if mfSaveErr != nil {
 				return mfSaveErr
 			}
@@ -888,7 +906,7 @@ func (k *Kernel) BeforeResume(ctx context.Context) {
 // pagesFile must be non-nil, saveMemoryFiles takes ownership of both
 // pagesMetadata and pagesFile (even if it returns a non-nil error), and
 // MemoryFile state will be saved to pagesMetadata and pagesFile.
-func (k *Kernel) saveMemoryFiles(ctx context.Context, w io.Writer, pagesMetadata io.WriteCloser, pagesFile stateio.AsyncWriter, mfsToSave map[checkpoint.ResourceID]*pgalloc.MemoryFile, appMFExcludeCommittedZeroPages bool) error {
+func (k *Kernel) saveMemoryFiles(ctx context.Context, w io.Writer, pagesMetadata io.WriteCloser, pagesFile stateio.AsyncWriter, mfsToSave map[checkpoint.ResourceID]*pgalloc.MemoryFile, opts *SaveOpts) error {
 	memoryStart := time.Now()
 
 	pmw := w
@@ -900,7 +918,7 @@ func (k *Kernel) saveMemoryFiles(ctx context.Context, w io.Writer, pagesMetadata
 	defer pmwCleanup.Clean()
 
 	mfOpts := pgalloc.SaveOpts{
-		ExcludeCommittedZeroPages: appMFExcludeCommittedZeroPages,
+		ExcludeCommittedZeroPages: opts.AppMFExcludeCommittedZeroPages,
 	}
 	var (
 		asyncPageSaveWg      sync.WaitGroup
@@ -927,9 +945,13 @@ func (k *Kernel) saveMemoryFiles(ctx context.Context, w io.Writer, pagesMetadata
 	if err := k.mf.SaveTo(ctx, pmw, &mfOpts); err != nil {
 		return err
 	}
-	// appMFExcludeCommittedZeroPages is expected to reflect application memory
+	// AppMFExcludeCommittedZeroPages is expected to reflect application memory
 	// usage behavior, but not necessarily usage of private MemoryFiles.
 	mfOpts.ExcludeCommittedZeroPages = false
+	// If PrivateMFExternalContent is set, private MemoryFiles only save
+	// segment metadata; their contents are expected to be captured out-of-band
+	// (the backing host files are preserved or snapshotted separately).
+	mfOpts.ExternalContent = opts.PrivateMFExternalContent
 	if err := savePrivateMFs(ctx, pmw, mfsToSave, &mfOpts); err != nil {
 		return err
 	}
@@ -1060,31 +1082,6 @@ func (k *Kernel) LoadFrom(ctx context.Context, r io.Reader, asyncMFLoader *Async
 		}
 		s.Restore()
 		timeline.Reached("Network stack restored")
-	}
-
-	if FSRestoreFromContext(ctx) {
-		if fsCheckpointed := pgalloc.FSCheckpointedMemoryFilesFromContext(ctx); fsCheckpointed != nil {
-			if mfmapVal := ctx.Value(pgalloc.CtxMemoryFileMap); mfmapVal != nil {
-				mfmap := mfmapVal.(map[checkpoint.ResourceID]*pgalloc.MemoryFile)
-				log.Infof("Discarding PMAs for FS-checkpointed private MemoryFiles: %v", fsCheckpointed)
-				k.tasks.mu.RLock()
-				mms := make(map[*mm.MemoryManager]struct{})
-				k.tasks.forEachTaskLocked(func(t *Task) {
-					if mm := t.MemoryManager(); mm != nil {
-						mms[mm] = struct{}{}
-					}
-				})
-				k.tasks.mu.RUnlock()
-
-				for mm := range mms {
-					for id := range fsCheckpointed {
-						if privateMF, ok := mfmap[id]; ok {
-							mm.DiscardPMAsForFile(privateMF)
-						}
-					}
-				}
-			}
-		}
 	}
 
 	if err := k.vfs.CompleteRestore(ctx, vfsOpts); err != nil {
@@ -2003,6 +2000,15 @@ func (k *Kernel) MonotonicClock() ktime.SampledClock {
 	return k.timekeeper.monotonicClock
 }
 
+// MonotonicRawClock returns the system CLOCK_MONOTONIC_RAW clock. When it is
+// not enabled as a distinct clock this is the same as MonotonicClock.
+func (k *Kernel) MonotonicRawClock() ktime.SampledClock {
+	if k.timekeeper.monotonicRawClock != nil {
+		return k.timekeeper.monotonicRawClock
+	}
+	return k.timekeeper.monotonicClock
+}
+
 // Syslog returns the syslog.
 func (k *Kernel) Syslog() *syslog {
 	return &k.syslog
@@ -2535,25 +2541,4 @@ func (k *Kernel) ContainerName(cid string) string {
 	k.extMu.Lock()
 	defer k.extMu.Unlock()
 	return k.containerNames[cid]
-}
-
-func filterMFsToSave(mfsToSave map[checkpoint.ResourceID]*pgalloc.MemoryFile, fsOpts *FSSaveOpts) map[checkpoint.ResourceID]*pgalloc.MemoryFile {
-	paths := fsOpts.Paths
-	if len(paths) == 0 {
-		paths = []checkpoint.ResourceID{{Path: "/"}}
-	}
-	pathsMap := make(map[checkpoint.ResourceID]struct{}, len(paths))
-	for _, p := range paths {
-		pathsMap[p] = struct{}{}
-	}
-	mfsToSaveActual := make(map[checkpoint.ResourceID]*pgalloc.MemoryFile)
-	for id, mf := range mfsToSave {
-		if !matchesPaths(id, pathsMap) {
-			mfsToSaveActual[id] = mf
-		}
-	}
-	if len(mfsToSaveActual) == 0 {
-		return nil
-	}
-	return mfsToSaveActual
 }

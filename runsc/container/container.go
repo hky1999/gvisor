@@ -35,6 +35,7 @@ import (
 	"gvisor.dev/gvisor/pkg/abi/linux"
 	"gvisor.dev/gvisor/pkg/cleanup"
 	"gvisor.dev/gvisor/pkg/log"
+	"gvisor.dev/gvisor/pkg/pinring"
 	"gvisor.dev/gvisor/pkg/sentry/control"
 	"gvisor.dev/gvisor/pkg/sentry/fsimpl/erofs"
 	"gvisor.dev/gvisor/pkg/sentry/fsimpl/tmpfs"
@@ -153,6 +154,16 @@ type Container struct {
 	// This field isn't saved to json, because only a creator of a gofer
 	// process will have it as a child process.
 	goferIsChild bool `nojson:"true"`
+
+	// sentryExitSock is the creator's end of the root gofer's
+	// `--sync-sentry-exit-fd` socket,
+	// A pidfd of the sandbox process is sent over it once the sandbox has been
+	// spawned, and then it is closed.
+	sentryExitSock *os.File `nojson:"true"`
+
+	// pinRingFile is the pin ring (see `//pkg/pinring`)
+	// It is held between the gofer and the boot process's spawn.
+	pinRingFile *os.File `nojson:"true"`
 }
 
 // Args is used to configure a new container.
@@ -197,13 +208,6 @@ type Args struct {
 	// for containers in a new Sandbox process.
 	FSRestoreImagePath string
 	FSRestoreDirect    bool
-
-	// CheckpointDirPath is the path to the sentry checkpoint directory.
-	// Used to default FSRestoreImagePath if it is empty and SplitFSRestore is true.
-	CheckpointDirPath string
-
-	// SplitFSRestore indicates that we are restoring from a split filesystem checkpoint.
-	SplitFSRestore bool
 }
 
 // New creates the container in a new Sandbox process, unless the metadata
@@ -211,21 +215,6 @@ type Args struct {
 // Destroy() on the container.
 func New(conf *config.Config, args Args) (*Container, error) {
 	log.Debugf("Create container, cid: %s, rootDir: %q", args.ID, conf.RootDir)
-
-	if args.FSRestoreImagePath == "" && args.SplitFSRestore {
-		if args.CheckpointDirPath == "" {
-			return nil, errors.New("checkpoint directory path must be provided for split FS restore")
-		}
-		defaultFSDir := path.Join(args.CheckpointDirPath, "fs")
-		if _, err := os.Stat(defaultFSDir); err != nil {
-			if os.IsNotExist(err) {
-				return nil, fmt.Errorf("split FS restore requested, but default FS checkpoint directory %q does not exist. Please specify FSRestoreImagePath", defaultFSDir)
-			}
-			return nil, fmt.Errorf("checking default FS checkpoint directory: %w", err)
-		}
-		args.FSRestoreImagePath = defaultFSDir
-	}
-
 	if err := validateID(args.ID); err != nil {
 		return nil, err
 	}
@@ -415,12 +404,23 @@ func (c *Container) createRoot(conf *config.Config, args Args, sandboxID string)
 			ExecFile:            args.ExecFile,
 			FSRestoreImagePath:  args.FSRestoreImagePath,
 			FSRestoreDirect:     args.FSRestoreDirect,
+			PinRingFile:         c.pinRingFile,
 		}
 		sand, err := sandbox.New(conf, sandArgs)
 		if err != nil {
 			return fmt.Errorf("cannot create sandbox: %w", err)
 		}
 		c.Sandbox = sand
+		c.pinRingFile = nil // Now owned by the sandbox's donation agency.
+		if c.sentryExitSock != nil {
+			// The gofer waits on this pidfd before exiting, so it is
+			// always the last holder of the pin ring.
+			if err := pinring.SendPidfd(c.sentryExitSock, sand.Pid.Load()); err != nil {
+				log.Warningf("Cannot send the sandbox's pidfd to the gofer (gofer exit may race the sandbox's): %v", err)
+			}
+			c.sentryExitSock.Close()
+			c.sentryExitSock = nil
+		}
 		return nil
 
 	}); err != nil {
@@ -464,11 +464,11 @@ func (c *Container) Start(conf *config.Config) error {
 
 // Restore takes a container and replaces its kernel and file system
 // to restore a container from its state file.
-func (c *Container) Restore(conf *config.Config, imagePath string, direct, background, splitFSRestore bool, networkArgs *boot.CreateLinksAndRoutesArgs) error {
+func (c *Container) Restore(conf *config.Config, imagePath string, direct, background bool, networkArgs *boot.CreateLinksAndRoutesArgs) error {
 	log.Debugf("Restore container, cid: %s", c.ID)
 
 	restore := func(conf *config.Config, spec *specs.Spec) error {
-		return c.Sandbox.Restore(conf, spec, c.ID, imagePath, direct, background, splitFSRestore, networkArgs)
+		return c.Sandbox.Restore(conf, spec, c.ID, imagePath, direct, background, networkArgs)
 	}
 	return c.startImpl(conf, "restore", restore, c.Sandbox.RestoreSubcontainer)
 }
@@ -539,11 +539,12 @@ func (c *Container) startImpl(conf *config.Config, action string, startRoot func
 		}
 	}
 
-	// "If any poststart hook fails, the runtime MUST log a warning, but
-	// the remaining hooks and lifecycle continue as if the hook had
-	// succeeded" -OCI spec.
+	// "If any poststart hook fails, the runtime MUST generate an error,
+	// stop the container, and continue the lifecycle at step 12" - OCI spec.
 	if c.Spec.Hooks != nil {
-		specutils.ExecuteHooksBestEffort(c.Spec.Hooks.Poststart, c.State())
+		if err := specutils.ExecuteHooks(c.Spec.Hooks.Poststart, c.State()); err != nil {
+			return err
+		}
 	}
 
 	c.changeStatus(Running)
@@ -850,6 +851,15 @@ func (c *Container) Checkpoint(conf *config.Config, imagePath string, opts sandb
 	if err := c.requireStatus("checkpoint", Created, Running, Paused); err != nil {
 		return err
 	}
+	if opts.FilestoreSnapshotDir != "" {
+		targets, destFiles, sidecar, err := c.prepareFilestoreSnapshot(opts.FilestoreSnapshotDir)
+		if err != nil {
+			return err
+		}
+		opts.FilestoreSnapshotTargets = targets
+		opts.FilestoreSnapshotFiles = destFiles
+		opts.FilestoreSidecarFile = sidecar
+	}
 	return c.Sandbox.Checkpoint(conf, c.ID, imagePath, opts)
 }
 
@@ -1147,7 +1157,7 @@ func (c *Container) initGoferConfs(ovlConf config.Overlay2, mountHints *boot.Pod
 // tmpfs/overlayfs mounts that will overlay some gofer mounts.
 //
 // Precondition: gofer process must be running.
-func (c *Container) createGoferFilestores(ovlConf config.Overlay2, mountHints *boot.PodMountHints) ([]*os.File, error) {
+func (c *Container) createGoferFilestores(conf *config.Config, ovlConf config.Overlay2, mountHints *boot.PodMountHints) ([]*os.File, error) {
 	var goferFilestores []*os.File
 	// NOTE(gvisor.dev/issue/9834): Create the filestores in the gofer mount
 	// namespace, so that they don't prevent the host mount points from being
@@ -1155,9 +1165,23 @@ func (c *Container) createGoferFilestores(ovlConf config.Overlay2, mountHints *b
 	// to access gofer's mount namespace. See proc_pid_root(5).
 	goferRootfs := fmt.Sprintf("/proc/%d/root", c.GoferPid.Load())
 
+	// If set, adopt pre-existing host files (from a checkpoint artifact) as
+	// the filestores instead of creating new anonymous ones, in mount order
+	// (root first). Artifacts are selected by sidecar resource identity when
+	// a runsc-issued filestores.json is present, and reflink-cloned when
+	// --filestore-clone-on-adopt is enabled (default).
+	var adopter *filestoreAdopter
+	if conf.FilestoreAdoptDir != "" {
+		var aerr error
+		adopter, aerr = newFilestoreAdopter(conf, c)
+		if aerr != nil {
+			return nil, aerr
+		}
+	}
+
 	// Handle rootfs first.
 	rootfsConf := c.GoferMountConfs[0]
-	filestore, err := c.createGoferFilestore(goferRootfs, ovlConf, rootfsConf, c.Spec.Root.Path, mountHints)
+	filestore, err := c.createGoferFilestore(goferRootfs, ovlConf, rootfsConf, c.Spec.Root.Path, "/", mountHints, adopter)
 	if err != nil {
 		return nil, err
 	}
@@ -1173,7 +1197,7 @@ func (c *Container) createGoferFilestores(ovlConf config.Overlay2, mountHints *b
 		}
 		mountConf := c.GoferMountConfs[mountIdx]
 		mountIdx++
-		filestore, err := c.createGoferFilestore(goferRootfs, ovlConf, mountConf, m.Source, mountHints)
+		filestore, err := c.createGoferFilestore(goferRootfs, ovlConf, mountConf, m.Source, m.Destination, mountHints, adopter)
 		if err != nil {
 			return nil, err
 		}
@@ -1189,14 +1213,24 @@ func (c *Container) createGoferFilestores(ovlConf config.Overlay2, mountHints *b
 	return goferFilestores, nil
 }
 
-func (c *Container) createGoferFilestore(goferRootfs string, ovlConf config.Overlay2, goferConf specutils.GoferMountConf, mountSrc string, mountHints *boot.PodMountHints) (*os.File, error) {
+func (c *Container) createGoferFilestore(goferRootfs string, ovlConf config.Overlay2, goferConf specutils.GoferMountConf, mountSrc string, mountDest string, mountHints *boot.PodMountHints, adopter *filestoreAdopter) (*os.File, error) {
 	if !goferConf.IsFilestorePresent() {
 		return nil, nil
+	}
+	if adopter != nil && goferConf.Upper == specutils.SelfOverlay {
+		// Adoption only supports anonymous filestores (overlay2 dir= medium).
+		// A self-overlay filestore is a named file inside the mount source;
+		// adopting it would make two restores (e.g. fan-out from the same
+		// checkpoint) silently share one writable file. Fail loudly instead.
+		return nil, fmt.Errorf("--filestore-adopt-dir supports anonymous filestores only (overlay2 'dir=' medium); mount %q uses the self overlay medium and its named filestore cannot be adopted", mountSrc)
 	}
 	switch goferConf.Upper {
 	case specutils.SelfOverlay:
 		return c.createGoferFilestoreInSelf(goferRootfs, mountSrc, mountHints)
 	case specutils.AnonOverlay:
+		if adopter != nil {
+			return adopter.adopt(c, mountDest)
+		}
 		return c.createGoferFilestoreInDir(goferRootfs, ovlConf.Medium().HostFileDir())
 	default:
 		return nil, fmt.Errorf("unexpected upper layer with filestore %s", goferConf)
@@ -1532,6 +1566,19 @@ func (c *Container) createGoferProcess(conf *config.Config, mountHints *boot.Pod
 		s.StartHandling(rpcServ)
 	}()
 
+	if ring, err := pinring.NewDisabledIOURing(); err != nil {
+		log.Warningf("Cannot create disabled io_uring ring: %v. This slows down gVisor sandbox teardown.", err)
+	} else {
+		donations.Donate("pin-ring-fd", ring)
+		c.pinRingFile = ring
+		fds, err := unix.Socketpair(unix.AF_UNIX, unix.SOCK_SEQPACKET|unix.SOCK_CLOEXEC, 0)
+		if err != nil {
+			return nil, nil, nil, nil, err
+		}
+		donations.DonateAndClose("sync-sentry-exit-fd", os.NewFile(uintptr(fds[1]), "sentry exit sync gofer FD"))
+		c.sentryExitSock = os.NewFile(uintptr(fds[0]), "sentry exit sync runsc FD")
+	}
+
 	// Count the number of mounts that needs an IO file.
 	ioFileCount := 0
 	for _, cfg := range c.GoferMountConfs {
@@ -1703,7 +1750,7 @@ func (c *Container) createGoferProcess(conf *config.Config, mountHints *boot.Pod
 
 	// Create gofer filestore files with the Gofer's mount namespaces while
 	// chrootSyncSandEnd is still open.
-	goferFilestores, err := c.createGoferFilestores(conf.GetOverlay2(), mountHints)
+	goferFilestores, err := c.createGoferFilestores(conf, conf.GetOverlay2(), mountHints)
 	if err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("creating gofer filestore files: %w", err)
 	}

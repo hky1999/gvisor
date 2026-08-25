@@ -22,10 +22,8 @@ import (
 
 	"github.com/google/subcommands"
 	specs "github.com/opencontainers/runtime-spec/specs-go"
-	"gvisor.dev/gvisor/pkg/sentry/checkpoint"
 	"gvisor.dev/gvisor/pkg/sentry/control"
 	"gvisor.dev/gvisor/pkg/state/statefile"
-	"gvisor.dev/gvisor/runsc/boot"
 	"gvisor.dev/gvisor/runsc/cmd/util"
 	"gvisor.dev/gvisor/runsc/config"
 	"gvisor.dev/gvisor/runsc/container"
@@ -40,9 +38,10 @@ type Checkpoint struct {
 	leaveRunning              bool
 	compression               CheckpointCompression
 	excludeCommittedZeroPages bool
+	skipFilestorePages        bool
+	filestoreSnapshotDir      string
 	cudaCheckpointPath        string
 	cudaCheckpointSequential  bool
-	splitFSCheckpointPaths    string
 	saveRestoreExecArgv       string
 	saveRestoreExecTimeout    time.Duration
 
@@ -75,12 +74,13 @@ func (c *Checkpoint) SetFlags(f *flag.FlagSet) {
 	f.BoolVar(&c.leaveRunning, "leave-running", false, "restart the container after checkpointing")
 	f.Var(newCheckpointCompressionValue(statefile.CompressionLevelDefault, &c.compression), "compression", "compress checkpoint image on disk. Values: none|flate-best-speed.")
 	f.BoolVar(&c.excludeCommittedZeroPages, "exclude-committed-zero-pages", false, "exclude committed zero-filled pages from checkpoint")
+	f.BoolVar(&c.skipFilestorePages, "skip-filestore-pages", false, "skip saving page contents of private (disk-backed) MemoryFiles; only segment metadata is saved and the backing host filestore files must be captured out-of-band and adopted on restore (experimental)")
+	f.StringVar(&c.filestoreSnapshotDir, "filestore-snapshot-dir", "", "directory in which reflink (FICLONE) snapshots of the writable-layer filestores are written inside the checkpoint's freeze window, together with a filestores.json artifact manifest. Requires --skip-filestore-pages, a fresh (empty) directory, and a reflink-capable filesystem (e.g. XFS); valid with --leave-running (snapshots and metadata describe the same instant). Restores adopt the directory via --filestore-adopt-dir (experimental)")
 	f.BoolVar(&c.direct, "direct", false, "use O_DIRECT for writing checkpoint pages file")
 	f.StringVar(&c.cudaCheckpointPath, "cuda-checkpoint-path", "", "path to the cuda-checkpoint binary in the container")
 	f.BoolVar(&c.cudaCheckpointSequential, "cuda-checkpoint-sequential", false, "run cuda-checkpoint sequentially in the container")
 	f.StringVar(&c.saveRestoreExecArgv, "save-restore-exec-argv", "", "argv (split by spaces) for a save/restore binary that's automatically executed in the sandbox before saving and after restoring. If the execution fails, the save/restore process will fail.")
 	f.DurationVar(&c.saveRestoreExecTimeout, "save-restore-exec-timeout", control.DefaultSaveRestoreExecTimeout, "timeout for the binary pointed to by save-restore-exec-argv.")
-	f.StringVar(&c.splitFSCheckpointPaths, "fs-checkpoint-paths", "", "comma-separated list of container:path targets to include in the filesystem checkpoint. For capturing all of tmpfs, the value should be \"all-tmpfs\".")
 
 	// Unimplemented flags necessary for compatibility with docker.
 	var wp string
@@ -118,23 +118,15 @@ func (c *Checkpoint) Execute(_ context.Context, f *flag.FlagSet, args ...any) su
 		util.Fatalf("making directories at path provided: %v", err)
 	}
 
-	var paths []checkpoint.ResourceID
-	if c.splitFSCheckpointPaths != "" {
-		var err error
-		paths, err = boot.ParseFSCheckpointPaths(c.splitFSCheckpointPaths)
-		if err != nil {
-			util.Fatalf("parsing fs-checkpoint-paths: %v", err)
-		}
-	}
-
 	opts := sandbox.CheckpointOpts{
 		Compression:                c.compression.Level(),
 		Resume:                     c.leaveRunning,
 		Direct:                     c.direct,
 		ExcludeCommittedZeroPages:  c.excludeCommittedZeroPages,
+		SkipFilestorePages:         c.skipFilestorePages,
+		FilestoreSnapshotDir:       c.filestoreSnapshotDir,
 		CudaCheckpointPath:         c.cudaCheckpointPath,
 		CudaCheckpointSequential:   c.cudaCheckpointSequential,
-		SplitFSCheckpointPaths:     paths,
 		SaveRestoreExecArgv:        c.saveRestoreExecArgv,
 		SaveRestoreExecTimeout:     c.saveRestoreExecTimeout,
 		SaveRestoreExecContainerID: cont.ID,

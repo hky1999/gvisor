@@ -425,6 +425,9 @@ func goferMountData(fd int, fa config.FileAccessType, conf *config.Config, suppr
 	if !conf.HostFifo.AllowOpen() {
 		opts = append(opts, "disable_fifo_open")
 	}
+	if conf.CharacterDevicePolicy.AllowsPassthrough() {
+		opts = append(opts, "char_device_policy="+conf.CharacterDevicePolicy.String())
+	}
 	return opts
 }
 
@@ -559,6 +562,13 @@ func getMountAccessType(conf *config.Config, hint *MountHint) config.FileAccessT
 
 func (c *containerMounter) mountAll(rootCtx context.Context, rootCreds *auth.Credentials, spec *specs.Spec, conf *config.Config, rootProcArgs *kernel.CreateProcessArgs) (*vfs.MountNamespace, error) {
 	log.Infof("Configuring container's file system")
+
+	if conf.FilestoreAdoptDir != "" {
+		// The donated filestore FDs are adopted host files whose contents are
+		// only valid for a state checkpoint restore. A fresh mount would
+		// truncate and overwrite them.
+		return nil, fmt.Errorf("cannot mount fresh filesystem with filestore adoption enabled; filestore-adopt-dir requires state checkpoint restore")
+	}
 
 	mns, err := c.createMountNamespace(rootCtx, spec, conf, rootCreds)
 	if err != nil {
@@ -763,7 +773,7 @@ func (c *containerMounter) configureOverlay(ctx context.Context, conf *config.Co
 	if filestoreFD != nil {
 		// Create memory file for disk-backed overlays.
 		resourceID := checkpoint.ResourceID{ContainerName: c.containerName, Path: dst}
-		mf, _, err := createPrivateMemoryFile(filestoreFD.ReleaseToFile("overlay-filestore"), resourceID, c.containerID, c.l.fsRestore)
+		mf, err := createPrivateMemoryFile(filestoreFD.ReleaseToFile("overlay-filestore"), resourceID, c.containerID, c.l.fsRestore, false /* adopt */)
 		if err != nil {
 			return nil, nil, fmt.Errorf("failed to create memory file for overlay: %v", err)
 		}
@@ -1100,7 +1110,7 @@ func getMountNameAndOptions(spec *specs.Spec, conf *config.Config, m *mountInfo,
 		}
 		if m.filestoreFD != nil {
 			resourceID := checkpoint.ResourceID{ContainerName: containerName, Path: m.mount.Destination}
-			mf, _, err := createPrivateMemoryFile(m.filestoreFD.ReleaseToFile("tmpfs-filestore"), resourceID, containerID, fsr)
+			mf, err := createPrivateMemoryFile(m.filestoreFD.ReleaseToFile("tmpfs-filestore"), resourceID, containerID, fsr, false /* adopt */)
 			if err != nil {
 				return "", nil, fmt.Errorf("failed to create memory file for tmpfs: %w", err)
 			}
@@ -1212,36 +1222,35 @@ func parseKeyValue(s string) (string, string, bool) {
 	return strings.TrimSpace(tokens[0]), strings.TrimSpace(tokens[1]), true
 }
 
-// createPrivateMemoryFile creates or loads a private memory file.
-// It returns:
-//   - The created pgalloc.MemoryFile.
-//   - A boolean indicating if the memory file was successfully loaded (restored) from the checkpoint.
-//   - An error if creation or restoration failed.
-func createPrivateMemoryFile(file *os.File, resourceID checkpoint.ResourceID, cid string, fsr *fsRestore) (*pgalloc.MemoryFile, bool, error) {
+func createPrivateMemoryFile(file *os.File, resourceID checkpoint.ResourceID, cid string, fsr *fsRestore, adopt bool) (*pgalloc.MemoryFile, error) {
 	pagesMetadataReader, pagesFileOffset, onLoadEnd, err := fsr.memoryFileLoadArgs(resourceID, cid)
 	if err != nil {
-		return nil, false, err
+		return nil, err
 	}
-	loaded := pagesMetadataReader != nil
 	mfOpts := pgalloc.MemoryFileOpts{
 		// Private memory files are usually backed by files on disk. Ideally we
 		// would confirm with fstatfs(2) but that is prohibited by seccomp.
 		DiskBackedFile: true,
-		// Disk backed files need to be decommited on destroy to release disk space.
-		DecommitOnDestroy: true,
+		// Disk backed files need to be decommitted on destroy to release disk space.
+		// Adopted files are not decommitted: their contents may still be
+		// referenced by other clones of the same checkpoint artifact.
+		DecommitOnDestroy: !adopt,
 		// sentry's seccomp filters don't allow the mmap(2) syscalls that
 		// pgalloc.IMAWorkAroundForMemFile() uses. Users of private memory files
 		// are expected to have performed the work around outside the sandbox.
 		DisableIMAWorkAround: true,
 		// Private memory files need to be restored correctly using this ID.
 		ResourceID: resourceID,
+		// Adopted files already contain the restored contents; they must not
+		// be truncated by NewMemoryFile().
+		AdoptExistingFile: adopt,
 	}
 	mf, err := pgalloc.NewMemoryFile(file, mfOpts)
 	if err != nil {
 		onLoadEnd(err)
-		return nil, false, err
+		return mf, err
 	}
-	if loaded {
+	if pagesMetadataReader != nil {
 		log.Infof("Loading filesystem checkpoint data for %q", resourceID)
 		if err := mf.LoadFrom(context.Background(), pagesMetadataReader, &pgalloc.LoadOpts{
 			PagesFile:       fsr.apfl,
@@ -1249,10 +1258,10 @@ func createPrivateMemoryFile(file *os.File, resourceID checkpoint.ResourceID, ci
 			DoneCallback:    onLoadEnd,
 		}); err != nil {
 			mf.Destroy()
-			return nil, false, err
+			return nil, err
 		}
 	}
-	return mf, loaded, nil
+	return mf, nil
 }
 
 // mountTmp mounts an internal tmpfs at '/tmp' if it's safe to do so.
@@ -1793,14 +1802,11 @@ func (c *containerMounter) configureRestore(restoreMnts *restoreMounts) error {
 	restoreMnts.fdmap[rootKey] = c.goferFDs.remove()
 
 	if rootfsConf := c.goferMountConfs[0]; rootfsConf.IsFilestorePresent() {
-		mf, loaded, err := createPrivateMemoryFile(c.goferFilestoreFDs.removeAsFD().ReleaseToFile("overlay-filestore"), rootKey, c.containerID, c.l.fsRestore)
+		mf, err := createPrivateMemoryFile(c.goferFilestoreFDs.removeAsFD().ReleaseToFile("overlay-filestore"), rootKey, c.containerID, c.l.fsRestore, c.l.root.conf.FilestoreAdoptDir != "")
 		if err != nil {
 			return fmt.Errorf("failed to create private memory file for mount rootfs: %w", err)
 		}
 		restoreMnts.mfmap[rootKey] = mf
-		if loaded {
-			restoreMnts.fsCheckpointedMfs[rootKey] = struct{}{}
-		}
 	}
 	// prepareMounts() consumes the remaining FDs for submounts.
 	mounts, err := c.prepareMounts()
@@ -1832,14 +1838,11 @@ func (c *containerMounter) configureRestore(restoreMnts *restoreMounts) error {
 		}
 		if submount.filestoreFD != nil {
 			key := checkpoint.ResourceID{ContainerName: c.containerName, Path: submount.mount.Destination}
-			mf, loaded, err := createPrivateMemoryFile(submount.filestoreFD.ReleaseToFile("overlay-filestore"), key, c.containerID, c.l.fsRestore)
+			mf, err := createPrivateMemoryFile(submount.filestoreFD.ReleaseToFile("overlay-filestore"), key, c.containerID, c.l.fsRestore, c.l.root.conf.FilestoreAdoptDir != "")
 			if err != nil {
 				return fmt.Errorf("failed to create private memory file for mount %q: %w", submount.mount.Destination, err)
 			}
 			restoreMnts.mfmap[key] = mf
-			if loaded {
-				restoreMnts.fsCheckpointedMfs[key] = struct{}{}
-			}
 		}
 	}
 	return nil

@@ -9,6 +9,7 @@ go_library(
     name = "container",
     srcs = [
         "container.go",
+        "filestore_snapshot.go",
         "gofer_to_host_rpc.go",
         "null_netns.go",
         "state_file.go",
@@ -22,6 +23,8 @@ go_library(
         "//pkg/abi/linux",
         "//pkg/cleanup",
         "//pkg/log",
+        "//pkg/pinring",
+        "//pkg/sentry/checkpoint",
         "//pkg/sentry/control",
         "//pkg/sentry/fsimpl/erofs",
         "//pkg/sentry/fsimpl/tmpfs",
@@ -49,7 +52,6 @@ go_test(
     name = "container_test",
     size = "large",
     srcs = [
-        "combined_restore_test.go",
         "console_test.go",
         "container_test.go",
         "metric_server_test.go",

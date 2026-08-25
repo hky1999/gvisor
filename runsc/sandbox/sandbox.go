@@ -68,7 +68,6 @@ import (
 	"gvisor.dev/gvisor/runsc/profile"
 	"gvisor.dev/gvisor/runsc/specutils"
 	"gvisor.dev/gvisor/runsc/starttime"
-	"gvisor.dev/gvisor/runsc/version"
 
 	metricpb "gvisor.dev/gvisor/pkg/metric/metric_go_proto"
 )
@@ -322,6 +321,10 @@ type Args struct {
 	// open filesystem checkpoint files using O_DIRECT.
 	FSRestoreImagePath string
 	FSRestoreDirect    bool
+
+	// PinRingFile, if non-nil, is the pin ring to donate to the boot
+	// process (see `//pkg/pinring`).
+	PinRingFile *os.File
 }
 
 // New creates the sandbox process. The caller must call Destroy() on the
@@ -537,7 +540,7 @@ func (s *Sandbox) StartSubcontainer(spec *specs.Spec, conf *config.Config, cid s
 }
 
 // Restore sends the restore call for a container in the sandbox.
-func (s *Sandbox) Restore(conf *config.Config, spec *specs.Spec, cid string, imagePath string, direct, background, splitFSRestore bool, networkArgs *boot.CreateLinksAndRoutesArgs) error {
+func (s *Sandbox) Restore(conf *config.Config, spec *specs.Spec, cid string, imagePath string, direct, background bool, networkArgs *boot.CreateLinksAndRoutesArgs) error {
 	if err := hostsettings.Handle(conf); err != nil {
 		return fmt.Errorf("host settings: %w (use --host-settings=ignore to bypass)", err)
 	}
@@ -545,8 +548,7 @@ func (s *Sandbox) Restore(conf *config.Config, spec *specs.Spec, cid string, ima
 	log.Debugf("Restore sandbox %q from path %q", s.ID, imagePath)
 
 	opt := boot.RestoreOpts{
-		Background:     background,
-		SplitFSRestore: splitFSRestore,
+		Background: background,
 	}
 	defer func() {
 		for _, f := range opt.FilePayload.Files {
@@ -1019,6 +1021,7 @@ func (s *Sandbox) createSandboxProcess(conf *config.Config, args *Args, startSyn
 	donations.DonateAndClose("gofer-filestore-fds", args.GoferFilestoreFiles...)
 	donations.DonateAndClose("mounts-fd", args.MountsFile)
 	donations.Donate("start-sync-fd", startSyncFile)
+	donations.DonateAndClose("pin-ring-fd", args.PinRingFile)
 	if err := donations.DonateLogFile("user-log-fd", args.UserLog, os.O_CREATE|os.O_WRONLY|os.O_APPEND, lfOpts); err != nil {
 		return err
 	}
@@ -1653,7 +1656,22 @@ type CheckpointOpts struct {
 	ExcludeCommittedZeroPages bool
 	CudaCheckpointPath        string
 	CudaCheckpointSequential  bool
-	SplitFSCheckpointPaths    []checkpoint.ResourceID
+
+	// SkipFilestorePages causes private (disk-backed) MemoryFiles to save
+	// only segment metadata; their backing host files (gofer filestore files)
+	// must be captured out-of-band and adopted on restore.
+	SkipFilestorePages bool
+
+	// FilestoreSnapshotDir internalizes the filestore capture: inside the
+	// checkpoint's freeze window, each private MemoryFile's backing file is
+	// reflink-cloned to FilestoreSnapshotFiles[i] (created by the container
+	// process under this directory), and the filestores.json manifest is
+	// written to FilestoreSidecarFile and renamed into place on success.
+	// Requires SkipFilestorePages.
+	FilestoreSnapshotDir     string
+	FilestoreSnapshotTargets []checkpoint.ResourceID
+	FilestoreSnapshotFiles   []*os.File
+	FilestoreSidecarFile     *os.File
 
 	// Save/restore exec options.
 	SaveRestoreExecArgv        string
@@ -1666,22 +1684,13 @@ type CheckpointOpts struct {
 func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, opts CheckpointOpts) error {
 	log.Debugf("Checkpoint sandbox %q, imagePath %q, opts %+v", s.ID, imagePath, opts)
 
-	if len(opts.SplitFSCheckpointPaths) > 0 {
-		// Verify we are not using GCS/gofer.
-		gcsOptsPath := path.Join(imagePath, checkpointGCSOptsFileName)
-		if _, err := os.Stat(gcsOptsPath); err == nil {
-			return fmt.Errorf("split filesystem checkpoint is not supported with GCS/gofer")
-		}
-	}
-
 	opt := control.SaveOpts{
 		Metadata:                       opts.Compression.ToMetadata(),
 		AppMFExcludeCommittedZeroPages: opts.ExcludeCommittedZeroPages,
+		PrivateMFExternalContent:       opts.SkipFilestorePages,
 		Resume:                         opts.Resume,
 		CudaCheckpointPath:             opts.CudaCheckpointPath,
 		CudaCheckpointSequential:       opts.CudaCheckpointSequential,
-		SplitFSCheckpointPaths:         opts.SplitFSCheckpointPaths,
-		RunscVersion:                   version.Version(),
 		ExecOpts: control.SaveRestoreExecOpts{
 			Argv:        opts.SaveRestoreExecArgv,
 			Timeout:     opts.SaveRestoreExecTimeout,
@@ -1697,8 +1706,75 @@ func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, 
 		return err
 	}
 
+	if opts.FilestoreSnapshotDir != "" {
+		if !opts.SkipFilestorePages {
+			return fmt.Errorf("--filestore-snapshot-dir requires --skip-filestore-pages")
+		}
+		if opt.UseCheckpointGofer {
+			return fmt.Errorf("--filestore-snapshot-dir is not supported with the checkpoint gofer")
+		}
+		// The snapshot destination FDs (and the sidecar temp file, last) are
+		// donated after the save files; the sentry FICLONEs into them inside
+		// the save freeze window.
+		base := len(opt.FilePayload.Files)
+		for i, dest := range opts.FilestoreSnapshotFiles {
+			opt.FilestoreSnapshot = append(opt.FilestoreSnapshot, control.FilestoreSnapshotTarget{
+				ResourceID: opts.FilestoreSnapshotTargets[i],
+				Name:       fmt.Sprintf("filestore-%d", i),
+				FDIndex:    base + i,
+			})
+			opt.FilePayload.Files = append(opt.FilePayload.Files, dest)
+		}
+		opt.FilestoreSidecarFDIndex = base + len(opts.FilestoreSnapshotFiles)
+		opt.FilePayload.Files = append(opt.FilePayload.Files, opts.FilestoreSidecarFile)
+	}
+
 	if err := s.call(boot.ContMgrCheckpoint, &opt, nil); err != nil {
+		// Remove the partial snapshot artifacts: without the sidecar rename,
+		// the directory is not a valid adoption target anyway.
+		if opts.FilestoreSnapshotDir != "" {
+			for _, f := range opts.FilestoreSnapshotFiles {
+				f.Close()
+				os.Remove(f.Name())
+			}
+			opts.FilestoreSidecarFile.Close()
+			os.Remove(opts.FilestoreSidecarFile.Name())
+		}
 		return fmt.Errorf("checkpointing container %q: %w", cid, err)
+	}
+	if opts.FilestoreSnapshotDir != "" {
+		// The sentry wrote the sidecar manifest during the freeze window;
+		// make it durable and visible atomically (tmp+rename). With zero
+		// filestore mounts the sentry writes nothing; emit an empty (but
+		// valid) manifest ourselves.
+		if len(opts.FilestoreSnapshotFiles) == 0 {
+			if err := checkpoint.WriteFilestoreSidecar(opts.FilestoreSidecarFile, nil); err != nil {
+				return fmt.Errorf("failed to write empty filestores.json: %w", err)
+			}
+		}
+		if err := opts.FilestoreSidecarFile.Sync(); err != nil {
+			return fmt.Errorf("failed to fsync filestores.json: %w", err)
+		}
+		if err := opts.FilestoreSidecarFile.Close(); err != nil {
+			return fmt.Errorf("failed to close filestores.json.tmp: %w", err)
+		}
+		final := filepath.Join(opts.FilestoreSnapshotDir, "filestores.json")
+		if err := os.Rename(opts.FilestoreSidecarFile.Name(), final); err != nil {
+			return fmt.Errorf("failed to rename filestores.json into place: %w", err)
+		}
+		// fsync the snapshot directory itself so the rename is durable too;
+		// the artifact files were already fsynced inside the freeze window.
+		snapDir, err := os.Open(opts.FilestoreSnapshotDir)
+		if err != nil {
+			return fmt.Errorf("failed to open filestore snapshot dir %q for fsync: %w", opts.FilestoreSnapshotDir, err)
+		}
+		if err := snapDir.Sync(); err != nil {
+			snapDir.Close()
+			return fmt.Errorf("failed to fsync filestore snapshot dir %q: %w", opts.FilestoreSnapshotDir, err)
+		}
+		if err := snapDir.Close(); err != nil {
+			return fmt.Errorf("failed to close filestore snapshot dir %q: %w", opts.FilestoreSnapshotDir, err)
+		}
 	}
 	s.Checkpointed = true
 	return nil
@@ -1726,21 +1802,6 @@ func setCheckpointOptsFilesForLocalCheckpoint(conf *config.Config, imagePath str
 	}
 	opt.FilePayload.Files = files
 	opt.HavePagesFile = len(files) > 1
-
-	if len(opts.SplitFSCheckpointPaths) > 0 {
-		fsImagePath := filepath.Join(imagePath, "fs")
-		if err := os.MkdirAll(fsImagePath, 0755); err != nil {
-			return fmt.Errorf("creating fs checkpoint directory: %w", err)
-		}
-		fsFiles, err := openFSCheckpointLocalFiles(fsImagePath, os.O_CREATE|os.O_EXCL|os.O_RDWR, opts.Direct)
-		if err != nil {
-			for _, f := range files {
-				_ = f.Close()
-			}
-			return fmt.Errorf("creating fs checkpoint files: %w", err)
-		}
-		opt.FilePayload.Files = append(opt.FilePayload.Files, fsFiles...)
-	}
 	return nil
 }
 
