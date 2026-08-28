@@ -69,9 +69,16 @@ func validateMounts(field, cName string, o, n []specs.Mount) error {
 			return validateError(field, cName, o, n)
 		}
 
-		// Duplicate mounts are allowed iff all fields in specs.Mount are same.
+		// Duplicate mounts are allowed iff all fields in specs.Mount are
+		// same, ignoring Source: source paths legitimately vary across
+		// checkpoint restore (per-sandbox container directories), so a
+		// duplicate destination with different sources is an override, not
+		// a conflict. Mirrors the Source handling of the single-mount
+		// comparison below.
 		if val, ok := newMnts[mnt.Destination]; ok {
-			if !reflect.DeepEqual(val, mnt) {
+			a, b := cloneMount(val), cloneMount(mnt)
+			a.Source, b.Source = "", ""
+			if !reflect.DeepEqual(a, b) {
 				return validateErrorWithMsg(field, cName, o, n, "invalid mount in the restore spec")
 			}
 			continue
