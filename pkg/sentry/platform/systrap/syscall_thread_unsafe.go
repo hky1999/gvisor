@@ -98,7 +98,16 @@ func (t *syscallThread) kickSeccompNotify() unix.Errno {
 	return errno
 }
 
+// maxSeccompNotifyENOENTRetries bounds how many times waitForSeccompNotify
+// re-enters SECCOMP_IOCTL_NOTIF_RECV after the ioctl returned ENOENT while
+// the stub still appeared alive. It only limits retries taken after an error
+// return; it is not a timeout for the blocking ioctl itself, and it does not
+// close the pre-existing window where the stub dies while RECV blocks
+// without returning at all.
+const maxSeccompNotifyENOENTRetries = 64
+
 func (t *syscallThread) waitForSeccompNotify() error {
+	enoentRetries := 0
 	for {
 		req := linux.SeccompNotif{}
 		errno := hostsyscall.RawSyscallErrno(unix.SYS_IOCTL, uintptr(t.seccompNotify.Fd()),
@@ -109,6 +118,20 @@ func (t *syscallThread) waitForSeccompNotify() error {
 			break
 		}
 		if errno == unix.EINTR && t.subproc.alive() {
+			continue
+		}
+		// ENOENT may indicate that the notification was interrupted and
+		// revoked while the stub is still running. Re-enter the same RECV
+		// only while the thread that installed this filter is observed
+		// alive, and only a bounded number of times per call; beyond that
+		// fall through to the original failure handling. EINTR retries are
+		// not counted. The response ID is updated only on a successful
+		// RECV, so a stale ID is never reused across retries.
+		if errno == unix.ENOENT && t.subproc.alive() && enoentRetries < maxSeccompNotifyENOENTRetries {
+			enoentRetries++
+			if enoentRetries == 1 {
+				t.thread.Warningf("seccomp notification receive interrupted (ENOENT); retrying while subprocess is alive")
+			}
 			continue
 		}
 		t.thread.kill()
