@@ -593,6 +593,11 @@ func (cm *containerManager) Restore(o *RestoreOpts, _ *struct{}) (retErr error) 
 	if cm.l.state != created {
 		return fmt.Errorf("cannot restore a container in state=%s", cm.l.state)
 	}
+	// onRestoreFailed broadcasts on restoreDone, so the cond must exist for
+	// EVERY failure path, including the early guards below that previously
+	// ran before restoreDone was initialized and panicked (nil-cond
+	// SIGSEGV) instead of surfacing the original error.
+	cm.l.restoreDone = sync.NewCond(&cm.l.mu)
 	defer func() {
 		if retErr != nil {
 			cu.Clean() // Release `cm.l.mu` as onRestoreFailed will acquire it.
@@ -656,7 +661,8 @@ func (cm *containerManager) Restore(o *RestoreOpts, _ *struct{}) (retErr error) 
 	stateFile = nil
 	timer.Reached("created statefile reader")
 
-	cm.l.restoreDone = sync.NewCond(&cm.l.mu)
+	// restoreDone was already created before the early-failure defer above;
+	// re-creating it here would orphan any waiters registered in between.
 	cm.l.state = restoringUnstarted
 
 	// Release `cm.l.mu`.
