@@ -276,6 +276,16 @@ func TestHostnetWithRawSockets(t *testing.T) {
 		if err := caps.Apply(capability.CAPS); err != nil {
 			t.Fatalf("error applying capabilities")
 		}
+		// Register the restore immediately after the successful drop — before
+		// the readback below — so a Fatalf in the readback still restores the
+		// capability. The restore runs strictly before the deferred
+		// UnlockOSThread so it lands on the same thread.
+		defer func() {
+			caps.Set(capability.EFFECTIVE, capability.CAP_NET_RAW)
+			if err := caps.Apply(capability.CAPS); err != nil {
+				t.Fatalf("error restoring capabilities")
+			}
+		}()
 		// Independent readback: prove the drop actually took effect on this
 		// thread before exercising loader.New.
 		verify, err := capability.NewPid2(0)
@@ -288,14 +298,6 @@ func TestHostnetWithRawSockets(t *testing.T) {
 		if verify.Get(capability.EFFECTIVE, capability.CAP_NET_RAW) {
 			t.Fatalf("CAP_NET_RAW drop did not take effect")
 		}
-		// Be nice and add it back when we are done — strictly before the
-		// deferred UnlockOSThread so the restore lands on the same thread.
-		defer func() {
-			caps.Set(capability.EFFECTIVE, capability.CAP_NET_RAW)
-			if err := caps.Apply(capability.CAPS); err != nil {
-				t.Fatalf("error restoring capabilities")
-			}
-		}()
 	}
 
 	// Configure host network with raw sockets.
