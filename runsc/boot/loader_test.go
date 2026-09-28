@@ -19,6 +19,7 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -250,7 +251,18 @@ func TestStartSignal(t *testing.T) {
 // Test that network=host with raw sockets enabled requires CAP_NET_RAW on the
 // host.
 func TestHostnetWithRawSockets(t *testing.T) {
+	// capset is per-thread and the drop below must be observed by loader.New
+	// on the SAME thread, so pin the goroutine for the whole test.
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
 	// Drop CAP_NET_RAW from effective capabilities, if we have it.
+	//
+	// Apply(EFFECTIVE) alone is a NO-OP in moby/sys/capability: capset only
+	// runs when kind covers CAPS = EFFECTIVE|PERMITTED|INHERITABLE (see
+	// capability_linux.go Apply). Apply the full CAPS set with the loaded
+	// permitted/inheritable vectors unchanged so ONLY the effective
+	// CAP_NET_RAW bit moves.
 	pid := os.Getpid()
 	caps, err := capability.NewPid2(0)
 	if err != nil {
@@ -261,13 +273,26 @@ func TestHostnetWithRawSockets(t *testing.T) {
 	}
 	if caps.Get(capability.EFFECTIVE, capability.CAP_NET_RAW) {
 		caps.Unset(capability.EFFECTIVE, capability.CAP_NET_RAW)
-		if err := caps.Apply(capability.EFFECTIVE); err != nil {
+		if err := caps.Apply(capability.CAPS); err != nil {
 			t.Fatalf("error applying capabilities")
 		}
-		// Be nice and add it back when we are done.
+		// Independent readback: prove the drop actually took effect on this
+		// thread before exercising loader.New.
+		verify, err := capability.NewPid2(0)
+		if err != nil {
+			t.Fatalf("error getting capabilities for readback: %v", err)
+		}
+		if err := verify.Load(); err != nil {
+			t.Fatalf("error loading capabilities for readback: %v", err)
+		}
+		if verify.Get(capability.EFFECTIVE, capability.CAP_NET_RAW) {
+			t.Fatalf("CAP_NET_RAW drop did not take effect")
+		}
+		// Be nice and add it back when we are done — strictly before the
+		// deferred UnlockOSThread so the restore lands on the same thread.
 		defer func() {
 			caps.Set(capability.EFFECTIVE, capability.CAP_NET_RAW)
-			if err := caps.Apply(capability.EFFECTIVE); err != nil {
+			if err := caps.Apply(capability.CAPS); err != nil {
 				t.Fatalf("error restoring capabilities")
 			}
 		}()
