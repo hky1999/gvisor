@@ -76,7 +76,10 @@ func TestRestoreEarlyGuardsReturnOriginalError(t *testing.T) {
 // ordering guesses, and deleting the Broadcast in onRestoreFailed makes the
 // test fail on the timeout instead of passing on a state short-circuit.
 type signaledLocker struct {
-	mu          *sync.Mutex
+	// mu is sync.Locker so the wrapper accepts &Loader.mu, whose concrete
+	// type is gvisor.dev/gvisor/pkg/sync.Mutex rather than the standard
+	// library mutex. NewCond/Once below remain the standard library types.
+	mu          sync.Locker
 	enteredWait chan struct{}
 	once        sync.Once
 }
