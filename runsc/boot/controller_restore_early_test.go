@@ -69,6 +69,25 @@ func TestRestoreEarlyGuardsReturnOriginalError(t *testing.T) {
 	}
 }
 
+// signaledLocker wraps the loader mutex for wait-registration proof: the
+// first Cond.Wait entry Unlocks through this wrapper, which closes
+// enteredWait exactly once. The main goroutine therefore knows the waiter
+// is genuinely blocked inside Wait before the failure fires — no sleeps, no
+// ordering guesses, and deleting the Broadcast in onRestoreFailed makes the
+// test fail on the timeout instead of passing on a state short-circuit.
+type signaledLocker struct {
+	mu          *sync.Mutex
+	enteredWait chan struct{}
+	once        sync.Once
+}
+
+func (s *signaledLocker) Lock() { s.mu.Lock() }
+
+func (s *signaledLocker) Unlock() {
+	s.once.Do(func() { close(s.enteredWait) })
+	s.mu.Unlock()
+}
+
 // TestRestoreEarlyFailureWakesRegisteredWaiter covers the Broadcast side of
 // onRestoreFailed for a waiter that is already blocked in waitRestore: it
 // must wake and receive the recorded error rather than deadlock. This is
@@ -76,13 +95,21 @@ func TestRestoreEarlyGuardsReturnOriginalError(t *testing.T) {
 // failure path end to end.
 func TestRestoreEarlyFailureWakesRegisteredWaiter(t *testing.T) {
 	l := &Loader{state: restoringUnstarted}
-	l.restoreDone = sync.NewCond(&l.mu)
+	lock := &signaledLocker{mu: &l.mu, enteredWait: make(chan struct{})}
+	l.restoreDone = sync.NewCond(lock)
 	cm := &containerManager{l: l}
 
 	woken := make(chan error, 1)
 	go func() {
 		woken <- l.waitRestore()
 	}()
+	select {
+	case <-lock.enteredWait:
+		// The waiter is now blocked inside Cond.Wait; only a Broadcast can
+		// release it from here.
+	case <-time.After(5 * time.Second):
+		t.Fatal("waiter never entered Cond.Wait")
+	}
 	cm.onRestoreFailed(&testRestoreError{})
 	select {
 	case err := <-woken:
