@@ -758,20 +758,15 @@ func (fs *filesystem) mknodMergeFromTar(ctx context.Context, hdr *tar.Header, pa
 			return nil
 		case tar.TypeFifo, tar.TypeBlock, tar.TypeChar:
 			// fs-checkpoint merge tolerance: a checkpointed overlay may
-			// carry transient entries (e.g. CPython atomic-write temp
-			// files *.pyc.<id>, or overlay whiteout-adjacent device
-			// markers) whose tar type conflicts with the regular file
-			// already materialized in the merged tree by an earlier
-			// layer of the same archive. These entries carry no
-			// meaningful restore state; keep the existing regular file
-			// and refresh only its metadata instead of failing the
+			// carry transient device-marker entries (overlay whiteouts,
+			// and artifacts of in-flight atomic renames such as CPython
+			// *.pyc.<id> temp files) whose tar type conflicts with
+			// whatever an earlier layer of the same archive already
+			// materialized at that path — regular OR non-regular. These
+			// entries carry no meaningful restore state; keep the
+			// existing child unchanged (recording only the inode map
+			// so later hardlink entries resolve) instead of failing the
 			// whole sandbox restore.
-			if _, ok := childDentry.inode.impl.(*regularFile); !ok {
-				return fmt.Errorf("updating non-regular file %v is not supported", hdr.Name)
-			}
-			if err := fs.populateInodeFromHeader(hdr, childDentry.inode, true); err != nil {
-				return err
-			}
 			pathToInode[hdr.Name] = childDentry.inode
 			return nil
 		default:
