@@ -34,6 +34,8 @@ type Delete struct {
 	containerLoader
 	expectedGeneration string
 	offlineCgroupFD    int
+	offlineParentFD    int
+	originalCgroup     container.OriginalCgroupIdentity
 	// force indicates that the container should be terminated if running.
 	force bool
 }
@@ -57,6 +59,10 @@ func (*Delete) Usage() string {
 func (d *Delete) SetFlags(f *flag.FlagSet) {
 	f.StringVar(&d.expectedGeneration, "expected-resource-generation", "", "reject another scheduler execution before deleting runtime children")
 	f.IntVar(&d.offlineCgroupFD, "scheduler-offline-cgroup-fd", 0, "original offline cgroup descriptor for managed cleanup; zero disables this mode")
+	f.IntVar(&d.offlineParentFD, "scheduler-offline-cgroup-parent-fd", 0, "producer-bound original parent descriptor and missing original cgroup entry for restart cleanup; zero disables this mode")
+	f.StringVar(&d.originalCgroup.Path, "scheduler-original-cgroup-path", "", "original generation lease cgroup path required with parent proof")
+	f.Uint64Var(&d.originalCgroup.Device, "scheduler-original-cgroup-device", 0, "original generation lease device required with parent proof")
+	f.Uint64Var(&d.originalCgroup.Inode, "scheduler-original-cgroup-inode", 0, "original generation lease inode required with parent proof")
 	f.BoolVar(&d.force, "force", false, "terminate container if running")
 }
 
@@ -92,7 +98,17 @@ func (d *Delete) execute(f *flag.FlagSet, conf *config.Config) error {
 
 func (d *Delete) executeContext(ctx context.Context, f *flag.FlagSet, conf *config.Config) error {
 	ids := f.Args()
-	if d.offlineCgroupFD != 0 && (d.expectedGeneration == "" || d.offlineCgroupFD < 3) {
+	if d.offlineParentFD != 0 && d.offlineCgroupFD != 0 {
+		return errors.New("offline cgroup cleanup refuses combined directory and parent proof descriptors")
+	}
+	if d.offlineParentFD != 0 && (d.originalCgroup.Path == "" || d.originalCgroup.Device == 0 || d.originalCgroup.Inode == 0) {
+		return errors.New("offline cgroup parent proof requires the original lease path, device and inode")
+	}
+	if d.offlineParentFD == 0 && (d.originalCgroup.Path != "" || d.originalCgroup.Device != 0 || d.originalCgroup.Inode != 0) {
+		return errors.New("original cgroup lease binding requires a parent proof descriptor")
+	}
+	if (d.offlineCgroupFD != 0 && (d.expectedGeneration == "" || d.offlineCgroupFD < 3)) ||
+		(d.offlineParentFD != 0 && (d.expectedGeneration == "" || d.offlineParentFD < 3)) {
 		return errors.New("offline cgroup cleanup requires the original generation and directory descriptor")
 	}
 	if d.expectedGeneration != "" && len(ids) != 1 {
@@ -124,7 +140,9 @@ func (d *Delete) executeContext(ctx context.Context, f *flag.FlagSet, conf *conf
 		}
 		var destroyErr error
 		if d.expectedGeneration != "" {
-			if d.offlineCgroupFD != 0 {
+			if d.offlineParentFD != 0 {
+				destroyErr = c.DestroyIfGenerationAfterCgroupParentOffline(ctx, d.expectedGeneration, d.offlineParentFD, d.originalCgroup)
+			} else if d.offlineCgroupFD != 0 {
 				destroyErr = c.DestroyIfGenerationAfterCgroupOffline(ctx, d.expectedGeneration, d.offlineCgroupFD)
 			} else {
 				destroyErr = c.DestroyIfGeneration(ctx, d.expectedGeneration)

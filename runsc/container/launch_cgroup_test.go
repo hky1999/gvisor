@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"strings"
 	"testing"
 
 	specs "github.com/opencontainers/runtime-spec/specs-go"
@@ -166,5 +167,144 @@ func TestManagedOfflineCgroupMissingSourceAndCancellationRetainUnknownLaunch(t *
 	}
 	if string(readBirthOwnerBytes(t, c)) != string(before) {
 		t.Fatal("unknown original launch changed")
+	}
+}
+
+func TestManagedOfflineParentCannotAdoptOrdinaryDirectoryMissingSourceOrWrongGeneration(t *testing.T) {
+	c := launchStageFixture(t)
+	c.Spec.Linux = &specs.Linux{CgroupsPath: "/owned/original"}
+	c.LaunchCgroup = managedCgroupFixture()
+	c.RuntimeDispatched, c.GoferRequired = true, true
+	c.GoferLaunchState = processDispatching
+	publishLaunchFixture(t, c)
+	before := readBirthOwnerBytes(t, c)
+	directory, err := os.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer directory.Close()
+	for _, generation := range []string{c.ResourceGeneration, "foreign-generation"} {
+		if err := c.DestroyIfGenerationAfterCgroupParentOffline(context.Background(), generation, int(directory.Fd()), OriginalCgroupIdentity{Path: "/owned/original", Device: 3, Inode: 9}); err == nil {
+			t.Fatal("ordinary directory authorized missing-birth cleanup")
+		}
+		if string(readBirthOwnerBytes(t, c)) != string(before) {
+			t.Fatal("unknown source was modified")
+		}
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if err := c.DestroyIfGenerationAfterCgroupParentOffline(ctx, c.ResourceGeneration, int(directory.Fd()), OriginalCgroupIdentity{Path: "/owned/original", Device: 3, Inode: 9}); err == nil {
+		t.Fatal("cancellation became cleanup")
+	}
+	if string(readBirthOwnerBytes(t, c)) != string(before) {
+		t.Fatal("canceled cleanup changed source")
+	}
+	if err := c.LaunchCgroup.verifyParentOffline(context.Background(), 2); err == nil {
+		t.Fatal("standard descriptor authorized parent absence")
+	}
+	var missing *ManagedLaunchCgroup
+	if err := missing.verifyParentOffline(context.Background(), int(directory.Fd())); err == nil {
+		t.Fatal("missing parent source authorized cleanup")
+	}
+}
+
+func TestManagedOfflineParentReplacementCannotUseCachedRuntimeOwner(t *testing.T) {
+	c := launchStageFixture(t)
+	c.Spec.Linux = &specs.Linux{CgroupsPath: "/owned/original"}
+	c.LaunchCgroup = managedCgroupFixture()
+	publishLaunchFixture(t, c)
+	var replacement Container
+	if err := json.Unmarshal(readBirthOwnerBytes(t, c), &replacement); err != nil {
+		t.Fatal(err)
+	}
+	replacement.LaunchCgroup.ParentInode++
+	data, err := json.Marshal(&replacement)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(c.Saver.statePath(), data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	directory, err := os.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer directory.Close()
+	if err := c.DestroyIfGenerationAfterCgroupParentOffline(context.Background(), c.ResourceGeneration, int(directory.Fd()), OriginalCgroupIdentity{Path: "/owned/original", Device: 3, Inode: 9}); err == nil {
+		t.Fatal("cached runtime adopted another parent")
+	}
+	if string(readBirthOwnerBytes(t, c)) != string(data) {
+		t.Fatal("replacement source changed")
+	}
+}
+
+func TestManagedCgroupCleanupSourceAllowsUnknownDispatchWithoutGrantingProcessAuthority(t *testing.T) {
+	c := launchStageFixture(t)
+	c.Spec.Linux = &specs.Linux{CgroupsPath: "/owned/original"}
+	c.LaunchCgroup = managedCgroupFixture()
+	c.RuntimeDispatched, c.GoferRequired = true, true
+	c.GoferLaunchState = processDispatching
+	if err := c.verifyCgroupCleanupSource(); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := c.managedProcessRequirements(); err == nil {
+		t.Fatal("unknown dispatch became process authority")
+	}
+	for _, change := range []string{"protocol", "stage", "dispatch", "parent", "hooks", "path", "pid"} {
+		t.Run(change, func(t *testing.T) {
+			copy := *c
+			spec := *c.Spec
+			copy.Spec = &spec
+			switch change {
+			case "protocol":
+				copy.ProcessLaunchVersion = 2
+			case "stage":
+				copy.SentryLaunchState = "unknown"
+			case "dispatch":
+				copy.RuntimeDispatched = false
+			case "parent":
+				copy.Spec.Annotations = map[string]string{cgroupParentAnnotation: ""}
+			case "hooks":
+				copy.Spec.Hooks = &specs.Hooks{Poststop: []specs.Hook{{Path: "/must-not-run"}}}
+			case "path":
+				copy.Spec.Linux = &specs.Linux{CgroupsPath: "/owned/replacement"}
+			case "pid":
+				copy.GoferPid.Store(77)
+			}
+			if err := copy.verifyCgroupCleanupSource(); err == nil {
+				t.Fatal("contradictory cleanup source accepted")
+			}
+		})
+	}
+}
+
+func TestManagedOfflineParentBindingCannotAdoptChangedLeaseDirectory(t *testing.T) {
+	c := launchStageFixture(t)
+	c.Spec.Linux = &specs.Linux{CgroupsPath: "/owned/original"}
+	c.LaunchCgroup = managedCgroupFixture()
+	publishLaunchFixture(t, c)
+	before := readBirthOwnerBytes(t, c)
+	directory, err := os.Open(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer directory.Close()
+	for _, change := range []string{"path", "device", "inode"} {
+		original := OriginalCgroupIdentity{Path: "/owned/original", Device: 3, Inode: 9}
+		switch change {
+		case "path":
+			original.Path = "/owned/replacement"
+		case "device":
+			original.Device++
+		case "inode":
+			original.Inode++
+		}
+		err := c.DestroyIfGenerationAfterCgroupParentOffline(context.Background(), c.ResourceGeneration, int(directory.Fd()), original)
+		if err == nil || !strings.Contains(err.Error(), "original generation lease") {
+			t.Fatalf("changed original binding was not refused before physical verification: %v", err)
+		}
+		if string(readBirthOwnerBytes(t, c)) != string(before) {
+			t.Fatal("original state changed")
+		}
 	}
 }

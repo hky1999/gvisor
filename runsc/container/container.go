@@ -998,7 +998,25 @@ func (c *Container) DestroyIfGenerationAfterCgroupOffline(ctx context.Context, g
 	return c.destroyWithOfflineCgroup(ctx, generation, fd)
 }
 
+// DestroyIfGenerationAfterCgroupParentOffline verifies the producer's original
+// parent and missing original entry after restart. It never fabricates a lost
+// directory descriptor or process birth and never sends new process signals.
+func (c *Container) DestroyIfGenerationAfterCgroupParentOffline(ctx context.Context, generation string, fd int, original OriginalCgroupIdentity) error {
+	if !processbirth.ValidBinding(c.ID, generation) || fd < 3 || !original.valid() {
+		return errors.New("original offline cgroup parent deletion binding is invalid")
+	}
+	return c.destroyWithCgroupProof(ctx, generation, -1, fd, original)
+}
+
 func (c *Container) destroyWithOfflineCgroup(ctx context.Context, expectedGeneration string, offlineCgroupFD int) error {
+	return c.destroyWithCgroupProof(ctx, expectedGeneration, offlineCgroupFD, -1, OriginalCgroupIdentity{})
+}
+
+func (c *Container) destroyWithCgroupProof(ctx context.Context, expectedGeneration string, offlineCgroupFD, offlineParentFD int, original OriginalCgroupIdentity) error {
+	if offlineCgroupFD >= 0 && offlineParentFD >= 0 {
+		return errors.New("offline cgroup cleanup accepts exactly one original proof descriptor")
+	}
+	offlineProof := offlineCgroupFD >= 0 || offlineParentFD >= 0
 	log.Debugf("Destroy container, cid: %s", c.ID)
 	if expectedGeneration != "" || c.ResourceGeneration != "" {
 		var cancel context.CancelFunc
@@ -1039,9 +1057,15 @@ func (c *Container) destroyWithOfflineCgroup(ctx context.Context, expectedGenera
 	var errs []string
 	var stopErr error
 	if c.ResourceGeneration != "" {
-		if offlineCgroupFD >= 0 {
-			if c.Spec == nil || c.Spec.Linux == nil || c.LaunchCgroup == nil || c.LaunchCgroup.Path != c.Spec.Linux.CgroupsPath {
-				stopErr = errors.New("original offline cgroup source differs from its managed OCI path")
+		if offlineProof {
+			if err := c.verifyCgroupCleanupSource(); err != nil {
+				stopErr = err
+			} else if offlineParentFD >= 0 {
+				if !original.valid() || c.LaunchCgroup.Path != original.Path || c.LaunchCgroup.Device != original.Device || c.LaunchCgroup.Inode != original.Inode {
+					stopErr = errors.New("native cgroup producer differs from the original generation lease")
+				} else {
+					stopErr = c.LaunchCgroup.verifyParentOffline(ctx, offlineParentFD)
+				}
 			} else {
 				stopErr = c.LaunchCgroup.verifyOffline(ctx, offlineCgroupFD)
 			}
@@ -1114,7 +1138,7 @@ func (c *Container) destroyWithOfflineCgroup(ctx context.Context, expectedGenera
 	//
 	// Use 'sb' to tell whether it has been executed before because Destroy must
 	// be idempotent.
-	if sb != nil && offlineCgroupFD < 0 {
+	if sb != nil && !offlineProof {
 		if err := adjustSandboxOOMScoreAdj(sb, c.Spec, c.Saver.RootDir, true); err != nil {
 			errs = append(errs, err.Error())
 		}

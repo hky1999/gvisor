@@ -36,6 +36,19 @@ type ManagedLaunchCgroup struct {
 	PIDNamespaceInode    uint64 `json:"pid_namespace_inode"`
 }
 
+// OriginalCgroupIdentity is supplied from the original generation lease when
+// the original directory descriptor was lost. It cannot come from new state.
+type OriginalCgroupIdentity struct {
+	Path   string
+	Device uint64
+	Inode  uint64
+}
+
+func (original OriginalCgroupIdentity) valid() bool {
+	return filepath.IsAbs(original.Path) && filepath.Clean(original.Path) == original.Path && original.Path != "/" &&
+		len(original.Path) < 4096 && !strings.ContainsAny(original.Path, "\x00\r\n") && original.Device != 0 && original.Inode != 0
+}
+
 func (b *ManagedLaunchCgroup) validate() error {
 	if b == nil || b.Version != 1 || !filepath.IsAbs(b.Path) || filepath.Clean(b.Path) != b.Path || b.Path == "/" || len(b.Path) >= 4096 || strings.ContainsAny(b.Path, "\x00\r\n") || b.Device == 0 || b.Inode == 0 || b.RootDevice != b.Device || b.ParentDevice != b.Device || b.RootInode == 0 || b.ParentInode == 0 || b.Inode == b.RootInode || b.Inode == b.ParentInode || b.BootID == "" || len(b.BootID) > 128 || b.CgroupNamespaceInode == 0 || b.MountNamespaceInode == 0 || b.PIDNamespaceInode == 0 {
 		return errors.New("original managed launch cgroup identity is incomplete")
@@ -193,4 +206,104 @@ func (b *ManagedLaunchCgroup) verifyOffline(ctx context.Context, fd int) error {
 		}
 	}
 	return b.verifyScope()
+}
+
+// verifyParentOffline is a restart proof for an original group whose directory
+// descriptor was lost. Only the producer's original parent, current original
+// mount and scope, and absence of the exact original entry can authorize it.
+// cgroup v2 does not allow rename; absence under that original parent cannot
+// mean that this same kernel group was renamed elsewhere.
+func (b *ManagedLaunchCgroup) verifyParentOffline(ctx context.Context, fd int) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if err := b.validate(); err != nil {
+		return err
+	}
+	if fd < 3 {
+		return errors.New("original cgroup parent descriptor is invalid")
+	}
+	if err := b.verifyScope(); err != nil {
+		return err
+	}
+	parent, err := managedCgroupDirectory(fd)
+	if err != nil || parent.Dev != b.ParentDevice || parent.Ino != b.ParentInode {
+		return errors.New("original cgroup parent descriptor differs from the producer identity")
+	}
+	root, err := unix.Open("/sys/fs/cgroup", unix.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0)
+	if err != nil {
+		return err
+	}
+	defer unix.Close(root)
+	rootStat, err := managedCgroupDirectory(root)
+	if err != nil || rootStat.Dev != b.RootDevice || rootStat.Ino != b.RootInode {
+		return errors.New("original cgroup mount root changed before parent absence verification")
+	}
+	path := strings.TrimPrefix(filepath.Dir(b.Path), "/")
+	if path == "" {
+		path = "."
+	}
+	current, err := unix.Openat2(root, path, &unix.OpenHow{Flags: unix.O_RDONLY | unix.O_DIRECTORY | unix.O_CLOEXEC, Resolve: unix.RESOLVE_BENEATH | unix.RESOLVE_NO_SYMLINKS | unix.RESOLVE_NO_MAGICLINKS | unix.RESOLVE_NO_XDEV})
+	if err != nil {
+		return err
+	}
+	defer unix.Close(current)
+	currentStat, err := managedCgroupDirectory(current)
+	if err != nil || currentStat.Dev != b.ParentDevice || currentStat.Ino != b.ParentInode {
+		return errors.New("original cgroup parent entry changed before absence verification")
+	}
+	for _, originalParent := range []int{fd, current} {
+		var entry unix.Stat_t
+		err := unix.Fstatat(originalParent, filepath.Base(b.Path), &entry, unix.AT_SYMLINK_NOFOLLOW)
+		if !errors.Is(err, unix.ENOENT) {
+			return errors.New("original cgroup name is present or its absence is unknown")
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	return b.verifyScope()
+}
+
+// This validator accepts a well-formed unknown dispatch only for an independently
+// proven offline original group. It never grants process or control authority.
+func (c *Container) verifyCgroupCleanupSource() error {
+	if c.Spec == nil || c.Spec.Linux == nil || c.LaunchCgroup == nil || c.LaunchCgroup.Path != c.Spec.Linux.CgroupsPath || c.ProcessLaunchVersion != 1 {
+		return errors.New("original offline cgroup source differs from its managed OCI path or launch protocol")
+	}
+	valid := func(stage string) bool {
+		return stage == processNotDispatched || stage == processDispatching || stage == processBirthPublished
+	}
+	if !valid(c.GoferLaunchState) || !valid(c.SentryLaunchState) ||
+		c.RuntimeDispatched != (c.GoferLaunchState != processNotDispatched || c.SentryLaunchState != processNotDispatched) ||
+		c.GoferRequired != (c.GoferLaunchState != processNotDispatched) {
+		return errors.New("original cgroup cleanup launch facts are missing or contradictory")
+	}
+	if _, override := c.Spec.Annotations[cgroupParentAnnotation]; override {
+		return errors.New("original cgroup cleanup cannot adopt an independent sandbox parent")
+	}
+	if h := c.Spec.Hooks; h != nil && len(h.Prestart)+len(h.CreateRuntime)+len(h.CreateContainer)+len(h.StartContainer)+len(h.Poststart)+len(h.Poststop) != 0 {
+		return errors.New("original cgroup cleanup does not support external lifecycle hooks")
+	}
+	if c.GoferLaunchState == processBirthPublished {
+		if err := c.GoferBirth.Validate(c.ID, c.ResourceGeneration, "gofer"); err != nil || c.GoferBirth.PID != c.GoferPid.Load() {
+			return errors.New("published gofer source differs from its original birth")
+		}
+	} else if c.GoferBirth != nil || c.GoferPid.Load() != 0 {
+		return errors.New("unpublished gofer contains contradictory process facts")
+	}
+	if c.GoferRequired && c.GoferLaunchState != processBirthPublished && c.SentryLaunchState != processNotDispatched {
+		return errors.New("sentry dispatch preceded required gofer publication")
+	}
+	if c.SentryLaunchState == processBirthPublished {
+		if c.Sandbox == nil || c.Sandbox.ResourceGeneration != c.ResourceGeneration || c.Sandbox.ProcessBirth == nil {
+			return errors.New("published sentry source is incomplete")
+		}
+		if err := c.Sandbox.ProcessBirth.Validate(c.ID, c.ResourceGeneration, "sentry"); err != nil || c.Sandbox.ProcessBirth.PID != c.Sandbox.Pid.Load() {
+			return errors.New("published sentry source differs from its original birth")
+		}
+	} else if c.Sandbox != nil {
+		return errors.New("unpublished sentry contains contradictory sandbox facts")
+	}
+	return c.LaunchCgroup.validate()
 }
