@@ -16,6 +16,7 @@
 package sandbox
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -65,6 +66,7 @@ import (
 	"gvisor.dev/gvisor/runsc/donation"
 	"gvisor.dev/gvisor/runsc/gvisorbinaries"
 	"gvisor.dev/gvisor/runsc/hostsettings"
+	"gvisor.dev/gvisor/runsc/processbirth"
 	"gvisor.dev/gvisor/runsc/profile"
 	"gvisor.dev/gvisor/runsc/specutils"
 	"gvisor.dev/gvisor/runsc/starttime"
@@ -153,6 +155,9 @@ func (p *Pid) MarshalJSON() ([]byte, error) {
 // Note: Sandbox must be immutable because a copy of it is saved for each
 // container and changes would not be synchronized to all of them.
 type Sandbox struct {
+	ResourceGeneration string              `json:"resourceGeneration,omitempty"`
+	ProcessBirth       *processbirth.Birth `json:"processBirth,omitempty"`
+	initializerChild   *os.Process         `nojson:"true"`
 	// ID is the id of the sandbox (immutable). By convention, this is the same
 	// ID as the first container run in the sandbox.
 	ID string `json:"id"`
@@ -253,6 +258,7 @@ func (s *Sandbox) Getpid() int {
 
 // Args is used to configure a new sandbox.
 type Args struct {
+	ResourceGeneration string
 	// ID is the sandbox unique identifier.
 	ID string
 
@@ -328,7 +334,8 @@ type Args struct {
 // sandbox.
 func New(conf *config.Config, args *Args) (*Sandbox, error) {
 	s := &Sandbox{
-		ID: args.ID,
+		ResourceGeneration: args.ResourceGeneration,
+		ID:                 args.ID,
 		CgroupJSON: cgroup.CgroupJSON{
 			Cgroup: args.Cgroup,
 		},
@@ -407,6 +414,13 @@ func New(conf *config.Config, args *Args) (*Sandbox, error) {
 			return nil, fmt.Errorf("cannot get registered metrics: %v", err)
 		}
 		s.RegisteredMetrics = registeredMetrics.RegisteredMetrics
+	}
+	if s.ResourceGeneration != "" {
+		birth, err := processbirth.CaptureChild(context.Background(), s.initializerChild, s.ID, s.ResourceGeneration, "sentry")
+		if err != nil {
+			return nil, fmt.Errorf("capture original sentry birth: %w", err)
+		}
+		s.ProcessBirth = birth
 	}
 
 	c.Release()
@@ -1426,6 +1440,7 @@ func (s *Sandbox) createSandboxProcess(conf *config.Config, args *Args, startSyn
 
 	s.child = true
 	s.Pid.Store(cmd.Process.Pid)
+	s.initializerChild = cmd.Process
 	log.Infof("Sandbox started, PID: %d", cmd.Process.Pid)
 
 	return nil
@@ -1561,6 +1576,14 @@ func (s *Sandbox) IsRootContainer(cid string) bool {
 // Destroy frees all resources associated with the sandbox. It fails fast and
 // is idempotent.
 func (s *Sandbox) destroy() error {
+	if s.ResourceGeneration != "" {
+		handle, err := processbirth.Open(context.Background(), s.ProcessBirth, s.ID, s.ResourceGeneration, "sentry")
+		if err != nil {
+			return err
+		}
+		defer handle.Close()
+		return s.DestroyOriginal(context.Background(), handle)
+	}
 	log.Debugf("Destroying sandbox %q", s.ID)
 	// Only delete the control file if it exists.
 	controlSocketPath := s.getControlSocketPath()
@@ -1580,6 +1603,27 @@ func (s *Sandbox) destroy() error {
 		}
 	}
 
+	return nil
+}
+
+// DestroyOriginal uses a pre-acquired original task handle, including when
+// another process has reused the numeric PID after acquisition.
+func (s *Sandbox) DestroyOriginal(ctx context.Context, handle *processbirth.Handle) error {
+	if s.ResourceGeneration == "" || s.ProcessBirth == nil || handle == nil {
+		return fmt.Errorf("original sentry birth or handle is unavailable")
+	}
+	if err := s.ProcessBirth.Validate(s.ID, s.ResourceGeneration, "sentry"); err != nil {
+		return err
+	}
+	if err := handle.KillAndWait(ctx); err != nil {
+		return err
+	}
+	s.Pid.Store(0)
+	if controlSocketPath := s.getControlSocketPath(); controlSocketPath != "" {
+		if err := os.Remove(controlSocketPath); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	}
 	return nil
 }
 

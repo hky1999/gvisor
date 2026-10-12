@@ -100,9 +100,13 @@ func Load(rootDir string, id FullID, opts LoadOpts) (*Container, error) {
 		}
 		return nil, fmt.Errorf("reading container metadata file %q: %v", state.statePath(), err)
 	}
-	c.Sandbox.SetRootDir(rootDir)
+	if c.Sandbox != nil {
+		c.Sandbox.SetRootDir(rootDir)
+	} else if c.ResourceGeneration == "" || c.Status != Creating {
+		return nil, fmt.Errorf("container state is missing its original sandbox")
+	}
 
-	if opts.RootContainer && c.ID != c.Sandbox.ID {
+	if opts.RootContainer && (c.Sandbox == nil || c.ID != c.Sandbox.ID) {
 		return nil, fmt.Errorf("ID %q doesn't belong to a sandbox", id)
 	}
 

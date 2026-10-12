@@ -12,6 +12,7 @@ go_library(
         "gofer_to_host_rpc.go",
         "null_netns.go",
         "state_file.go",
+        "process_birth.go",
         "status.go",
     ],
     visibility = [
@@ -36,10 +37,23 @@ go_library(
         "//runsc/console",
         "//runsc/donation",
         "//runsc/profile",
+        "//runsc/processbirth",
         "//runsc/sandbox",
         "//runsc/specutils",
         "//runsc/starttime",
         "@com_github_gofrs_flock//:go_default_library",
+        "@com_github_opencontainers_runtime_spec//specs-go:go_default_library",
+        "@org_golang_x_sys//unix:go_default_library",
+    ],
+)
+
+go_test(
+    name = "process_birth_test",
+    size = "small",
+    srcs = ["process_birth_test.go"],
+    library = ":container",
+    deps = [
+        "//runsc/processbirth",
         "@com_github_opencontainers_runtime_spec//specs-go:go_default_library",
         "@org_golang_x_sys//unix:go_default_library",
     ],

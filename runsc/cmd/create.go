@@ -29,6 +29,7 @@ import (
 
 // Create implements subcommands.Command for the "create" command.
 type Create struct {
+	resourceGeneration string
 	// bundleDir is the path to the bundle directory (defaults to the
 	// current working directory).
 	bundleDir string
@@ -78,6 +79,7 @@ func (*Create) Usage() string {
 
 // SetFlags implements subcommands.Command.SetFlags.
 func (c *Create) SetFlags(f *flag.FlagSet) {
+	f.StringVar(&c.resourceGeneration, "scheduler-resource-generation", "", "bind runtime children to the trusted scheduler resource generation")
 	f.StringVar(&c.bundleDir, "bundle", "", "path to the root of the bundle directory, defaults to the current directory")
 	f.StringVar(&c.consoleSocket, "console-socket", "", "path to an AF_UNIX socket which will receive a file descriptor referencing the master end of the console's pseudoterminal")
 	f.StringVar(&c.pidFile, "pid-file", "", "filename that the container pid will be written to")
@@ -128,6 +130,7 @@ func (c *Create) Execute(_ context.Context, f *flag.FlagSet, args ...any) subcom
 	// container unless the metadata specifies that it should be run in an
 	// existing container.
 	contArgs := container.Args{
+		ResourceGeneration: c.resourceGeneration,
 		ID:                 id,
 		Spec:               spec,
 		BundleDir:          c.bundleDir,

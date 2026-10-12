@@ -17,6 +17,7 @@ package container
 
 import (
 	"bufio"
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -47,6 +48,7 @@ import (
 	"gvisor.dev/gvisor/runsc/config"
 	"gvisor.dev/gvisor/runsc/console"
 	"gvisor.dev/gvisor/runsc/donation"
+	"gvisor.dev/gvisor/runsc/processbirth"
 	"gvisor.dev/gvisor/runsc/profile"
 	"gvisor.dev/gvisor/runsc/sandbox"
 	"gvisor.dev/gvisor/runsc/specutils"
@@ -94,6 +96,12 @@ func validateID(id string) error {
 //
 // Container is thread-unsafe.
 type Container struct {
+	// Managed children use producer-captured births and kernel pidfds.
+	ResourceGeneration  string              `json:"resourceGeneration,omitempty"`
+	ProcessBirthVersion int                 `json:"processBirthVersion,omitempty"`
+	RuntimeDispatched   bool                `json:"runtimeDispatched,omitempty"`
+	GoferRequired       bool                `json:"goferRequired,omitempty"`
+	GoferBirth          *processbirth.Birth `json:"goferBirth,omitempty"`
 	// ID is the container ID.
 	ID string `json:"id"`
 
@@ -157,6 +165,7 @@ type Container struct {
 
 // Args is used to configure a new container.
 type Args struct {
+	ResourceGeneration string
 	// ID is the container unique identifier.
 	ID string
 
@@ -210,6 +219,13 @@ type Args struct {
 // indicates that an existing Sandbox should be used. The caller must call
 // Destroy() on the container.
 func New(conf *config.Config, args Args) (*Container, error) {
+	if args.ResourceGeneration != "" {
+		if !processbirth.ValidBinding(args.ID, args.ResourceGeneration) || args.Spec == nil ||
+			args.Spec.Annotations[processbirth.GenerationAnnotation] != args.ResourceGeneration ||
+			!specutils.IsRootContainer(args.Spec) {
+			return nil, fmt.Errorf("managed runtime requires a matching trusted generation and a root container")
+		}
+	}
 	log.Debugf("Create container, cid: %s, rootDir: %q", args.ID, conf.RootDir)
 
 	if args.FSRestoreImagePath == "" && args.SplitFSRestore {
@@ -251,13 +267,14 @@ func New(conf *config.Config, args Args) (*Container, error) {
 	}
 
 	c := &Container{
-		ID:            args.ID,
-		Spec:          args.Spec,
-		ConsoleSocket: args.ConsoleSocket,
-		BundleDir:     args.BundleDir,
-		Status:        Creating,
-		CreatedAt:     time.Now(),
-		Owner:         os.Getenv("USER"),
+		ResourceGeneration: args.ResourceGeneration,
+		ID:                 args.ID,
+		Spec:               args.Spec,
+		ConsoleSocket:      args.ConsoleSocket,
+		BundleDir:          args.BundleDir,
+		Status:             Creating,
+		CreatedAt:          time.Now(),
+		Owner:              os.Getenv("USER"),
 		Saver: StateFile{
 			RootDir: conf.RootDir,
 			ID: FullID{
@@ -280,6 +297,12 @@ func New(conf *config.Config, args Args) (*Container, error) {
 		return nil, fmt.Errorf("cannot lock container metadata file: %w", err)
 	}
 	defer c.Saver.UnlockOrDie()
+	if c.ResourceGeneration != "" {
+		c.ProcessBirthVersion = 1
+		if err := c.saveLocked(); err != nil {
+			return nil, err
+		}
+	}
 
 	// If the metadata annotations indicate that this container should be started
 	// in an existing sandbox, we must do so. These are the possible metadata
@@ -397,6 +420,7 @@ func (c *Container) createRoot(conf *config.Config, args Args, sandboxID string)
 		// Start a new sandbox for this container. Any errors after this point
 		// must destroy the container.
 		sandArgs := &sandbox.Args{
+			ResourceGeneration:  c.ResourceGeneration,
 			ID:                  sandboxID,
 			Spec:                args.Spec,
 			BundleDir:           args.BundleDir,
@@ -415,6 +439,12 @@ func (c *Container) createRoot(conf *config.Config, args Args, sandboxID string)
 			ExecFile:            args.ExecFile,
 			FSRestoreImagePath:  args.FSRestoreImagePath,
 			FSRestoreDirect:     args.FSRestoreDirect,
+		}
+		if c.ResourceGeneration != "" {
+			c.RuntimeDispatched = true
+			if err := c.saveLocked(); err != nil {
+				return err
+			}
 		}
 		sand, err := sandbox.New(conf, sandArgs)
 		if err != nil {
@@ -925,15 +955,43 @@ func (c *Container) Processes() ([]*control.Process, error) {
 // Destroy stops all processes and frees all resources associated with the
 // container.
 func (c *Container) Destroy() error {
-	log.Debugf("Destroy container, cid: %s", c.ID)
+	return c.destroy(context.Background(), "")
+}
 
-	if err := c.Saver.lock(BlockAcquire); err != nil {
-		return err
+// DestroyIfGeneration verifies fresh native ownership under the state lock.
+func (c *Container) DestroyIfGeneration(ctx context.Context, generation string) error {
+	if !processbirth.ValidBinding(c.ID, generation) {
+		return fmt.Errorf("original runtime generation is invalid")
+	}
+	return c.destroy(ctx, generation)
+}
+
+func (c *Container) destroy(ctx context.Context, expectedGeneration string) error {
+	log.Debugf("Destroy container, cid: %s", c.ID)
+	if expectedGeneration != "" || c.ResourceGeneration != "" {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, 20*time.Second)
+		defer cancel()
+		if err := c.lockManagedDeletion(ctx); err != nil {
+			return err
+		}
+	} else {
+		if err := c.Saver.lock(BlockAcquire); err != nil {
+			return err
+		}
 	}
 	defer func() {
 		c.Saver.UnlockOrDie()
 		_ = c.Saver.close()
 	}()
+	if expectedGeneration != "" || c.ResourceGeneration != "" {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		if err := c.verifyLockedProcessOwner(expectedGeneration); err != nil {
+			return err
+		}
+	}
 
 	// Stored for later use as stop() sets c.Sandbox to nil.
 	sb := c.Sandbox
@@ -947,16 +1005,27 @@ func (c *Container) Destroy() error {
 	// do our best to perform all of the cleanups. Hence, we keep a slice
 	// of errors return their concatenation.
 	var errs []string
-	if err := c.stop(); err != nil {
+	var stopErr error
+	if c.ResourceGeneration != "" {
+		stopErr = c.stopManagedRuntime(ctx)
+	} else {
+		stopErr = c.stop()
+	}
+	if err := stopErr; err != nil {
+		if c.ResourceGeneration != "" {
+			return fmt.Errorf("original managed runtime stop is unconfirmed: %w", err)
+		}
 		err = fmt.Errorf("stopping container: %v", err)
 		log.Warningf("%v", err)
 		errs = append(errs, err.Error())
 	}
 
-	if err := c.Saver.Destroy(); err != nil {
-		err = fmt.Errorf("deleting container state files: %v", err)
-		log.Warningf("%v", err)
-		errs = append(errs, err.Error())
+	if c.ResourceGeneration == "" {
+		if err := c.Saver.Destroy(); err != nil {
+			err = fmt.Errorf("deleting container state files: %v", err)
+			log.Warningf("%v", err)
+			errs = append(errs, err.Error())
+		}
 	}
 
 	// Clean up self-backed filestore files created in their respective mounts.
@@ -1019,6 +1088,14 @@ func (c *Container) Destroy() error {
 	// container can't be loaded again.
 	if c.Spec.Hooks != nil {
 		specutils.ExecuteHooksBestEffort(c.Spec.Hooks.Poststop, c.State())
+	}
+	if c.ResourceGeneration != "" {
+		if len(errs) != 0 {
+			return fmt.Errorf("%s", strings.Join(errs, "\n"))
+		}
+		if err := c.Saver.Destroy(); err != nil {
+			return err
+		}
 	}
 
 	if len(errs) == 0 {
@@ -1261,8 +1338,14 @@ func (c *Container) createGoferFilestoreInDir(goferRootfs string, filestoreDir s
 // Precondition: container must be locked with container.lock().
 func (c *Container) saveLocked() error {
 	log.Debugf("Save container, cid: %s", c.ID)
-	if err := c.Saver.SaveLocked(c); err != nil {
-		return fmt.Errorf("saving container metadata: %v", err)
+	var saveErr error
+	if c.ResourceGeneration != "" {
+		saveErr = c.Saver.SaveLockedDurable(c)
+	} else {
+		saveErr = c.Saver.SaveLocked(c)
+	}
+	if saveErr != nil {
+		return fmt.Errorf("saving container metadata: %v", saveErr)
 	}
 	return nil
 }
@@ -1271,6 +1354,9 @@ func (c *Container) saveLocked() error {
 // root containers), and waits for the container or sandbox and the gofer
 // to stop. If any of them doesn't stop before timeout, an error is returned.
 func (c *Container) stop() error {
+	if c.ResourceGeneration != "" {
+		return c.stopManagedRuntime(context.Background())
+	}
 	var parentCgroup cgroup.Cgroup
 
 	if c.Sandbox != nil {
@@ -1670,12 +1756,29 @@ func (c *Container) createGoferProcess(conf *config.Config, mountHints *boot.Pod
 	donation.LogDonations(cmd)
 
 	log.Debugf("Starting gofer: %s %v", cmd.Path, cmd.Args)
+	if c.ResourceGeneration != "" {
+		c.GoferRequired = true
+		c.RuntimeDispatched = true
+		if err := c.saveLocked(); err != nil {
+			return nil, nil, nil, nil, err
+		}
+	}
 	if err := specutils.StartInNS(cmd, nss); err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("gofer: %v", err)
 	}
 	log.Infof("Gofer started, PID: %d", cmd.Process.Pid)
 	c.GoferPid.Store(cmd.Process.Pid)
 	c.goferIsChild = true
+	if c.ResourceGeneration != "" {
+		birth, err := processbirth.CaptureChild(context.Background(), cmd.Process, c.ID, c.ResourceGeneration, "gofer")
+		if err != nil {
+			return nil, nil, nil, nil, fmt.Errorf("capture original gofer birth: %w", err)
+		}
+		c.GoferBirth = birth
+		if err := c.saveLocked(); err != nil {
+			return nil, nil, nil, nil, err
+		}
+	}
 	rpcPidCh <- cmd.Process.Pid
 
 	if pinGoferNetNS {

@@ -31,6 +31,7 @@ import (
 // Delete implements subcommands.Command for the "delete" command.
 type Delete struct {
 	containerLoader
+	expectedGeneration string
 	// force indicates that the container should be terminated if running.
 	force bool
 }
@@ -52,6 +53,7 @@ func (*Delete) Usage() string {
 
 // SetFlags implements subcommands.Command.SetFlags.
 func (d *Delete) SetFlags(f *flag.FlagSet) {
+	f.StringVar(&d.expectedGeneration, "expected-resource-generation", "", "reject another scheduler execution before deleting runtime children")
 	f.BoolVar(&d.force, "force", false, "terminate container if running")
 }
 
@@ -68,21 +70,28 @@ func (d *Delete) FetchSpec(conf *config.Config, f *flag.FlagSet) (string, *specs
 }
 
 // Execute implements subcommands.Command.Execute.
-func (d *Delete) Execute(_ context.Context, f *flag.FlagSet, args ...any) subcommands.ExitStatus {
+func (d *Delete) Execute(ctx context.Context, f *flag.FlagSet, args ...any) subcommands.ExitStatus {
 	if f.NArg() == 0 {
 		f.Usage()
 		return subcommands.ExitUsageError
 	}
 
 	conf := args[0].(*config.Config)
-	if err := d.execute(f, conf); err != nil {
+	if err := d.executeContext(ctx, f, conf); err != nil {
 		util.Fatalf("%v", err)
 	}
 	return subcommands.ExitSuccess
 }
 
 func (d *Delete) execute(f *flag.FlagSet, conf *config.Config) error {
+	return d.executeContext(context.Background(), f, conf)
+}
+
+func (d *Delete) executeContext(ctx context.Context, f *flag.FlagSet, conf *config.Config) error {
 	ids := f.Args()
+	if d.expectedGeneration != "" && len(ids) != 1 {
+		return fmt.Errorf("generation-conditional deletion requires exactly one full container ID")
+	}
 	for i, id := range ids {
 		var (
 			c   *container.Container
@@ -95,17 +104,26 @@ func (d *Delete) execute(f *flag.FlagSet, conf *config.Config) error {
 			c, err = container.Load(conf.RootDir, container.FullID{ContainerID: id}, container.LoadOpts{})
 		}
 		if err != nil {
-			if os.IsNotExist(err) && d.force {
+			if os.IsNotExist(err) && d.force && d.expectedGeneration == "" {
 				log.Warningf("couldn't find container %q: %v", id, err)
 				return nil
 			}
 			return fmt.Errorf("loading container %q: %v", id, err)
 		}
+		if d.expectedGeneration != "" && c.ID != id {
+			return fmt.Errorf("generation-conditional deletion rejects abbreviated container IDs")
+		}
 		if !d.force && c.Status != container.Created && c.Status != container.Stopped {
 			return fmt.Errorf("cannot delete container that is not stopped without --force flag")
 		}
-		if err := c.Destroy(); err != nil {
-			return fmt.Errorf("destroying container: %v", err)
+		var destroyErr error
+		if d.expectedGeneration != "" {
+			destroyErr = c.DestroyIfGeneration(ctx, d.expectedGeneration)
+		} else {
+			destroyErr = c.Destroy()
+		}
+		if destroyErr != nil {
+			return fmt.Errorf("destroying container: %v", destroyErr)
 		}
 	}
 	return nil

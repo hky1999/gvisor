@@ -54,6 +54,7 @@ go_library(
         "//runsc/gvisorbinaries",
         "//runsc/hostsettings",
         "//runsc/profile",
+        "//runsc/processbirth",
         "//runsc/sandbox/bpf",
         "//runsc/specutils",
         "//runsc/starttime",
