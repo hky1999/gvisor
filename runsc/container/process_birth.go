@@ -199,6 +199,7 @@ func (c *Container) verifyLockedProcessOwner(expected string) error {
 	if current.ID != c.ID || current.ResourceGeneration != expected || current.ProcessBirthVersion != 1 ||
 		current.RuntimeDispatched != c.RuntimeDispatched || current.GoferRequired != c.GoferRequired ||
 		current.ProcessLaunchVersion != c.ProcessLaunchVersion || current.GoferLaunchState != c.GoferLaunchState || current.SentryLaunchState != c.SentryLaunchState ||
+		!reflect.DeepEqual(current.LaunchCgroup, c.LaunchCgroup) ||
 		current.GoferPid.Load() != c.GoferPid.Load() || current.BundleDir != c.BundleDir ||
 		!reflect.DeepEqual(current.Spec, c.Spec) || !reflect.DeepEqual(current.GoferBirth, c.GoferBirth) {
 		return errors.New("original managed runtime state was replaced after loading")

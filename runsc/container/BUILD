@@ -10,6 +10,7 @@ go_library(
     srcs = [
         "container.go",
         "gofer_to_host_rpc.go",
+        "launch_cgroup.go",
         "null_netns.go",
         "state_file.go",
         "process_birth.go",
@@ -53,9 +54,11 @@ go_test(
     srcs = [
         "process_birth_test.go",
         "process_launch_test.go",
+        "launch_cgroup_test.go",
     ],
     library = ":container",
     deps = [
+        "//runsc/config",
         "//runsc/processbirth",
         "@com_github_opencontainers_runtime_spec//specs-go:go_default_library",
         "@org_golang_x_sys//unix:go_default_library",

@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -32,6 +33,7 @@ import (
 type Delete struct {
 	containerLoader
 	expectedGeneration string
+	offlineCgroupFD    int
 	// force indicates that the container should be terminated if running.
 	force bool
 }
@@ -54,6 +56,7 @@ func (*Delete) Usage() string {
 // SetFlags implements subcommands.Command.SetFlags.
 func (d *Delete) SetFlags(f *flag.FlagSet) {
 	f.StringVar(&d.expectedGeneration, "expected-resource-generation", "", "reject another scheduler execution before deleting runtime children")
+	f.IntVar(&d.offlineCgroupFD, "scheduler-offline-cgroup-fd", 0, "original offline cgroup descriptor for managed cleanup; zero disables this mode")
 	f.BoolVar(&d.force, "force", false, "terminate container if running")
 }
 
@@ -89,6 +92,9 @@ func (d *Delete) execute(f *flag.FlagSet, conf *config.Config) error {
 
 func (d *Delete) executeContext(ctx context.Context, f *flag.FlagSet, conf *config.Config) error {
 	ids := f.Args()
+	if d.offlineCgroupFD != 0 && (d.expectedGeneration == "" || d.offlineCgroupFD < 3) {
+		return errors.New("offline cgroup cleanup requires the original generation and directory descriptor")
+	}
 	if d.expectedGeneration != "" && len(ids) != 1 {
 		return fmt.Errorf("generation-conditional deletion requires exactly one full container ID")
 	}
@@ -118,7 +124,11 @@ func (d *Delete) executeContext(ctx context.Context, f *flag.FlagSet, conf *conf
 		}
 		var destroyErr error
 		if d.expectedGeneration != "" {
-			destroyErr = c.DestroyIfGeneration(ctx, d.expectedGeneration)
+			if d.offlineCgroupFD != 0 {
+				destroyErr = c.DestroyIfGenerationAfterCgroupOffline(ctx, d.expectedGeneration, d.offlineCgroupFD)
+			} else {
+				destroyErr = c.DestroyIfGeneration(ctx, d.expectedGeneration)
+			}
 		} else {
 			destroyErr = c.Destroy()
 		}

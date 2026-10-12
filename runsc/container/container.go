@@ -97,14 +97,15 @@ func validateID(id string) error {
 // Container is thread-unsafe.
 type Container struct {
 	// Managed children use producer-captured births and kernel pidfds.
-	ResourceGeneration   string              `json:"resourceGeneration,omitempty"`
-	ProcessBirthVersion  int                 `json:"processBirthVersion,omitempty"`
-	RuntimeDispatched    bool                `json:"runtimeDispatched,omitempty"`
-	GoferRequired        bool                `json:"goferRequired,omitempty"`
-	GoferBirth           *processbirth.Birth `json:"goferBirth,omitempty"`
-	ProcessLaunchVersion int                 `json:"processLaunchVersion,omitempty"`
-	GoferLaunchState     string              `json:"goferLaunchState,omitempty"`
-	SentryLaunchState    string              `json:"sentryLaunchState,omitempty"`
+	ResourceGeneration   string               `json:"resourceGeneration,omitempty"`
+	ProcessBirthVersion  int                  `json:"processBirthVersion,omitempty"`
+	RuntimeDispatched    bool                 `json:"runtimeDispatched,omitempty"`
+	GoferRequired        bool                 `json:"goferRequired,omitempty"`
+	GoferBirth           *processbirth.Birth  `json:"goferBirth,omitempty"`
+	ProcessLaunchVersion int                  `json:"processLaunchVersion,omitempty"`
+	GoferLaunchState     string               `json:"goferLaunchState,omitempty"`
+	SentryLaunchState    string               `json:"sentryLaunchState,omitempty"`
+	LaunchCgroup         *ManagedLaunchCgroup `json:"launchCgroup,omitempty"`
 	// ID is the container ID.
 	ID string `json:"id"`
 
@@ -301,6 +302,11 @@ func New(conf *config.Config, args Args) (*Container, error) {
 	}
 	defer c.Saver.UnlockOrDie()
 	if c.ResourceGeneration != "" {
+		binding, err := captureManagedLaunchCgroup(conf, args.Spec)
+		if err != nil {
+			return nil, err
+		}
+		c.LaunchCgroup = binding
 		c.ProcessBirthVersion = 1
 		c.ProcessLaunchVersion = 1
 		c.GoferLaunchState = processNotDispatched
@@ -980,6 +986,19 @@ func (c *Container) DestroyIfGeneration(ctx context.Context, generation string) 
 }
 
 func (c *Container) destroy(ctx context.Context, expectedGeneration string) error {
+	return c.destroyWithOfflineCgroup(ctx, expectedGeneration, -1)
+}
+
+// DestroyIfGenerationAfterCgroupOffline 依据原离线目录句柄清理原状态。
+// 此入口不发送进程信号，也不生成节点预算回执。
+func (c *Container) DestroyIfGenerationAfterCgroupOffline(ctx context.Context, generation string, fd int) error {
+	if !processbirth.ValidBinding(c.ID, generation) || fd < 3 {
+		return errors.New("original offline cgroup deletion binding is invalid")
+	}
+	return c.destroyWithOfflineCgroup(ctx, generation, fd)
+}
+
+func (c *Container) destroyWithOfflineCgroup(ctx context.Context, expectedGeneration string, offlineCgroupFD int) error {
 	log.Debugf("Destroy container, cid: %s", c.ID)
 	if expectedGeneration != "" || c.ResourceGeneration != "" {
 		var cancel context.CancelFunc
@@ -1020,7 +1039,19 @@ func (c *Container) destroy(ctx context.Context, expectedGeneration string) erro
 	var errs []string
 	var stopErr error
 	if c.ResourceGeneration != "" {
-		stopErr = c.stopManagedRuntime(ctx)
+		if offlineCgroupFD >= 0 {
+			if c.Spec == nil || c.Spec.Linux == nil || c.LaunchCgroup == nil || c.LaunchCgroup.Path != c.Spec.Linux.CgroupsPath {
+				stopErr = errors.New("original offline cgroup source differs from its managed OCI path")
+			} else {
+				stopErr = c.LaunchCgroup.verifyOffline(ctx, offlineCgroupFD)
+			}
+			if stopErr == nil {
+				c.GoferPid.Store(0)
+				c.Sandbox = nil
+			}
+		} else {
+			stopErr = c.stopManagedRuntime(ctx)
+		}
 	} else {
 		stopErr = c.stop()
 	}
@@ -1083,7 +1114,7 @@ func (c *Container) destroy(ctx context.Context, expectedGeneration string) erro
 	//
 	// Use 'sb' to tell whether it has been executed before because Destroy must
 	// be idempotent.
-	if sb != nil {
+	if sb != nil && offlineCgroupFD < 0 {
 		if err := adjustSandboxOOMScoreAdj(sb, c.Spec, c.Saver.RootDir, true); err != nil {
 			errs = append(errs, err.Error())
 		}
