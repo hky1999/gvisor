@@ -22,6 +22,12 @@ import (
 
 const managedRuntimeStateLimit = 8 << 20
 
+const (
+	processNotDispatched  = "not_dispatched"
+	processDispatching    = "dispatching"
+	processBirthPublished = "birth_published"
+)
+
 func originalStateDirectory(path string) (*os.File, unix.Stat_t, error) {
 	fd, err := unix.Open(path, unix.O_RDONLY|unix.O_DIRECTORY|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0)
 	if err != nil {
@@ -192,6 +198,7 @@ func (c *Container) verifyLockedProcessOwner(expected string) error {
 	}
 	if current.ID != c.ID || current.ResourceGeneration != expected || current.ProcessBirthVersion != 1 ||
 		current.RuntimeDispatched != c.RuntimeDispatched || current.GoferRequired != c.GoferRequired ||
+		current.ProcessLaunchVersion != c.ProcessLaunchVersion || current.GoferLaunchState != c.GoferLaunchState || current.SentryLaunchState != c.SentryLaunchState ||
 		current.GoferPid.Load() != c.GoferPid.Load() || current.BundleDir != c.BundleDir ||
 		!reflect.DeepEqual(current.Spec, c.Spec) || !reflect.DeepEqual(current.GoferBirth, c.GoferBirth) {
 		return errors.New("original managed runtime state was replaced after loading")
@@ -214,37 +221,35 @@ func (c *Container) stopManagedRuntime(ctx context.Context) error {
 	if c.ProcessBirthVersion != 1 {
 		return errors.New("original runtime process birth protocol is missing")
 	}
-	if !c.RuntimeDispatched {
-		if c.Sandbox != nil || c.GoferPid.Load() != 0 || c.GoferBirth != nil {
-			return errors.New("undispatched runtime has contradictory process facts")
-		}
-		return nil
-	}
-	if c.Sandbox == nil || c.Sandbox.ProcessBirth == nil || c.Sandbox.ResourceGeneration != c.ResourceGeneration {
-		return errors.New("original sentry birth is incomplete")
-	}
-	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
-	sentry, err := processbirth.Open(ctx, c.Sandbox.ProcessBirth, c.ID, c.ResourceGeneration, "sentry")
+	needSentry, needGofer, err := c.managedProcessRequirements()
 	if err != nil {
 		return err
 	}
-	defer sentry.Close()
-	var gofer *processbirth.Handle
-	if c.GoferRequired {
-		if c.GoferBirth == nil || (c.GoferPid.Load() != 0 && c.GoferPid.Load() != c.GoferBirth.PID) {
-			return errors.New("original gofer birth is incomplete")
+	if !needSentry && !needGofer {
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, 20*time.Second)
+	defer cancel()
+	var sentry *processbirth.Handle
+	if needSentry {
+		sentry, err = processbirth.Open(ctx, c.Sandbox.ProcessBirth, c.ID, c.ResourceGeneration, "sentry")
+		if err != nil {
+			return err
 		}
+		defer sentry.Close()
+	}
+	var gofer *processbirth.Handle
+	if needGofer {
 		gofer, err = processbirth.Open(ctx, c.GoferBirth, c.ID, c.ResourceGeneration, "gofer")
 		if err != nil {
 			return err
 		}
 		defer gofer.Close()
-	} else if c.GoferBirth != nil || c.GoferPid.Load() != 0 {
-		return errors.New("runtime no-gofer fact contradicts native ownership")
 	}
-	if err := c.Sandbox.DestroyOriginal(ctx, sentry); err != nil {
-		return err
+	if sentry != nil {
+		if err := c.Sandbox.DestroyOriginal(ctx, sentry); err != nil {
+			return err
+		}
 	}
 	if gofer != nil {
 		if err := gofer.KillAndWait(ctx); err != nil {
@@ -257,6 +262,56 @@ func (c *Container) stopManagedRuntime(ctx context.Context) error {
 	// generation-bound retirement. Do not uninstall it through a path-only
 	// native runtime record after the original processes exit.
 	return nil
+}
+
+// This classifies producer facts only. Any returned process still needs its
+// original kernel handle and complete birth verification before a signal.
+func (c *Container) managedProcessRequirements() (bool, bool, error) {
+	if c.ProcessLaunchVersion == 0 {
+		if c.GoferLaunchState != "" || c.SentryLaunchState != "" {
+			return false, false, errors.New("legacy process owner contains unsupported launch-stage facts")
+		}
+		if !c.RuntimeDispatched {
+			if c.Sandbox != nil || c.GoferPid.Load() != 0 || c.GoferBirth != nil {
+				return false, false, errors.New("undispatched runtime has contradictory process facts")
+			}
+			return false, false, nil
+		}
+		if c.Sandbox == nil || c.Sandbox.ProcessBirth == nil || c.Sandbox.ResourceGeneration != c.ResourceGeneration {
+			return false, false, errors.New("original sentry birth is incomplete")
+		}
+	} else if c.ProcessLaunchVersion == 1 {
+		valid := func(stage string) bool {
+			return stage == processNotDispatched || stage == processDispatching || stage == processBirthPublished
+		}
+		if !valid(c.GoferLaunchState) || !valid(c.SentryLaunchState) {
+			return false, false, errors.New("original process launch stage is missing or invalid")
+		}
+		dispatched := c.GoferLaunchState != processNotDispatched || c.SentryLaunchState != processNotDispatched
+		if c.RuntimeDispatched != dispatched || c.GoferRequired != (c.GoferLaunchState != processNotDispatched) {
+			return false, false, errors.New("original process launch facts contradict dispatch ownership")
+		}
+		if c.GoferLaunchState == processDispatching || c.SentryLaunchState == processDispatching {
+			return false, false, errors.New("original process dispatch lacks a published birth; outcome remains unknown")
+		}
+		if c.SentryLaunchState == processNotDispatched {
+			if c.Sandbox != nil {
+				return false, false, errors.New("undispatched sentry has contradictory sandbox facts")
+			}
+		} else if c.Sandbox == nil || c.Sandbox.ProcessBirth == nil || c.Sandbox.ResourceGeneration != c.ResourceGeneration {
+			return false, false, errors.New("original sentry birth is incomplete")
+		}
+	} else {
+		return false, false, errors.New("original process launch protocol is unsupported")
+	}
+	if c.GoferRequired {
+		if c.GoferBirth == nil || (c.GoferPid.Load() != c.GoferBirth.PID && (c.ProcessLaunchVersion != 0 || c.GoferPid.Load() != 0)) {
+			return false, false, errors.New("original gofer birth is incomplete")
+		}
+	} else if c.GoferBirth != nil || c.GoferPid.Load() != 0 {
+		return false, false, errors.New("runtime no-gofer fact contradicts native ownership")
+	}
+	return c.Sandbox != nil, c.GoferRequired, nil
 }
 
 func (c *Container) lockManagedDeletion(ctx context.Context) error {

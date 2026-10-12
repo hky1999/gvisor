@@ -97,11 +97,14 @@ func validateID(id string) error {
 // Container is thread-unsafe.
 type Container struct {
 	// Managed children use producer-captured births and kernel pidfds.
-	ResourceGeneration  string              `json:"resourceGeneration,omitempty"`
-	ProcessBirthVersion int                 `json:"processBirthVersion,omitempty"`
-	RuntimeDispatched   bool                `json:"runtimeDispatched,omitempty"`
-	GoferRequired       bool                `json:"goferRequired,omitempty"`
-	GoferBirth          *processbirth.Birth `json:"goferBirth,omitempty"`
+	ResourceGeneration   string              `json:"resourceGeneration,omitempty"`
+	ProcessBirthVersion  int                 `json:"processBirthVersion,omitempty"`
+	RuntimeDispatched    bool                `json:"runtimeDispatched,omitempty"`
+	GoferRequired        bool                `json:"goferRequired,omitempty"`
+	GoferBirth           *processbirth.Birth `json:"goferBirth,omitempty"`
+	ProcessLaunchVersion int                 `json:"processLaunchVersion,omitempty"`
+	GoferLaunchState     string              `json:"goferLaunchState,omitempty"`
+	SentryLaunchState    string              `json:"sentryLaunchState,omitempty"`
 	// ID is the container ID.
 	ID string `json:"id"`
 
@@ -299,6 +302,9 @@ func New(conf *config.Config, args Args) (*Container, error) {
 	defer c.Saver.UnlockOrDie()
 	if c.ResourceGeneration != "" {
 		c.ProcessBirthVersion = 1
+		c.ProcessLaunchVersion = 1
+		c.GoferLaunchState = processNotDispatched
+		c.SentryLaunchState = processNotDispatched
 		if err := c.saveLocked(); err != nil {
 			return nil, err
 		}
@@ -442,6 +448,7 @@ func (c *Container) createRoot(conf *config.Config, args Args, sandboxID string)
 		}
 		if c.ResourceGeneration != "" {
 			c.RuntimeDispatched = true
+			c.SentryLaunchState = processDispatching
 			if err := c.saveLocked(); err != nil {
 				return err
 			}
@@ -451,6 +458,12 @@ func (c *Container) createRoot(conf *config.Config, args Args, sandboxID string)
 			return fmt.Errorf("cannot create sandbox: %w", err)
 		}
 		c.Sandbox = sand
+		if c.ResourceGeneration != "" {
+			c.SentryLaunchState = processBirthPublished
+			if err := c.saveLocked(); err != nil {
+				return err
+			}
+		}
 		return nil
 
 	}); err != nil {
@@ -1759,6 +1772,7 @@ func (c *Container) createGoferProcess(conf *config.Config, mountHints *boot.Pod
 	if c.ResourceGeneration != "" {
 		c.GoferRequired = true
 		c.RuntimeDispatched = true
+		c.GoferLaunchState = processDispatching
 		if err := c.saveLocked(); err != nil {
 			return nil, nil, nil, nil, err
 		}
@@ -1775,6 +1789,7 @@ func (c *Container) createGoferProcess(conf *config.Config, mountHints *boot.Pod
 			return nil, nil, nil, nil, fmt.Errorf("capture original gofer birth: %w", err)
 		}
 		c.GoferBirth = birth
+		c.GoferLaunchState = processBirthPublished
 		if err := c.saveLocked(); err != nil {
 			return nil, nil, nil, nil, err
 		}

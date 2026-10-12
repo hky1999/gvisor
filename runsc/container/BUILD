@@ -50,7 +50,10 @@ go_library(
 go_test(
     name = "process_birth_test",
     size = "small",
-    srcs = ["process_birth_test.go"],
+    srcs = [
+        "process_birth_test.go",
+        "process_launch_test.go",
+    ],
     library = ":container",
     deps = [
         "//runsc/processbirth",
