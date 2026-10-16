@@ -65,6 +65,10 @@ const keySize = 32
 // stateFileChunkSize is the chunk size used to read/write the state file.
 const stateFileChunkSize = 1024 * 1024
 
+// stateFileReaderMaxWorkers bounds decompressed read-ahead while restored
+// application pages and the live kernel share the same memory cgroup.
+const stateFileReaderMaxWorkers = 4
+
 // maxMetadataSize is the size limit of metadata section.
 const maxMetadataSize = 16 * 1024 * 1024
 
@@ -326,7 +330,7 @@ func NewReader(r io.ReadCloser, key []byte) (io.ReadCloser, map[string]string, e
 
 	switch compression {
 	case CompressionLevelFlateBestSpeed:
-		cr, err = compressio.NewReader(r, key)
+		cr, err = compressio.NewReaderWithMaxWorkers(r, key, stateFileReaderMaxWorkers)
 	case CompressionLevelNone:
 		cr = compressio.NewSimpleReader(r, key)
 	default:

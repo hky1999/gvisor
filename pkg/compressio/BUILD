@@ -21,6 +21,7 @@ go_test(
     srcs = [
         "compressio_test.go",
         "nocompressio_test.go",
+        "reader_workers_test.go",
     ],
     library = ":compressio",
 )

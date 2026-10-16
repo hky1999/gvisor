@@ -382,12 +382,26 @@ var _ io.Reader = (*Reader)(nil)
 // hash values computed from the compressed bytes. See package comments for
 // details.
 func NewReader(in io.ReadCloser, key []byte) (*Reader, error) {
+	return newReader(in, key, 2*runtime.GOMAXPROCS(0))
+}
+
+// NewReaderWithMaxWorkers is NewReader with an upper bound on decompression
+// workers and their read-ahead buffers. It preserves the compressed format and
+// hash validation. maxWorkers must be positive; invalid limits consume no input.
+func NewReaderWithMaxWorkers(in io.ReadCloser, key []byte, maxWorkers int) (*Reader, error) {
+	if maxWorkers <= 0 {
+		return nil, errors.New("maximum decompression workers must be positive")
+	}
+	return newReader(in, key, min(maxWorkers, 2*runtime.GOMAXPROCS(0)))
+}
+
+func newReader(in io.ReadCloser, key []byte, workers int) (*Reader, error) {
 	r := &Reader{
 		in: in,
 	}
 
 	// Use double buffering for read.
-	r.init(key, 2*runtime.GOMAXPROCS(0), false, 0)
+	r.init(key, workers, false, 0)
 
 	if _, err := io.ReadFull(in, r.scratch[:4]); err != nil {
 		return nil, err

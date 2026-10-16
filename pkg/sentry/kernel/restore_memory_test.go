@@ -40,6 +40,7 @@ import (
 	"os/exec"
 	"runtime"
 	"runtime/debug"
+	"sync"
 	"testing"
 )
 
@@ -92,4 +93,52 @@ func TestReclaimRestoreMemory(t *testing.T) {
 	}
 	runtime.KeepAlive(live)
 	t.Logf("heap_alloc_before=%d heap_alloc_after=%d resident_before=%d resident_after=%d", before.HeapAlloc, after.HeapAlloc, residentBefore, residentAfter)
+}
+
+var decoderScratchPool sync.Pool
+
+//go:noinline
+func leaveDecoderScratchInPool() {
+	b := make([]byte, 64<<20)
+	for i := 0; i < len(b); i += 4096 {
+		b[i] = 0x3d
+	}
+	decoderScratchPool.Put(&b)
+}
+
+func TestReclaimPooledDecoderMemory(t *testing.T) {
+	const child = "GVISOR_TEST_POOLED_DECODER_RECLAIM_CHILD"
+	if os.Getenv(child) != "1" {
+		cmd := exec.Command(os.Args[0], "-test.run=^TestReclaimPooledDecoderMemory$", "-test.v")
+		cmd.Env = append(os.Environ(), child+"=1")
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("pooled restore heap child failed: %v\n%s", err, out)
+		} else {
+			t.Logf("%s", out)
+		}
+		return
+	}
+
+	debug.SetGCPercent(-1)
+	debug.FreeOSMemory()
+	live := make([]byte, 8<<20)
+	for i := 0; i < len(live); i += 4096 {
+		live[i] = byte(i / 4096)
+	}
+	leaveDecoderScratchInPool()
+	before, after := reclaimRestoreMemory()
+	const expectedRelease = 32 << 20
+	t.Logf("before_alloc=%d after_alloc=%d before_retained=%d after_retained=%d gc=%d->%d", before.HeapAlloc, after.HeapAlloc, before.HeapSys-before.HeapReleased, after.HeapSys-after.HeapReleased, before.NumGC, after.NumGC)
+	if before.HeapAlloc < after.HeapAlloc+expectedRelease {
+		t.Fatalf("pooled decoder scratch remains retained across page loading: before=%d after=%d", before.HeapAlloc, after.HeapAlloc)
+	}
+	if before.HeapSys-before.HeapReleased < after.HeapSys-after.HeapReleased+expectedRelease {
+		t.Fatal("pooled decoder backing pages were not returned")
+	}
+	for i := 0; i < len(live); i += 4096 {
+		if live[i] != byte(i/4096) {
+			t.Fatal("live data changed")
+		}
+	}
+	runtime.KeepAlive(live)
 }

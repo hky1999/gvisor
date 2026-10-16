@@ -46,6 +46,9 @@ import (
 // or prompt the scavenger to return the decoder's unused heap to the host.
 func reclaimRestoreMemory() (before, after runtime.MemStats) {
 	runtime.ReadMemStats(&before)
+	// One GC moves sync.Pool entries into its victim cache. A second cycle
+	// is required to discard that cache before external page memory grows.
+	runtime.GC()
 	debug.FreeOSMemory()
 	runtime.ReadMemStats(&after)
 	return
