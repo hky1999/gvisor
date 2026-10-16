@@ -1043,6 +1043,17 @@ func (c *Container) destroyWithCgroupProof(ctx context.Context, expectedGenerati
 		}
 	}
 
+	// Capture the original socket before any offline cleanup changes the owner.
+	var originalSocket *managedControlSocket
+	if c.ResourceGeneration != "" && offlineProof {
+		var err error
+		originalSocket, err = c.prepareManagedControlSocket(ctx)
+		if err != nil {
+			return err
+		}
+		defer originalSocket.close()
+	}
+
 	// Stored for later use as stop() sets c.Sandbox to nil.
 	sb := c.Sandbox
 
@@ -1068,6 +1079,9 @@ func (c *Container) destroyWithCgroupProof(ctx context.Context, expectedGenerati
 				}
 			} else {
 				stopErr = c.LaunchCgroup.verifyOffline(ctx, offlineCgroupFD)
+			}
+			if stopErr == nil {
+				stopErr = originalSocket.remove(ctx)
 			}
 			if stopErr == nil {
 				c.GoferPid.Store(0)

@@ -210,6 +210,7 @@ func (c *Container) verifyLockedProcessOwner(expected string) error {
 	if c.Sandbox != nil && (current.Sandbox.ID != c.ID || c.Sandbox.ID != c.ID ||
 		current.Sandbox.ResourceGeneration != expected || c.Sandbox.ResourceGeneration != expected ||
 		current.Sandbox.Pid.Load() != c.Sandbox.Pid.Load() ||
+		current.Sandbox.ControlSocketPath != c.Sandbox.ControlSocketPath ||
 		!reflect.DeepEqual(current.Sandbox.ProcessBirth, c.Sandbox.ProcessBirth)) {
 		return errors.New("original managed sentry source differs")
 	}
