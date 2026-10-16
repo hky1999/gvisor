@@ -1037,6 +1037,12 @@ func (k *Kernel) LoadFrom(ctx context.Context, r io.Reader, asyncMFLoader *Async
 	timeline.Reached("Kernel loaded")
 
 	if asyncMFLoader == nil {
+		// Kernel decoding allocates temporary Go objects. Return their backing
+		// pages before adding the application MemoryFiles to the same cgroup.
+		reclaimStart := time.Now()
+		before, after := reclaimRestoreMemory()
+		log.Infof("Restore heap reclaim took [%s]: alloc=%d->%d inuse=%d->%d released=%d->%d GC=%d->%d", time.Since(reclaimStart), before.HeapAlloc, after.HeapAlloc, before.HeapInuse, after.HeapInuse, before.HeapReleased, after.HeapReleased, before.NumGC, after.NumGC)
+		timeline.Reached("Decoder heap reclaimed")
 		mfStart := time.Now()
 		if err := k.loadMemoryFiles(ctx, r); err != nil {
 			return fmt.Errorf("failed to load memory files: %w", err)

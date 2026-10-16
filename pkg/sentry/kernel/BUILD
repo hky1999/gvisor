@@ -279,6 +279,7 @@ go_library(
         "kernel.go",
         "kernel_opts.go",
         "kernel_restore.go",
+        "restore_memory.go",
         "kernel_state.go",
         "pending_signals.go",
         "pending_signals_list.go",
@@ -464,5 +465,14 @@ go_test(
         "//pkg/sentry/usage",
         "//pkg/sentry/vfs",
         "//pkg/sync",
+    ],
+)
+
+# A separate process verifies actual heap collection and host memory release.
+go_test(
+    name = "restore_memory_test",
+    srcs = [
+        "restore_memory.go",
+        "restore_memory_test.go",
     ],
 )
