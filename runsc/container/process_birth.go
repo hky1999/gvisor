@@ -53,18 +53,36 @@ func checkStateDirectory(path string, original unix.Stat_t) error {
 // SaveLockedDurable publishes native producer facts before another process can
 // receive ownership. Failure keeps dispatch or completion unconfirmed.
 func (s *StateFile) SaveLockedDurable(value any) error {
-	if !s.flock.Locked() {
+	if s.flock == nil || !s.flock.Locked() {
 		return errors.New("original managed runtime state lock is not held")
-	}
-	data, err := json.Marshal(value)
-	if err != nil || len(data) > managedRuntimeStateLimit {
-		return errors.New("managed runtime state is invalid or exceeds its limit")
 	}
 	directory, original, err := originalStateDirectory(s.RootDir)
 	if err != nil {
 		return err
 	}
 	defer directory.Close()
+	return s.saveLockedDurableAt(value, directory, original)
+}
+
+// saveLockedDurableAt keeps every write anchored to the caller's original
+// directory descriptor. A replaced pathname must never redirect its journal.
+func (s *StateFile) saveLockedDurableAt(value any, directory *os.File, original unix.Stat_t) error {
+	if s.flock == nil || !s.flock.Locked() {
+		return errors.New("original managed runtime state lock is not held")
+	}
+	if err := checkStateDirectory(s.RootDir, original); err != nil {
+		return err
+	}
+	var held unix.Stat_t
+	if err := unix.Fstat(int(directory.Fd()), &held); err != nil ||
+		held.Dev != original.Dev || held.Ino != original.Ino || held.Mode != original.Mode ||
+		held.Uid != original.Uid || held.Gid != original.Gid {
+		return errors.New("original managed runtime state directory descriptor changed")
+	}
+	data, err := json.Marshal(value)
+	if err != nil || len(data) > managedRuntimeStateLimit {
+		return errors.New("managed runtime state is invalid or exceeds its limit")
+	}
 	random := make([]byte, 16)
 	if _, err := rand.Read(random); err != nil {
 		return err
@@ -200,6 +218,8 @@ func (c *Container) verifyLockedProcessOwner(expected string) error {
 		current.RuntimeDispatched != c.RuntimeDispatched || current.GoferRequired != c.GoferRequired ||
 		current.ProcessLaunchVersion != c.ProcessLaunchVersion || current.GoferLaunchState != c.GoferLaunchState || current.SentryLaunchState != c.SentryLaunchState ||
 		!reflect.DeepEqual(current.LaunchCgroup, c.LaunchCgroup) ||
+		!reflect.DeepEqual(current.ControlSocketRetirement, c.ControlSocketRetirement) ||
+		current.ControlSocketRetired != c.ControlSocketRetired ||
 		current.GoferPid.Load() != c.GoferPid.Load() || current.BundleDir != c.BundleDir ||
 		!reflect.DeepEqual(current.Spec, c.Spec) || !reflect.DeepEqual(current.GoferBirth, c.GoferBirth) {
 		return errors.New("original managed runtime state was replaced after loading")

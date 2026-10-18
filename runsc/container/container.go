@@ -97,15 +97,17 @@ func validateID(id string) error {
 // Container is thread-unsafe.
 type Container struct {
 	// Managed children use producer-captured births and kernel pidfds.
-	ResourceGeneration   string               `json:"resourceGeneration,omitempty"`
-	ProcessBirthVersion  int                  `json:"processBirthVersion,omitempty"`
-	RuntimeDispatched    bool                 `json:"runtimeDispatched,omitempty"`
-	GoferRequired        bool                 `json:"goferRequired,omitempty"`
-	GoferBirth           *processbirth.Birth  `json:"goferBirth,omitempty"`
-	ProcessLaunchVersion int                  `json:"processLaunchVersion,omitempty"`
-	GoferLaunchState     string               `json:"goferLaunchState,omitempty"`
-	SentryLaunchState    string               `json:"sentryLaunchState,omitempty"`
-	LaunchCgroup         *ManagedLaunchCgroup `json:"launchCgroup,omitempty"`
+	ResourceGeneration      string                   `json:"resourceGeneration,omitempty"`
+	ProcessBirthVersion     int                      `json:"processBirthVersion,omitempty"`
+	RuntimeDispatched       bool                     `json:"runtimeDispatched,omitempty"`
+	GoferRequired           bool                     `json:"goferRequired,omitempty"`
+	GoferBirth              *processbirth.Birth      `json:"goferBirth,omitempty"`
+	ProcessLaunchVersion    int                      `json:"processLaunchVersion,omitempty"`
+	GoferLaunchState        string                   `json:"goferLaunchState,omitempty"`
+	SentryLaunchState       string                   `json:"sentryLaunchState,omitempty"`
+	LaunchCgroup            *ManagedLaunchCgroup     `json:"launchCgroup,omitempty"`
+	ControlSocketRetirement *controlSocketRetirement `json:"controlSocketRetirement,omitempty"`
+	ControlSocketRetired    bool                     `json:"controlSocketRetired,omitempty"`
 	// ID is the container ID.
 	ID string `json:"id"`
 
@@ -1041,6 +1043,10 @@ func (c *Container) destroyWithCgroupProof(ctx context.Context, expectedGenerati
 		if err := c.verifyLockedProcessOwner(expectedGeneration); err != nil {
 			return err
 		}
+	}
+
+	if (c.ControlSocketRetirement != nil || c.ControlSocketRetired) && !offlineProof {
+		return errors.New("managed control socket retirement requires a fresh original offline cgroup proof")
 	}
 
 	// Capture the original socket before any offline cleanup changes the owner.
