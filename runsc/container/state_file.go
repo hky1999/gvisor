@@ -365,10 +365,28 @@ func (s *StateFile) SaveLocked(v any) error {
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(s.statePath(), meta, 0640); err != nil {
-		return fmt.Errorf("writing json file: %v", err)
+	f, err := os.CreateTemp(s.RootDir, ".state-")
+	if err != nil {
+		return err
 	}
-	return nil
+	defer os.Remove(f.Name())
+	defer f.Close()
+	if err := f.Chmod(0640); err != nil {
+		return err
+	}
+	if _, err := f.Write(meta); err != nil {
+		return err
+	}
+	if err := f.Sync(); err != nil {
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	if err := os.Rename(f.Name(), s.statePath()); err != nil {
+		return fmt.Errorf("publishing json file: %w", err)
+	}
+	return syncStateDirectory(s.RootDir)
 }
 
 // Stat returns the result of calling stat() on the state file.
@@ -431,4 +449,21 @@ func (s *StateFile) Destroy() error {
 		return err
 	}
 	return nil
+}
+
+// destroyRetiredState retains the creation lock inode for subsequent users.
+func (s *StateFile) destroyRetiredState() error {
+	if err := os.Remove(s.statePath()); err != nil {
+		return err
+	}
+	return syncStateDirectory(s.RootDir)
+}
+
+func syncStateDirectory(root string) error {
+	f, err := os.Open(root)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return f.Sync()
 }

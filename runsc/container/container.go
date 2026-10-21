@@ -100,6 +100,9 @@ type Container struct {
 	// Spec is the OCI runtime spec that configures this container.
 	Spec *specs.Spec `json:"spec"`
 
+	// RetirementIdentity binds this creation to its original host readers.
+	RetirementIdentity *retirementIdentity `json:"akernelRetirementIdentity,omitempty"`
+
 	// BundleDir is the directory containing the container bundle.
 	BundleDir string `json:"bundleDir"`
 
@@ -314,6 +317,9 @@ func New(conf *config.Config, args Args) (*Container, error) {
 		if err := c.createSubcontainer(conf, args.Spec); err != nil {
 			return nil, err
 		}
+	}
+	if err := c.captureRetirementIdentity(); err != nil {
+		return nil, fmt.Errorf("recording reader process identities: %w", err)
 	}
 	c.changeStatus(Created)
 
@@ -925,15 +931,47 @@ func (c *Container) Processes() ([]*control.Process, error) {
 // Destroy stops all processes and frees all resources associated with the
 // container.
 func (c *Container) Destroy() error {
+	return c.destroy("")
+}
+
+// DestroyIfGeneration destroys only the specified creation, after proving that
+// its sentry, gofer, and their private PID namespaces have exited. Missing or
+// ambiguous identity evidence is an error, never a successful retirement proof.
+func (c *Container) DestroyIfGeneration(expected string) error {
+	if expected == "" {
+		return fmt.Errorf("expected resource generation is required")
+	}
+	return c.destroy(expected)
+}
+
+func (c *Container) destroy(expected string) error {
 	log.Debugf("Destroy container, cid: %s", c.ID)
 
 	if err := c.Saver.lock(BlockAcquire); err != nil {
 		return err
 	}
+	lockedSaver := &c.Saver
 	defer func() {
-		c.Saver.UnlockOrDie()
-		_ = c.Saver.close()
+		lockedSaver.UnlockOrDie()
+		_ = lockedSaver.close()
 	}()
+
+	if expected != "" {
+		// Reload under the creation lock: the caller may hold a stale object.
+		fresh, err := loadRetirementLocked(lockedSaver, expected)
+		if err != nil {
+			return err
+		}
+		c = fresh
+		if err := c.retireReaders(); err != nil {
+			return fmt.Errorf("confirming reader exit: %w", err)
+		}
+		// Never let legacy cleanup signal a numeric PID that may be reused.
+		if c.Sandbox != nil {
+			c.Sandbox.Pid.Store(0)
+		}
+		c.GoferPid.Store(0)
+	}
 
 	// Stored for later use as stop() sets c.Sandbox to nil.
 	sb := c.Sandbox
@@ -948,15 +986,20 @@ func (c *Container) Destroy() error {
 	// of errors return their concatenation.
 	var errs []string
 	if err := c.stop(); err != nil {
+		if expected != "" {
+			return fmt.Errorf("cleaning retired container: %w", err)
+		}
 		err = fmt.Errorf("stopping container: %v", err)
 		log.Warningf("%v", err)
 		errs = append(errs, err.Error())
 	}
 
-	if err := c.Saver.Destroy(); err != nil {
-		err = fmt.Errorf("deleting container state files: %v", err)
-		log.Warningf("%v", err)
-		errs = append(errs, err.Error())
+	if expected == "" {
+		if err := c.Saver.Destroy(); err != nil {
+			err = fmt.Errorf("deleting container state files: %v", err)
+			log.Warningf("%v", err)
+			errs = append(errs, err.Error())
+		}
 	}
 
 	// Clean up self-backed filestore files created in their respective mounts.
@@ -1004,6 +1047,16 @@ func (c *Container) Destroy() error {
 	if sb != nil {
 		if err := adjustSandboxOOMScoreAdj(sb, c.Spec, c.Saver.RootDir, true); err != nil {
 			errs = append(errs, err.Error())
+		}
+	}
+
+	if expected != "" {
+		if len(errs) != 0 {
+			return fmt.Errorf("%s", strings.Join(errs, "\n"))
+		}
+		// Keep the creation lock inode so old and new waiters share one lock.
+		if err := c.Saver.destroyRetiredState(); err != nil {
+			return fmt.Errorf("deleting retired container state: %w", err)
 		}
 	}
 

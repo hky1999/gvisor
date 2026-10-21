@@ -165,6 +165,11 @@ type CheckpointWaitable struct {
 // Register registers a callback that is notified when the checkpoint generation count is higher
 // than the desired count.
 func (w *CheckpointWaitable) Register(cb func(CheckpointGeneration, error), count uint32) any {
+	// Match checkpoint notification lock ordering and keep waiter registration
+	// atomic with the checkpoint generation check.
+	w.k.checkpointMu.Lock()
+	defer w.k.checkpointMu.Unlock()
+
 	w.mu.Lock()
 	defer w.mu.Unlock()
 
@@ -177,7 +182,7 @@ func (w *CheckpointWaitable) Register(cb func(CheckpointGeneration, error), coun
 	}
 	w.waiters[waiter] = struct{}{}
 
-	if gen := w.k.CheckpointGen(); count <= gen.Count {
+	if gen := w.k.checkpointGen; count <= gen.Count {
 		// The checkpoint has already occurred. Signal immediately.
 		waiter.callback(gen, nil)
 		waiter.callback = nil

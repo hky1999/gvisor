@@ -11,6 +11,7 @@ go_library(
         "container.go",
         "gofer_to_host_rpc.go",
         "null_netns.go",
+        "retirement.go",
         "state_file.go",
         "status.go",
     ],
@@ -122,5 +123,17 @@ go_test(
         ":container",
         "//runsc/sandbox",
         "@org_golang_google_protobuf//proto:go_default_library",
+    ],
+)
+
+go_test(
+    name = "retirement_test",
+    srcs = ["retirement_test.go"],
+    library = ":container",
+    deps = [
+        "//runsc/boot",
+        "//runsc/sandbox",
+        "@com_github_opencontainers_runtime_spec//specs-go:go_default_library",
+        "@org_golang_x_sys//unix:go_default_library",
     ],
 )

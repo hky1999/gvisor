@@ -33,6 +33,8 @@ type Delete struct {
 	containerLoader
 	// force indicates that the container should be terminated if running.
 	force bool
+	// expectedGeneration enables fail-closed AKernel reader retirement.
+	expectedGeneration string
 }
 
 // Name implements subcommands.Command.Name.
@@ -53,13 +55,14 @@ func (*Delete) Usage() string {
 // SetFlags implements subcommands.Command.SetFlags.
 func (d *Delete) SetFlags(f *flag.FlagSet) {
 	f.BoolVar(&d.force, "force", false, "terminate container if running")
+	f.StringVar(&d.expectedGeneration, "expected-generation", "", "require this AKernel creation and kernel-confirmed reader exit")
 }
 
 // FetchSpec implements util.SubCommand.FetchSpec.
 func (d *Delete) FetchSpec(conf *config.Config, f *flag.FlagSet) (string, *specs.Spec, error) {
-	c, err := d.loadContainer(conf, f, container.LoadOpts{})
+	c, err := d.loadForDelete(conf, f)
 	if err != nil {
-		if os.IsNotExist(err) && d.force {
+		if os.IsNotExist(err) && d.force && d.expectedGeneration == "" {
 			return "", nil, nil
 		}
 		return "", nil, fmt.Errorf("loading container: %w", err)
@@ -83,6 +86,13 @@ func (d *Delete) Execute(_ context.Context, f *flag.FlagSet, args ...any) subcom
 
 func (d *Delete) execute(f *flag.FlagSet, conf *config.Config) error {
 	ids := f.Args()
+	if d.expectedGeneration != "" {
+		c, err := d.loadForDelete(conf, f)
+		if err != nil {
+			return err
+		}
+		return c.DestroyIfGeneration(d.expectedGeneration)
+	}
 	for i, id := range ids {
 		var (
 			c   *container.Container
@@ -109,4 +119,15 @@ func (d *Delete) execute(f *flag.FlagSet, conf *config.Config) error {
 		}
 	}
 	return nil
+}
+
+func (d *Delete) loadForDelete(conf *config.Config, f *flag.FlagSet) (*container.Container, error) {
+	if d.expectedGeneration == "" {
+		return d.loadContainer(conf, f, container.LoadOpts{})
+	}
+	if !d.force || f.NArg() != 1 {
+		return nil, fmt.Errorf("expected-generation requires --force and exactly one full container ID")
+	}
+	id := f.Arg(0)
+	return container.Load(conf.RootDir, container.FullID{SandboxID: id, ContainerID: id}, container.LoadOpts{Exact: true, SkipCheck: true})
 }
