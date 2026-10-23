@@ -83,14 +83,8 @@ func (c *Container) StartPark(conf *config.Config, dir string, opts sandbox.Chec
 	}
 	defer store.Close()
 	fail := func(err error) (park.Status, error) {
-		status.State = park.Failed
-		status.Error = err.Error()
-		if cleanupErr := store.RemoveArtifacts(); cleanupErr != nil {
-			status.CleanupError = cleanupErr.Error()
-		} else {
-			status.CleanupComplete = true
-		}
-		return status, errors.Join(err, store.Write(status, true))
+		failed, cleanupErr := store.Fail(status, err)
+		return failed, errors.Join(err, cleanupErr)
 	}
 	opts.SkipFilestorePages = true
 	request := parkRequest{Version: 1, Config: conf, ID: c.Saver.ID, Opts: opts}
@@ -167,21 +161,8 @@ func RunParkWorker(dir string, lock *os.File) (retErr error) {
 	defer func() {
 		closeFiles()
 		if retErr != nil {
-			status.State = park.Failed
-			status.DurableAt = nil
-			status.Error = retErr.Error()
-			// A durable failure record must replace any visible READY before deleting
-			// outputs. If publication fails, leave artifacts for later reconciliation.
-			if err := store.Write(status, true); err != nil {
-				retErr = errors.Join(retErr, fmt.Errorf("publishing failure; outputs retained: %w", err))
-				return
-			}
-			if err := store.RemoveArtifacts(); err != nil {
-				status.CleanupError = err.Error()
-			} else {
-				status.CleanupComplete = true
-			}
-			retErr = errors.Join(retErr, store.Write(status, true))
+			_, cleanupErr := store.Fail(status, retErr)
+			retErr = errors.Join(retErr, cleanupErr)
 		}
 	}()
 	status.WorkerPID = os.Getpid()
@@ -208,6 +189,7 @@ func RunParkWorker(dir string, lock *os.File) (retErr error) {
 	if err != nil {
 		return err
 	}
+	defer c.Saver.close()
 	if err := c.Saver.lock(BlockAcquire); err != nil {
 		return err
 	}

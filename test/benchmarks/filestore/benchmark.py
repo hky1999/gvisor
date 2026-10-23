@@ -63,7 +63,7 @@ def main():
     parser.add_argument("--sizes-mib", type=int, nargs="+", default=[64, 1024, 4096])
     parser.add_argument("--platforms", nargs="+", default=["systrap"])
     parser.add_argument("--memory-mib", type=int, default=0)
-    parser.add_argument("--baseline-mode", choices=["full", "external"], default="full")
+    parser.add_argument("--baseline-mode", choices=["full", "external", "runsc-park"], default="full")
     parser.add_argument("--candidate-mode", choices=["full", "external", "deferred", "runsc-park"], default="external")
     parser.add_argument("--leave-running", action="store_true")
     parser.add_argument("--verify-clones", action="store_true")
@@ -82,7 +82,7 @@ def main():
     if args.background_preflush_ms is not None:
         if args.background_preflush_ms < 0 or args.preflush:
             parser.error("background preflush requires a nonnegative delay and cannot be combined with --preflush")
-    if args.candidate_mode in ["deferred", "runsc-park"] and (args.leave_running or not args.sync_artifacts):
+    if any(mode in ["deferred", "runsc-park"] for mode in [args.baseline_mode, args.candidate_mode]) and (args.leave_running or not args.sync_artifacts):
         parser.error("asynchronous capture requires --sync-artifacts and cannot use --leave-running")
     args.work_dir.mkdir(parents=True, exist_ok=False)
     args.output.mkdir(parents=True, exist_ok=True)
@@ -327,7 +327,7 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
             effective_memory_limit = min(limits) if limits else None
             if effective_memory_limit != args.memory_mib << 20:
                 raise RuntimeError(f"effective memory limit is {effective_memory_limit}, wanted {args.memory_mib << 20}")
-        if args.candidate_mode in ["deferred", "runsc-park"]:
+        if any(mode in ["deferred", "runsc-park"] for mode in [args.baseline_mode, args.candidate_mode]):
             if state is None:
                 state = json.loads(subprocess.check_output(common + ["state", ids["source"]], timeout=30))
             source_pidfd = os.pidfd_open(state['pid'])

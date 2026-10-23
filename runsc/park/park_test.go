@@ -15,8 +15,14 @@
 package park
 
 import (
+	"bufio"
+	"errors"
+	"fmt"
+	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -91,6 +97,10 @@ func TestAbandonedWorkerFailsAndCleansOnlyOwnedArtifacts(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(status.FilestorePath, "partial"), []byte("partial"), 0600); err != nil {
 		t.Fatal(err)
 	}
+	temporary := filepath.Join(store.Dir, ".park-write-abandoned")
+	if err := os.WriteFile(temporary, []byte("partial status"), 0600); err != nil {
+		t.Fatal(err)
+	}
 	now := time.Now()
 	status.StoppedAt = &now
 	status.State = Committing
@@ -109,6 +119,9 @@ func TestAbandonedWorkerFailsAndCleansOnlyOwnedArtifacts(t *testing.T) {
 		if _, err := os.Stat(dir); !os.IsNotExist(err) {
 			t.Fatalf("output survived cleanup: %s: %v", dir, err)
 		}
+	}
+	if _, err := os.Stat(temporary); !os.IsNotExist(err) {
+		t.Fatalf("abandoned status temporary remains: %v", err)
 	}
 	if got, err := os.ReadFile(victim); err != nil || string(got) != "original" {
 		t.Fatalf("cleanup escaped job: %q %v", got, err)
@@ -227,4 +240,219 @@ func TestReadyJobRemainsUsableAfterMove(t *testing.T) {
 	if got.State != Ready || got.ImagePath != filepath.Join(moved, "image") || got.FilestorePath != filepath.Join(moved, "filestores") {
 		t.Fatalf("moved task retained source paths: %+v", got)
 	}
+}
+
+func TestFailureMarkerOverridesOldReadyRecord(t *testing.T) {
+	store, status := newTestJob(t)
+	now := time.Now()
+	status.StoppedAt = &now
+	status.DurableAt = &now
+	status.State = Ready
+	if err := store.Write(status, true); err != nil {
+		t.Fatal(err)
+	}
+	ready, err := os.ReadFile(filepath.Join(store.Dir, statusName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.Fail(status, errors.New("publishing ready failed")); err != nil {
+		t.Fatal(err)
+	}
+	// The failure marker must take precedence even if crash recovery exposes
+	// an older READY generation of the detailed status file.
+	if err := os.WriteFile(filepath.Join(store.Dir, statusName), ready, 0600); err != nil {
+		t.Fatal(err)
+	}
+	store.Close()
+	got, err := Read(store.Dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.State != Failed || got.DurableAt != nil || !got.CleanupComplete || got.StoppedAt == nil {
+		t.Fatalf("old READY survived failure: %+v", got)
+	}
+}
+
+func TestUnreadableFailureRecordDoesNotAdvertiseReady(t *testing.T) {
+	store, status := newTestJob(t)
+	now := time.Now()
+	status.StoppedAt = &now
+	status.DurableAt = &now
+	status.State = Ready
+	if err := store.Write(status, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(store.Dir, failureName), []byte("invalid"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	store.Close()
+	got, err := Read(store.Dir)
+	if err == nil || got.State == Ready || got.DurableAt != nil {
+		t.Fatalf("unverified publication advertised ready: %+v %v", got, err)
+	}
+}
+
+func TestCleanupDoesNotRequireDetailedStatusPublication(t *testing.T) {
+	store, status := newTestJob(t)
+	for _, dir := range []string{status.ImagePath, status.FilestorePath} {
+		if err := os.Mkdir(dir, 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, "partial"), []byte("data"), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	reserved, err := os.Stat(filepath.Join(store.Dir, failureReserveName))
+	if err != nil {
+		t.Fatal(err)
+	}
+	statusPath := filepath.Join(store.Dir, statusName)
+	oldStatus := filepath.Join(store.Dir, "previous-status")
+	if err := os.Rename(statusPath, oldStatus); err != nil {
+		t.Fatal(err)
+	}
+	// Keep JSON replacement unavailable throughout failure and cleanup.
+	if err := os.Mkdir(statusPath, 0700); err != nil {
+		t.Fatal(err)
+	}
+	failed, err := store.Fail(status, unix.ENOSPC)
+	if err == nil || !failed.CleanupComplete {
+		t.Fatalf("cleanup depended on JSON publication: %+v %v", failed, err)
+	}
+	published, err := os.Stat(filepath.Join(store.Dir, failureName))
+	if err != nil || !os.SameFile(reserved, published) {
+		t.Fatalf("failure allocated a new record: %v", err)
+	}
+	for _, dir := range []string{status.ImagePath, status.FilestorePath} {
+		if _, err := os.Stat(dir); !os.IsNotExist(err) {
+			t.Fatalf("partial artifacts remain: %s: %v", dir, err)
+		}
+	}
+	if err := os.Remove(statusPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(oldStatus, statusPath); err != nil {
+		t.Fatal(err)
+	}
+	store.Close()
+	got, err := Read(store.Dir)
+	if err != nil || got.State != Failed || !got.CleanupComplete {
+		t.Fatalf("failure was forgotten after status repair: %+v %v", got, err)
+	}
+}
+
+func TestConcurrentOrphanQueries(t *testing.T) {
+	store, status := newTestJob(t)
+	if err := os.Mkdir(status.ImagePath, 0700); err != nil {
+		t.Fatal(err)
+	}
+	store.Close()
+	var wg sync.WaitGroup
+	for i := 0; i < 32; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			got, err := Read(store.Dir)
+			if err != nil || got.State == Ready {
+				t.Errorf("concurrent query: %+v %v", got, err)
+			}
+		}()
+	}
+	wg.Wait()
+	got, err := Read(store.Dir)
+	if err != nil || got.State != Failed || !got.CleanupComplete {
+		t.Fatalf("orphan cleanup did not finish: %+v %v", got, err)
+	}
+}
+
+func TestLegacyFailureWithoutReserve(t *testing.T) {
+	for _, blocked := range []bool{false, true} {
+		t.Run(fmt.Sprint(blocked), func(t *testing.T) {
+			store, status := newTestJob(t)
+			if err := os.Remove(filepath.Join(store.Dir, failureReserveName)); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Mkdir(status.ImagePath, 0700); err != nil {
+				t.Fatal(err)
+			}
+			if blocked {
+				statusPath := filepath.Join(store.Dir, statusName)
+				if err := os.Remove(statusPath); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Mkdir(statusPath, 0700); err != nil {
+					t.Fatal(err)
+				}
+			}
+			got, err := store.Fail(status, unix.ENOSPC)
+			if blocked {
+				if err == nil || got.CleanupComplete || got.CleanupError == "" {
+					t.Fatalf("legacy job cleaned without durable failure: %+v %v", got, err)
+				}
+				if _, err := os.Stat(status.ImagePath); err != nil {
+					t.Fatalf("legacy outputs lost after publication failure: %v", err)
+				}
+			} else if err != nil || !got.CleanupComplete {
+				t.Fatalf("legacy cleanup failed: %+v %v", got, err)
+			}
+		})
+	}
+}
+
+func TestInheritedLockDoesNotSurviveExec(t *testing.T) {
+	store, _ := newTestJob(t)
+	raw, err := unix.Dup(int(store.LockFile().Fd()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	inherited, _, err := Inherit(store.Dir, os.NewFile(uintptr(raw), "worker-lock"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer inherited.Close()
+	flags, err := unix.FcntlInt(inherited.LockFile().Fd(), unix.F_GETFD, 0)
+	if err != nil || flags&unix.FD_CLOEXEC == 0 {
+		t.Fatalf("worker lock is inherited across exec: %d %v", flags, err)
+	}
+	executable, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	child := exec.Command(executable, "-test.run=^TestParkLockExecHelper$")
+	child.Env = append(os.Environ(), "GVISOR_PARK_LOCK_HELPER=1")
+	input, err := child.StdinPipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer input.Close()
+	output, err := child.StdoutPipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := child.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		child.Process.Kill()
+		child.Wait()
+	}()
+	if line, err := bufio.NewReader(output).ReadString('\n'); err != nil || line != "ready\n" {
+		t.Fatalf("helper not ready: %q %v", line, err)
+	}
+	store.Close()
+	inherited.Close()
+	// The helper is still alive. It must not keep the worker's lease alive.
+	got, err := Read(store.Dir)
+	if err != nil || got.State != Failed {
+		t.Fatalf("exec child retained ownership: %+v %v", got, err)
+	}
+}
+
+func TestParkLockExecHelper(t *testing.T) {
+	if os.Getenv("GVISOR_PARK_LOCK_HELPER") != "1" {
+		return
+	}
+	fmt.Fprintln(os.Stdout, "ready")
+	var buf [1]byte
+	io.ReadFull(os.Stdin, buf[:])
 }

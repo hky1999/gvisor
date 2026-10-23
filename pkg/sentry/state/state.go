@@ -220,15 +220,18 @@ func (opts *SaveOpts) Save(ctx context.Context, k *kernel.Kernel, w *watchdog.Wa
 
 	t1, _ := CPUTime()
 	log.Infof("Save CPU usage: %s", (t1 - t).String())
+	var transferErr *checkpoint.ParkTransferError
+	parkResumed := opts.ParkFilestores != nil && errors.As(err, &transferErr)
 	if err == nil {
 		log.Infof("Save succeeded: exiting...")
 		k.SetSaveSuccess(opts.Autosave)
 	} else {
-		log.Warningf("Save failed: exiting... %v", err)
-		k.SetSaveError(err)
+		log.Warningf("Save failed: %v", err)
+		if !parkResumed {
+			k.SetSaveError(err)
+		}
 	}
-	var transferErr *checkpoint.ParkTransferError
-	if opts.Resume || (opts.ParkFilestores != nil && errors.As(err, &transferErr)) {
+	if opts.Resume || parkResumed {
 		k.BeforeResume(ctx)
 	} else {
 		// Kill the sandbox.

@@ -22,6 +22,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -63,6 +64,10 @@ type Status struct {
 
 const statusName = ".runsc-park.json"
 const lockName = ".runsc-park.lock"
+const failureName = ".runsc-park.failed"
+const failureReserveName = ".runsc-park.failure-reserve"
+
+const failureRecord = "runsc-park-failure-v1\n"
 
 // Store owns the exclusive task lock. Closing the last inherited lock descriptor
 // proves that the worker can no longer retain anonymous filestore references.
@@ -97,7 +102,20 @@ func Create(dir, containerID string) (*Store, Status, error) {
 		return nil, Status{}, err
 	}
 	status := Status{Kind: "runsc-park", Version: 1, ContainerID: containerID, State: Preparing, StartedAt: time.Now(), ImagePath: filepath.Join(dir, "image"), FilestorePath: filepath.Join(dir, "filestores")}
-	if err := store.Write(status, false); err != nil {
+	// Reserve the failure record before capturing the source. Renaming this
+	// file can publish failure even when no space remains for a new JSON file.
+	reserve, err := os.OpenFile(filepath.Join(dir, failureReserveName), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err == nil {
+		_, err = reserve.WriteString(failureRecord)
+		if err == nil {
+			err = reserve.Sync()
+		}
+		err = errors.Join(err, reserve.Close())
+	}
+	if err == nil {
+		err = store.Write(status, true)
+	}
+	if err != nil {
 		store.Close()
 		os.RemoveAll(dir)
 		return nil, Status{}, err
@@ -150,6 +168,7 @@ func Inherit(dir string, file *os.File) (*Store, Status, error) {
 		file.Close()
 		return nil, Status{}, err
 	}
+	unix.CloseOnExec(int(file.Fd()))
 	store := &Store{Dir: dir, lock: file}
 	status, err := read(dir)
 	if err != nil {
@@ -239,13 +258,104 @@ func read(dir string) (Status, error) {
 	if (status.State == Stopped || status.State == Committing) && status.StoppedAt == nil {
 		return status, fmt.Errorf("park stop has not been confirmed")
 	}
+	failed, err := failurePublished(dir)
+	if err != nil {
+		return status, err
+	}
+	if failed && status.State != Failed {
+		status.State = Failed
+		status.DurableAt = nil
+		status.CleanupComplete = false
+		status.Error = "park failed before durable completion; detailed status could not be published"
+	}
 	return status, nil
 }
 
-// RemoveArtifacts removes only fixed task-owned output paths. Metadata and logs
-// remain available for diagnosis; symlinks are removed rather than followed.
+func failurePublished(dir string) (bool, error) {
+	file, err := os.OpenFile(filepath.Join(dir, failureName), os.O_RDONLY|unix.O_NOFOLLOW|unix.O_NONBLOCK, 0)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return false, err
+	}
+	if !info.Mode().IsRegular() || info.Size() != int64(len(failureRecord)) {
+		return false, fmt.Errorf("invalid park failure record")
+	}
+	data := make([]byte, len(failureRecord))
+	if _, err := file.ReadAt(data, 0); err != nil {
+		return false, err
+	}
+	if string(data) != failureRecord {
+		return false, fmt.Errorf("invalid park failure record")
+	}
+	return true, nil
+}
+
+// Fail records failure before removing incomplete artifacts. A reserved record
+// keeps cleanup independent of allocating space for the detailed JSON status.
+// If failure cannot be made durable, artifacts remain for reconciliation.
+func (s *Store) Fail(status Status, cause error) (Status, error) {
+	status.State = Failed
+	status.DurableAt = nil
+	status.Error = cause.Error()
+	status.CleanupComplete = false
+	retain := func(err error) (Status, error) {
+		status.CleanupError = fmt.Sprintf("publishing failure; outputs retained: %v", err)
+		return status, err
+	}
+	failed, err := failurePublished(s.Dir)
+	if err != nil {
+		return retain(err)
+	}
+	if !failed {
+		if err := os.Rename(filepath.Join(s.Dir, failureReserveName), filepath.Join(s.Dir, failureName)); err != nil {
+			if !os.IsNotExist(err) {
+				return retain(err)
+			}
+			// Older jobs have no reserve. They must persist the full failure
+			// status before cleanup and may need free space to do so.
+			if err := s.Write(status, true); err != nil {
+				return retain(err)
+			}
+		}
+	}
+	if err := s.Sync(); err != nil {
+		return retain(err)
+	}
+	// A failure marker is already durable. JSON publication may be retried
+	// after deleting the outputs has freed space.
+	_ = s.Write(status, true)
+	cleanupErr := s.RemoveArtifacts()
+	cleanupErr = errors.Join(cleanupErr, s.Sync())
+	if cleanupErr != nil {
+		status.CleanupError = cleanupErr.Error()
+	} else {
+		status.CleanupError = ""
+		status.CleanupComplete = true
+	}
+	return status, errors.Join(cleanupErr, s.Write(status, true))
+}
+
+// RemoveArtifacts removes fixed output paths and abandoned status temporaries.
+// Metadata and logs remain available; symlinks are removed rather than followed.
 func (s *Store) RemoveArtifacts() error {
-	return errors.Join(os.RemoveAll(filepath.Join(s.Dir, "image")), os.RemoveAll(filepath.Join(s.Dir, "filestores")))
+	err := errors.Join(os.RemoveAll(filepath.Join(s.Dir, "image")), os.RemoveAll(filepath.Join(s.Dir, "filestores")))
+	entries, readErr := os.ReadDir(s.Dir)
+	if readErr != nil {
+		return errors.Join(err, readErr)
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), ".park-write-") {
+			err = errors.Join(err, os.Remove(filepath.Join(s.Dir, entry.Name())))
+		}
+	}
+	return err
 }
 
 // Read returns progress and reconciles tasks whose exclusive owner disappeared.
@@ -270,6 +380,10 @@ func Read(dir string) (Status, error) {
 	}
 	status, err := read(dir)
 	if err != nil {
+		if status.State == Ready {
+			status.State = Committing
+			status.DurableAt = nil
+		}
 		return status, err
 	}
 	if lockErr != nil {
@@ -281,27 +395,22 @@ func Read(dir string) (Status, error) {
 	}
 	if status.State == Ready {
 		// Finish publication if a worker died between status rename and fsync.
-		return status, (&Store{Dir: dir}).Sync()
+		if err := (&Store{Dir: dir}).Sync(); err != nil {
+			status.State = Committing
+			status.DurableAt = nil
+			return status, err
+		}
+		return status, nil
 	}
 	store := &Store{Dir: dir, lock: file}
 	if status.State == Failed && status.CleanupComplete {
 		return status, nil
 	}
+	cause := status.Error
 	if status.State != Failed {
-		status.State = Failed
-		status.Error = "park worker exited before durable completion; task lost its retained filestore descriptors"
+		cause = "park worker exited before durable completion; task lost its retained filestore descriptors"
 	}
-	status.DurableAt = nil
-	if err := store.Write(status, true); err != nil {
-		return status, err
-	}
-	if err := store.RemoveArtifacts(); err != nil {
-		status.CleanupError = err.Error()
-	} else {
-		status.CleanupError = ""
-		status.CleanupComplete = true
-	}
-	return status, store.Write(status, true)
+	return store.Fail(status, errors.New(cause))
 }
 
 // Wait waits for confirmed source exit or durable completion. A timeout leaves

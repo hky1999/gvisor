@@ -217,6 +217,15 @@ even if the foreground command exits or the stopped container is deleted.
 Nonterminal progress records are atomic but are not synchronized to disk, so
 reporting stopped does not wait for filestore writeback.
 
+The initial pending record and a small failure reserve are synchronized before
+capture starts. On failure the worker atomically renames the reserved record
+and synchronizes its directory before removing outputs. This permits cleanup
+when no space remains to allocate a new detailed status file. The failure
+marker takes precedence over an older JSON record, including `ready`. If even
+this metadata update or synchronization fails, outputs are retained and the
+query reports `cleanup_error`. Jobs created by older versions have no reserve
+and may require free space to publish failure before cleanup can proceed.
+
 States are `preparing`, `capturing`, `stopped`, `committing`, `ready`, and
 `failed`. `stopped` can be brief; `stopped_at` remains present during commit.
 An abnormal worker exit before ready is detected by the task's ownership lock
@@ -224,6 +233,10 @@ when status is queried. The query records failure and removes incomplete
 outputs. Failed jobs retain diagnostics and report `cleanup_complete` and any
 `cleanup_error`. Unreadable task metadata or filesystem errors fail closed and
 can require operator intervention.
+
+A wait for stopped or ready returns an error as soon as failure is observed.
+The worker can still be cleaning outputs at that time. Query
+`cleanup_complete` separately before treating cleanup as finished.
 
 Stopping is irreversible once capture completes. If the worker or host fails
 before ready, the new checkpoint is not guaranteed recoverable. Failure cleanup

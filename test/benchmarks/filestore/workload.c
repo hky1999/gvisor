@@ -28,6 +28,22 @@ static _Noreturn void fail(const char* what) {
 
 int main(int argc, char** argv) {
   if (argc < 2) return 2;
+  if (!strcmp(argv[1], "hook-resumed"))
+    return access("/hook-resumed", F_OK) != 0;
+  if (!strcmp(argv[1], "save-hook")) {
+    const char* mode = getenv("GVISOR_SAVE_RESTORE_AUTO_EXEC_MODE");
+    if (!mode) return 2;
+    if (!strcmp(mode, "save")) sleep(5);
+    if (strcmp(mode, "resume")) return 0;
+    int fd = open("/hook-resumed", O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (fd < 0) fail("resume hook marker");
+    return close(fd) != 0;
+  }
+  if (!strcmp(argv[1], "delay")) {
+    if (argc != 3) return 2;
+    sleep(strtoul(argv[2], NULL, 10));
+    return 0;
+  }
   if (!strcmp(argv[1], "ready")) return access("/ready", F_OK) != 0;
   if (!strcmp(argv[1], "mark")) {
     int fd = open("/clone-marker", O_WRONLY | O_CREAT | O_EXCL, 0600);

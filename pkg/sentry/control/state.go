@@ -298,7 +298,18 @@ func (s *State) SaveWithOpts(saveOpts *state.SaveOpts, execOpts *controlapi.Save
 	if err := preSave(s.Kernel, saveOpts, execOpts); err != nil {
 		return err
 	}
-	return saveOpts.Save(s.Kernel.SupervisorContext(), s.Kernel, s.Watchdog)
+	err := saveOpts.Save(s.Kernel.SupervisorContext(), s.Kernel, s.Watchdog)
+	var transferErr *checkpoint.ParkTransferError
+	if saveOpts.ParkFilestores != nil && errors.As(err, &transferErr) {
+		// Rejected ownership transfer leaves the source running. Complete the
+		// matching resume hooks before another save can start.
+		if resumeErr := PostResume(s.Kernel, nil); resumeErr != nil {
+			s.Kernel.SetSaveError(resumeErr)
+			s.Kernel.Kill(linux.WaitStatusTerminationSignal(linux.SIGKILL))
+			return errors.Join(err, fmt.Errorf("resuming after rejected park transfer: %w", resumeErr))
+		}
+	}
+	return err
 }
 
 // preSave is called before saving the kernel.

@@ -137,3 +137,34 @@ func TestRejectedParkTransferClosesReceivedReferences(t *testing.T) {
 		t.Fatalf("rejection closed sender-owned file: %v", err)
 	}
 }
+
+func TestInterruptedParkTransferClosesPartialReferences(t *testing.T) {
+	sender, receiver, err := unet.SocketPair(true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer receiver.Close()
+	source, err := os.CreateTemp(t.TempDir(), "file")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer source.Close()
+	if err := SendParkFile(sender, ParkFile{ID: ResourceID{Path: "/"}}, source); err != nil {
+		t.Fatal(err)
+	}
+	sender.Close()
+	var received *os.File
+	_, files, err := ReceiveParkFiles(receiver, func(_ ParkFile, file *os.File) error {
+		received = file
+		return nil
+	})
+	if err == nil || files != nil || received == nil {
+		t.Fatalf("interrupted transfer: %v %v", files, err)
+	}
+	if _, err := received.Stat(); !errors.Is(err, os.ErrClosed) {
+		t.Fatalf("partial reference survived disconnect: %v", err)
+	}
+	if _, err := source.Stat(); err != nil {
+		t.Fatalf("sender-owned reference closed: %v", err)
+	}
+}
