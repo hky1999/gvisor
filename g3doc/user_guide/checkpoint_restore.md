@@ -155,12 +155,22 @@ filestores and the checkpoint gofer are not supported by this
 snapshot interface. Split filesystem bundles retain their separate metadata
 and use the same external filestore artifacts. `--skip-filestore-pages` without
 `--filestore-snapshot-dir` is intended for external orchestrators that preserve
-the backing files themselves; that form cannot use `--leave-running`.
+the backing files themselves; that form cannot use `--leave-running`. An
+orchestrator can hold the backing file descriptors, wait for the source Sentry
+to exit, then capture and persist those files on a worker. Stopping the sandbox
+and completing a durable checkpoint are separate events in that workflow.
 
 The reproducible comparison harness is
 [`test/benchmarks/filestore/benchmark.py`](../../test/benchmarks/filestore/benchmark.py).
 It alternates baseline and candidate runs and verifies the complete payload
-after each restore. Compare its output with `benchstat`.
+after each restore. Use `--sync-artifacts` to include file and directory fsync
+for all restore artifacts in the `DurableCheckpoint` measurement; the separate
+`Checkpoint` metric measures CLI latency. `--background-preflush-ms` starts
+host filestore writeback before checkpoint while the sandbox remains running.
+The workload stops writing at readiness, so this experiment measures overlap
+without concurrent application writes. `--candidate-mode=deferred` tests the
+non-resuming FD retention workflow and reports `StoppedCheckpoint` separately
+from `DurableCheckpoint`. Compare the output with `benchstat`.
 
 ## How to use checkpoint/restore in Docker:
 

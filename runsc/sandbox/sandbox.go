@@ -1975,9 +1975,11 @@ func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, 
 	if opts.FilestoreSnapshotDir != "" {
 		// The sentry wrote the sidecar manifest during the freeze window;
 		// make it durable and visible atomically (tmp+rename).
+		fileSyncStart := time.Now()
 		if err := opts.FilestoreSidecarFile.Sync(); err != nil {
 			return fmt.Errorf("failed to fsync filestores.json: %w", err)
 		}
+		fileSyncNS := time.Since(fileSyncStart).Nanoseconds()
 		if err := opts.FilestoreSidecarFile.Close(); err != nil {
 			return fmt.Errorf("failed to close filestores.json.tmp: %w", err)
 		}
@@ -1991,13 +1993,16 @@ func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, 
 		if err != nil {
 			return fmt.Errorf("failed to open filestore snapshot dir %q for fsync: %w", opts.FilestoreSnapshotDir, err)
 		}
+		dirSyncStart := time.Now()
 		if err := snapDir.Sync(); err != nil {
 			snapDir.Close()
 			return fmt.Errorf("failed to fsync filestore snapshot dir %q: %w", opts.FilestoreSnapshotDir, err)
 		}
+		dirSyncNS := time.Since(dirSyncStart).Nanoseconds()
 		if err := snapDir.Close(); err != nil {
 			return fmt.Errorf("failed to close filestore snapshot dir %q: %w", opts.FilestoreSnapshotDir, err)
 		}
+		log.Debugf("Filestore manifest timing: file_fsync_ns=%d directory_fsync_ns=%d", fileSyncNS, dirSyncNS)
 	}
 	s.Checkpointed = true
 	return nil

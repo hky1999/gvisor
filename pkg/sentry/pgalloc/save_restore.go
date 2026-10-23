@@ -249,6 +249,7 @@ func (f *MemoryFile) BeginSaveWindow() {
 // the backing file and dst must be on a filesystem supporting reflink
 // (e.g. XFS/btrfs); otherwise this fails loudly (EOPNOTSUPP/EXDEV).
 func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string, err error) {
+	prepareStart := gohacks.Nanotime()
 	if err := f.AwaitLoadAll(); err != nil {
 		return 0, "", fmt.Errorf("previous async page loading failed: %w", err)
 	}
@@ -265,12 +266,15 @@ func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string
 	if f.file == nil {
 		return 0, "", fmt.Errorf("MemoryFile %p has no backing file to snapshot", f)
 	}
+	cloneStart := gohacks.Nanotime()
 	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, dst.Fd(), unix.FICLONE, f.file.Fd()); errno != 0 {
 		return 0, "", fmt.Errorf("FICLONE of filestore backing file to snapshot failed (%w); --filestore-snapshot-dir requires a reflink-capable filesystem (e.g. XFS) for both the backing filestore and the snapshot directory", errno)
 	}
+	cloneEnd := gohacks.Nanotime()
 	if err := dst.Sync(); err != nil {
 		return 0, "", fmt.Errorf("failed to fsync filestore snapshot: %w", err)
 	}
+	syncEnd := gohacks.Nanotime()
 	fi, err := dst.Stat()
 	if err != nil {
 		return 0, "", fmt.Errorf("failed to stat filestore snapshot: %w", err)
@@ -281,6 +285,8 @@ func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string
 	}
 	f.externalSavedSize = uint64(fi.Size())
 	f.externalSavedFingerprint = fp
+	fingerprintEnd := gohacks.Nanotime()
+	log.Debugf("MemoryFile(%p): filestore snapshot timing: prepare_ns=%d ficlone_ns=%d fsync_ns=%d fingerprint_ns=%d total_ns=%d", f, cloneStart-prepareStart, cloneEnd-cloneStart, syncEnd-cloneEnd, fingerprintEnd-syncEnd, fingerprintEnd-prepareStart)
 	return f.externalSavedSize, f.externalSavedFingerprint, nil
 }
 

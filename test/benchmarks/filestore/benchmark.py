@@ -20,6 +20,16 @@ arguments must refer to complete release directories, with sidecar binaries.
 The script creates isolated OCI bundles and runtime state under --work-dir.
 Every restore checks the complete nonzero payload. Results are saved as JSON
 and Go benchmark text for benchstat. Alternate sample order to reduce drift.
+Use --sync-artifacts to include fsync of every image/snapshot file and its
+directories in DurableCheckpoint. The separate Checkpoint metric retains CLI
+latency. --background-preflush-ms starts host fsync while the sandbox runs,
+then waits the given lead time before checkpoint. This workload stops writing
+at readiness, so that experiment measures a best-case opportunity to overlap
+writeback, not behavior under continuous application writes.
+--candidate-mode=deferred pins the original root filestore, saves external
+metadata without an in-window clone, waits for Sentry exit, and clones/syncs
+on a host worker. It records StoppedCheckpoint separately from durability.
+This experiment requires --sync-artifacts and excludes --leave-running.
 
 Example:
   sudo python3 benchmark.py --baseline /opt/before/runsc \
@@ -29,11 +39,15 @@ Example:
 """
 
 import argparse
+import concurrent.futures
+import fcntl
 import hashlib
 import json
 import os
 from pathlib import Path
 import platform
+import re
+import select
 import shutil
 import subprocess
 import time
@@ -49,17 +63,26 @@ def main():
     parser.add_argument("--sizes-mib", type=int, nargs="+", default=[64, 1024, 4096])
     parser.add_argument("--platforms", nargs="+", default=["systrap"])
     parser.add_argument("--memory-mib", type=int, default=0)
-    parser.add_argument("--candidate-mode", choices=["full", "external"], default="external")
+    parser.add_argument("--candidate-mode", choices=["full", "external", "deferred"], default="external")
     parser.add_argument("--leave-running", action="store_true")
     parser.add_argument("--verify-clones", action="store_true")
     parser.add_argument("--split-filesystem", action="store_true")
     parser.add_argument("--preflush", action="store_true",
                         help="fsync host filestores before the measured checkpoint; report that cost separately")
+    parser.add_argument("--background-preflush-ms", type=int,
+                        help="start host filestore fsync on a worker, then checkpoint after this many milliseconds")
+    parser.add_argument("--sync-artifacts", action="store_true",
+                        help="fsync all restore artifacts and their directories; report total durable checkpoint latency")
     args = parser.parse_args()
     if os.geteuid() != 0:
         parser.error("run as root")
     if args.pairs < 1 or any(size < 0 for size in args.sizes_mib) or args.memory_mib < 0:
         parser.error("pairs must be positive; sizes and memory limits must be nonnegative")
+    if args.background_preflush_ms is not None:
+        if args.background_preflush_ms < 0 or args.preflush:
+            parser.error("background preflush requires a nonnegative delay and cannot be combined with --preflush")
+    if args.candidate_mode == "deferred" and (args.leave_running or not args.sync_artifacts):
+        parser.error("deferred capture requires --sync-artifacts and cannot use --leave-running")
     args.work_dir.mkdir(parents=True, exist_ok=False)
     args.output.mkdir(parents=True, exist_ok=True)
     rootfs = args.work_dir / "rootfs"
@@ -93,13 +116,134 @@ def main():
                                 bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/{metric} 1 {value} {unit}\n")
                             if args.preflush:
                                 bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/Preflush 1 {data['preflush_ns']} ns/op\n")
+                            if args.sync_artifacts:
+                                for metric, key in [("ArtifactSync", "artifact_sync_ns"),
+                                                    ("DurableCheckpoint", "durable_checkpoint_ns")]:
+                                    bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/{metric} 1 {data[key]} ns/op\n")
+                            if args.background_preflush_ms is not None:
+                                bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/BackgroundPreflush 1 {data['background_preflush']['duration_ns']} ns/op\n")
+                            if data["stopped_checkpoint_ns"] is not None:
+                                bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/StoppedCheckpoint 1 {data['stopped_checkpoint_ns']} ns/op\n")
+                        snapshot_phases = data["snapshot_phases"] or data["deferred_snapshot_phases"]
+                        if snapshot_phases:
+                            with (args.output / f"{variant}-phases.txt").open("a") as phases:
+                                for key in snapshot_phases[0]:
+                                    value = sum(x[key] for x in snapshot_phases)
+                                    phases.write(f"BenchmarkFilestore/{plat}/{mib}MiB/{key} 1 {value} ns/op\n")
+                                for key, value in data["manifest_phases"].items():
+                                    phases.write(f"BenchmarkFilestore/{plat}/{mib}MiB/{key} 1 {value} ns/op\n")
                         print(json.dumps(data), flush=True)
                         shutil.rmtree(trial)
 
 
+def open_filestores(pid):
+    """Open independent descriptors, including unlinked filestores."""
+    files = []
+    try:
+        for file in Path(f"/proc/{pid}/fd").iterdir():
+            try:
+                name = os.readlink(file)
+            except FileNotFoundError:
+                continue
+            if "runsc-filestore-" in name:
+                files.append(os.open(file, os.O_RDWR))
+        if not files:
+            raise RuntimeError("no host filestore descriptor found for preflush")
+        return files
+    except BaseException:
+        for fd in files:
+            os.close(fd)
+        raise
+
+
+def sync_filestores(files):
+    """Own and close files; return the actual worker interval."""
+    start = time.monotonic_ns()
+    calls = []
+    try:
+        for fd in files:
+            before = time.monotonic_ns()
+            os.fsync(fd)
+            calls.append(time.monotonic_ns() - before)
+    finally:
+        for fd in files:
+            os.close(fd)
+    end = time.monotonic_ns()
+    return {"start_ns": start, "duration_ns": end - start, "fsync_calls_ns": calls}
+
+
+def sync_artifacts(roots, parent):
+    """Sync only this checkpoint's restore inputs, then their directories."""
+    files = sorted(file for root in roots for file in root.rglob("*") if file.is_file())
+    dirs = {parent}
+    calls = []
+    for file in files:
+        directory = file.parent
+        while directory != parent:
+            dirs.add(directory)
+            directory = directory.parent
+    for root in roots:
+        dirs.update(directory for directory in root.rglob("*") if directory.is_dir())
+    dirs.update(roots)
+    for file, kind in [(file, "file") for file in files] + [
+            (directory, "directory") for directory in sorted(dirs, key=lambda d: (-len(d.parts), str(d)))]:
+        flags = os.O_RDONLY | os.O_CLOEXEC
+        if kind == "directory":
+            flags |= os.O_DIRECTORY
+        fd = os.open(file, flags)
+        try:
+            start = time.monotonic_ns()
+            os.fsync(fd)
+            elapsed = time.monotonic_ns() - start
+        finally:
+            os.close(fd)
+        calls.append({"path": str(file.relative_to(parent)), "kind": kind, "duration_ns": elapsed})
+    return calls
+
+
+def snapshot_timings(logs):
+    snapshots = []
+    manifest = {}
+    for file in sorted(logs.glob("*.txt")):
+        data = file.read_text()
+        for fields in re.findall(r"filestore snapshot timing: ([^\n]+)", data):
+            snapshots.append({key: int(value) for key, value in re.findall(r"(\w+_ns)=(\d+)", fields)})
+        for fields in re.findall(r"Filestore manifest timing: ([^\n]+)", data):
+            for key, value in re.findall(r"(\w+_ns)=(\d+)", fields):
+                manifest[key] = manifest.get(key, 0) + int(value)
+    return snapshots, manifest
+
+
+def commit_deferred(files, image, snapshot, trial):
+    """Own stopped-sandbox filestores until independent artifacts are durable."""
+    phases = []
+    try:
+        snapshot.mkdir()
+        for index, source in enumerate(files):
+            dest = os.open(snapshot / f"filestore-{index}", os.O_RDWR | os.O_CREAT | os.O_EXCL, 0o600)
+            try:
+                start = time.monotonic_ns()
+                # Linux FICLONE, from linux/fs.h. This runs on the host.
+                fcntl.ioctl(dest, 0x40049409, source)
+                cloned = time.monotonic_ns()
+                os.fsync(dest)
+                synced = time.monotonic_ns()
+                phases.append({"ficlone_ns": cloned - start, "fsync_ns": synced - cloned})
+            finally:
+                os.close(dest)
+        start = time.monotonic_ns()
+        calls = sync_artifacts([image, snapshot], trial)
+        elapsed = time.monotonic_ns() - start
+        return phases, calls, elapsed
+    finally:
+        for fd in files:
+            os.close(fd)
+
+
 def run_trial(args, trial, rootfs, plat, mib, variant):
     binary = getattr(args, variant)
-    external = variant == "candidate" and args.candidate_mode == "external"
+    external = variant == "candidate" and args.candidate_mode != "full"
+    deferred = external and args.candidate_mode == "deferred"
     bundle = trial / "bundle"
     bundle.mkdir()
     filestores = trial / "filestores"
@@ -126,7 +270,7 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
     common = [str(binary), f"--root={args.work_dir / ('runtime-' + variant)}", f"--platform={plat}",
               "--network=none", f"--overlay2=all:dir={filestores}", "--debug",
               f"--debug-log={logs}/"]
-    if external:
+    if external and not deferred:
         common.append("--filestore-reflink=enabled")
     prefix = hashlib.sha256(str(trial.resolve()).encode()).hexdigest()[:16]
     ids = {label: f"fsbench-{prefix}-{label}"
@@ -140,6 +284,11 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
                                     stderr=log, timeout=180, check=check)
             return time.monotonic_ns() - start, result.returncode
 
+    flush_executor = None
+    flush_future = None
+    commit_executor = None
+    preserved_files = []
+    source_pidfd = None
     try:
         run(["run", "--detach", f"--bundle={bundle}", "source"])
         deadline = time.monotonic() + 120
@@ -173,37 +322,69 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
             effective_memory_limit = min(limits) if limits else None
             if effective_memory_limit != args.memory_mib << 20:
                 raise RuntimeError(f"effective memory limit is {effective_memory_limit}, wanted {args.memory_mib << 20}")
+        if args.candidate_mode == "deferred":
+            if state is None:
+                state = json.loads(subprocess.check_output(common + ["state", ids["source"]], timeout=30))
+            source_pidfd = os.pidfd_open(state['pid'])
+            if deferred:
+                preserved_files = open_filestores(state['pid'])
+                if len(preserved_files) != 1:
+                    raise RuntimeError("deferred benchmark supports exactly one root filestore")
         preflush_ns = 0
-        if args.preflush:
+        if args.preflush or args.background_preflush_ms is not None:
             start = time.monotonic_ns()
             if state is None:
                 state = json.loads(subprocess.check_output(common + ["state", ids["source"]], timeout=30))
-            flushed = 0
-            for file in Path(f"/proc/{state['pid']}/fd").iterdir():
-                try:
-                    name = os.readlink(file)
-                except FileNotFoundError:
-                    continue
-                if "runsc-filestore-" not in name:
-                    continue
-                fd = os.open(file, os.O_RDWR)
-                try:
-                    os.fsync(fd)
-                    flushed += 1
-                finally:
-                    os.close(fd)
-            if not flushed:
-                raise RuntimeError("no host filestore descriptor found for preflush")
-            preflush_ns = time.monotonic_ns() - start
+            files = open_filestores(state['pid'])
+            if args.preflush:
+                sync_filestores(files)
+                preflush_ns = time.monotonic_ns() - start
+            else:
+                flush_executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+                flush_future = flush_executor.submit(sync_filestores, files)
+                time.sleep(args.background_preflush_ms / 1000)
         checkpoint = ["checkpoint", f"--image-path={image}"]
         if args.split_filesystem:
             checkpoint.append("--fs-checkpoint-paths=/")
         if args.leave_running:
             checkpoint.append("--leave-running")
         if external:
-            checkpoint.extend(["--skip-filestore-pages", f"--filestore-snapshot-dir={trial / 'snapshot'}"])
+            checkpoint.append("--skip-filestore-pages")
+            if not deferred:
+                checkpoint.append(f"--filestore-snapshot-dir={trial / 'snapshot'}")
         checkpoint.append("source")
+        checkpoint_start = time.monotonic_ns()
         checkpoint_ns, _ = run(checkpoint)
+        stopped_checkpoint_ns = None
+        source_exit_wait_ns = 0
+        if source_pidfd is not None:
+            before = time.monotonic_ns()
+            poller = select.poll()
+            poller.register(source_pidfd, select.POLLIN)
+            if not poller.poll(180000):
+                raise RuntimeError("source Sentry did not exit after non-resuming checkpoint")
+            source_exit_wait_ns = time.monotonic_ns() - before
+            stopped_checkpoint_ns = time.monotonic_ns() - checkpoint_start
+        artifact_sync_start = time.monotonic_ns()
+        artifact_sync_calls = []
+        deferred_phases = []
+        if deferred:
+            commit_executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+            commit_future = commit_executor.submit(commit_deferred, preserved_files, image, trial / "snapshot", trial)
+            preserved_files = []  # The commit worker now owns these descriptors.
+            deferred_phases, artifact_sync_calls, artifact_sync_ns = commit_future.result(timeout=180)
+        elif args.sync_artifacts:
+            roots = [image, trial / "snapshot"] if external else [image]
+            artifact_sync_calls = sync_artifacts(roots, trial)
+            artifact_sync_ns = time.monotonic_ns() - artifact_sync_start
+        else:
+            artifact_sync_ns = 0
+        durable_checkpoint_ns = time.monotonic_ns() - checkpoint_start if args.sync_artifacts else None
+        snapshots, manifest = snapshot_timings(logs)
+        background_preflush = None
+        if flush_future is not None:
+            background_preflush = flush_future.result(timeout=180)
+            background_preflush["lead_ns"] = checkpoint_start - background_preflush["start_ns"]
         if args.leave_running:
             run(["exec", "source", "/workload", "mark"])
             if args.verify_clones:
@@ -216,6 +397,9 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
                     for arg in checkpoint
                 ]
                 run(second_checkpoint)
+                if args.sync_artifacts:
+                    roots = [second_image, trial / "second-snapshot"] if external else [second_image]
+                    sync_artifacts(roots, trial)
                 second_extra = [f"--filestore-adopt-dir={trial / 'second-snapshot'}"] if external else []
                 run(["restore", "--detach", f"--bundle={bundle}",
                      f"--image-path={second_image}", "newer"], extra=second_extra)
@@ -237,9 +421,25 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
         return {"checkpoint_ns": checkpoint_ns, "restore_ns": restore_ns,
                 "image_bytes": image_bytes, "verified_bytes": size,
                 "preflush_ns": preflush_ns,
+                "artifact_sync_ns": artifact_sync_ns,
+                "durable_checkpoint_ns": durable_checkpoint_ns,
+                "artifact_sync_calls": artifact_sync_calls,
+                "snapshot_phases": snapshots, "manifest_phases": manifest,
+                "deferred_snapshot_phases": deferred_phases,
+                "stopped_checkpoint_ns": stopped_checkpoint_ns,
+                "source_exit_wait_ns": source_exit_wait_ns,
+                "background_preflush": background_preflush,
                 "effective_memory_limit_bytes": effective_memory_limit,
                 "memory_limit_bytes": args.memory_mib << 20}
     finally:
+        if flush_executor is not None:
+            flush_executor.shutdown(wait=True)
+        if commit_executor is not None:
+            commit_executor.shutdown(wait=True)
+        for fd in preserved_files:
+            os.close(fd)
+        if source_pidfd is not None:
+            os.close(source_pidfd)
         for cid in ids:
             run(["delete", "--force", cid], check=False)
 
