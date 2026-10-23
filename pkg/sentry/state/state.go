@@ -24,6 +24,7 @@ import (
 	"gvisor.dev/gvisor/pkg/abi/linux"
 	"gvisor.dev/gvisor/pkg/context"
 	"gvisor.dev/gvisor/pkg/log"
+	"gvisor.dev/gvisor/pkg/sentry/checkpoint"
 	"gvisor.dev/gvisor/pkg/sentry/kernel"
 	"gvisor.dev/gvisor/pkg/sentry/state/stateio"
 	"gvisor.dev/gvisor/pkg/sentry/watchdog"
@@ -65,6 +66,27 @@ type SaveOpts struct {
 	// file.
 	AppMFExcludeCommittedZeroPages bool
 
+	// PrivateMFExternalContent is the value of
+	// pgalloc.SaveOpts.ExternalContent for private (disk-backed) MemoryFiles.
+	// If true, their page contents are not saved; the backing host files must
+	// be captured out-of-band and adopted on restore.
+	PrivateMFExternalContent bool
+
+	// FilestoreSnapshots, if non-empty, requests in-window snapshots of the
+	// private MemoryFiles: inside the save freeze window (after Pause, before
+	// memory-file metadata serialization), each MemoryFile identified by ID
+	// has its backing file FICLONE'd to Dest. This makes the snapshot and the
+	// saved metadata describe the same instant, so it is correct even with
+	// Resume (leave-running). Name is the artifact file name recorded in the
+	// sidecar. The type lives in pkg/sentry/checkpoint to avoid an import
+	// cycle with pkg/sentry/kernel.
+	FilestoreSnapshots []checkpoint.FilestoreSnapshot
+
+	// FilestoreSidecar, if non-nil, receives a JSON manifest describing the
+	// FilestoreSnapshots artifacts (names, resource IDs, sizes, sampled
+	// fingerprints) written during the freeze window.
+	FilestoreSidecar io.WriteCloser
+
 	// Resume indicates if the statefile is used for save-resume.
 	Resume bool
 
@@ -103,6 +125,14 @@ func (opts *SaveOpts) Close() error {
 	}
 	if opts.FSSaveOpts != nil {
 		err = errors.Join(err, opts.FSSaveOpts.Close())
+	}
+	for _, snapshot := range opts.FilestoreSnapshots {
+		err = errors.Join(err, snapshot.Dest.Close())
+	}
+	opts.FilestoreSnapshots = nil
+	if opts.FilestoreSidecar != nil {
+		err = errors.Join(err, opts.FilestoreSidecar.Close())
+		opts.FilestoreSidecar = nil
 	}
 	return err
 }
@@ -167,7 +197,13 @@ func (opts *SaveOpts) Save(ctx context.Context, k *kernel.Kernel, w *watchdog.Wa
 	} else {
 		opts.Destination = nil
 		// Save the kernel.
-		err = k.SaveTo(ctx, wc, opts.PagesMetadata, opts.PagesFile, opts.AppMFExcludeCommittedZeroPages, opts.Resume, opts.FSSaveOpts) // transfers ownership of wc, opts.PagesMetadata, opts.PagesFile, opts.FSSaveOpts
+		err = k.SaveTo(ctx, wc, opts.PagesMetadata, opts.PagesFile, &kernel.SaveOpts{
+			AppMFExcludeCommittedZeroPages: opts.AppMFExcludeCommittedZeroPages,
+			PrivateMFExternalContent:       opts.PrivateMFExternalContent,
+			FilestoreSnapshots:             opts.FilestoreSnapshots,
+			FilestoreSidecar:               opts.FilestoreSidecar,
+			Resume:                         opts.Resume,
+		}, opts.FSSaveOpts) // transfers ownership of wc, opts.PagesMetadata, opts.PagesFile, opts.FSSaveOpts
 		opts.PagesMetadata = nil
 		opts.PagesFile = nil
 		opts.FSSaveOpts = nil

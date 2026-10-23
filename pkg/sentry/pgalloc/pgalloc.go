@@ -197,6 +197,21 @@ type MemoryFile struct {
 	// release all MemoryFile resources and exit. destroyed is protected by mu.
 	destroyed bool
 
+	// contentExternal preserves the original backing inode after a
+	// non-resuming external save without an independent snapshot.
+	// +checklocks:mu
+	contentExternal bool
+
+	// externalSavedSize/externalSavedFingerprint record the exact size and
+	// sampled fingerprint of the snapshot taken by SnapshotToFd() during the
+	// current save window (empty fingerprint = no snapshot taken; the backing
+	// file itself is then fingerprinted by SaveTo inside the window). They
+	// are only written and read while the kernel is paused during a save.
+	// +checklocks:mu
+	externalSavedSize uint64
+	// +checklocks:mu
+	externalSavedFingerprint string
+
 	// stopNotifyPressure stops memory cgroup pressure level
 	// notifications used to drive eviction. stopNotifyPressure is
 	// immutable.
@@ -391,6 +406,13 @@ type MemoryFileOpts struct {
 	// If DisableMemoryAccounting is true, memory usage observed by the
 	// MemoryFile will not be reported in usage.MemoryAccounting.
 	DisableMemoryAccounting bool
+
+	// If AdoptExistingFile is true, NewMemoryFile() will not truncate the
+	// backing file, allowing an existing file with meaningful contents to be
+	// adopted. The caller is responsible for the file's contents being valid
+	// for the restored MemoryFile (e.g. via MemoryFile.LoadFrom() of a
+	// checkpoint whose metadata was saved with ExternalContent).
+	AdoptExistingFile bool
 }
 
 // DelayedEvictionType is the type of MemoryFileOpts.DelayedEviction.
@@ -439,9 +461,11 @@ func NewMemoryFile(file *os.File, opts MemoryFileOpts) (*MemoryFile, error) {
 		return nil, fmt.Errorf("invalid MemoryFileOpts.DelayedEviction: %v", opts.DelayedEviction)
 	}
 
-	// Truncate the file to 0 bytes first to ensure that it's empty.
-	if err := file.Truncate(0); err != nil {
-		return nil, err
+	if !opts.AdoptExistingFile {
+		// Truncate the file to 0 bytes first to ensure that it's empty.
+		if err := file.Truncate(0); err != nil {
+			return nil, err
+		}
 	}
 	f := &MemoryFile{
 		opts: opts,
@@ -498,13 +522,13 @@ func (f *MemoryFile) Destroy() {
 	f.releaseCond.Signal()
 }
 
-// Preconditions: f.mu must be locked.
+// +checklocks:f.mu
 func (f *MemoryFile) releaserDestroyLocked() {
 	if !f.destroyed {
 		panic("destroyed is no longer set")
 	}
 
-	if f.opts.DecommitOnDestroy {
+	if f.opts.DecommitOnDestroy && !f.contentExternal {
 		if chunks := f.chunksLoad(); len(chunks) != 0 {
 			if err := f.decommitFile(memmap.FileRange{0, uint64(len(chunks)) * chunkSize}); err != nil {
 				panic(fmt.Sprintf("failed to decommit entire memory file during destruction: %v", err))
