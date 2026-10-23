@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-23",
+  "architecture": "amd64",
+  "gvisor_source": "31b8e2a868913a95dbddb6d8c446716379bd884a",
+  "release": "https://github.com/hky1999/gvisor/releases/tag/release-20260817.0-akernel.5",
+  "archive_sha512": "837ed08f9c3a0346a5d61c83ee0f68a86e0e4b0ffa9ee7888b82be5bf8c0488b1ba19e9ebaa966b5a4847a69507db65bcc2943351a5b0ae70fc3cdbd0151bed8",
+  "runsc_sha256": "f6416bd37596fb6e468d336765c98374d1d84096d4e29fcf657e84a1fa0e9853",
+  "sandboxd_test_source": "bf623fe36bf3fd363d8f0c1f63f61d4429f14234",
+  "sandboxd_daemon_source": "3fba0372531aa5c8d5dab68a1180c649ea4a3657",
+  "sandboxd_daemon_sha256": "301358dbfc745686d41124c3f28c02ba43db7ad479540c886cb29faecfa96bd6",
+  "environment": {
+    "kernel": "5.10.134-19.8.al8.x86_64",
+    "cgroup": "v1",
+    "virtualization": "KVM with nested KVM",
+    "vcpus": 6,
+    "ram_mib": 8192,
+    "userspace": "Ubuntu 24.04",
+    "filestore_fs": "XFS reflink=1, 4096-byte blocks",
+    "user.max_user_namespaces": 65536
+  },
+  "deployment_survey": {
+    "kernel": "5.10.134-19.8.al8.x86_64",
+    "cgroup": "v2",
+    "sampled_workers": 11,
+    "production_services_changed": false
+  },
+  "full_sandboxd_runsc_regression": {
+    "systrap": {
+      "status": "PASS runsc systrap",
+      "managed_cgroups": true,
+      "cgroup_disabled_additional_path": true,
+      "redis_snat_dnat_soak": true,
+      "consecutive_checkpoints": 10
+    },
+    "kvm": {
+      "status": "PASS runsc kvm",
+      "managed_cgroups": true,
+      "cgroup_disabled_additional_path": false,
+      "redis_snat_dnat_soak": true,
+      "consecutive_checkpoints": 10
+    },
+    "reflink": {
+      "status": "PASS runsc reflink",
+      "managed_cgroups": true,
+      "cgroup_disabled_additional_path": true,
+      "redis_snat_dnat_soak": true,
+      "consecutive_checkpoints": 10
+    }
+  },
+  "anonymous_tmpfs_parent_mountns_combinations": [
+    {
+      "cgroup": "v1",
+      "platform": "kvm",
+      "status": "PASS",
+      "restored_generations": 5,
+      "mapped_bytes_sum": 167813120,
+      "unique_physical_data_bytes": 37773312,
+      "saved_bytes": 130039808,
+      "saving_ratio": 0.7749084696119112,
+      "shared_flag_bytes_sum": 166744064
+    },
+    {
+      "cgroup": "v1",
+      "platform": "systrap",
+      "status": "PASS",
+      "restored_generations": 5,
+      "mapped_bytes_sum": 167813120,
+      "unique_physical_data_bytes": 37773312,
+      "saved_bytes": 130039808,
+      "saving_ratio": 0.7749084696119112,
+      "shared_flag_bytes_sum": 166744064
+    },
+    {
+      "cgroup": "v2",
+      "platform": "kvm",
+      "status": "PASS",
+      "restored_generations": 5,
+      "mapped_bytes_sum": 167813120,
+      "unique_physical_data_bytes": 37773312,
+      "saved_bytes": 130039808,
+      "saving_ratio": 0.7749084696119112,
+      "shared_flag_bytes_sum": 166744064
+    },
+    {
+      "cgroup": "v2",
+      "platform": "systrap",
+      "status": "PASS",
+      "restored_generations": 5,
+      "mapped_bytes_sum": 167813120,
+      "unique_physical_data_bytes": 37773312,
+      "saved_bytes": 130039808,
+      "saving_ratio": 0.7749084696119112,
+      "shared_flag_bytes_sum": 166744064
+    }
+  ],
+  "space_accounting": "FIEMAP physical interval union over saved filestore files only; excludes RAM serialization, filesystem metadata, live filestores and restored clones. Not a general workload benchmark.",
+  "previous_complete_qualification": "https://github.com/hky1999/gvisor/actions/runs/39383260302",
+  "scope": "Full runsc regression on Linux 5.10/cgroup-v1; other runtime qualification retains the prior complete CI matrix. Full systrap/KVM/reflink regressions were not repeated on native cgroup-v2; the four combination probes use --ignore-cgroups."
+}

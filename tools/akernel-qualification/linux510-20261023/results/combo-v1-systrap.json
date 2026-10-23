@@ -1,0 +1,471 @@
+{
+  "kernel": "5.10.134-19.8.al8.x86_64",
+  "cgroup_mode": "v1",
+  "platform": "systrap",
+  "runsc_sha256": "f6416bd37596fb6e468d336765c98374d1d84096d4e29fcf657e84a1fa0e9853",
+  "cycles": [
+    {
+      "number": 1,
+      "checkpoint_seconds": 0.11421286299992062,
+      "before": {
+        "counter": 2,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "payload_sha256": "3af575c20fa9b96e9ea3e239d60177edeb2654920d9407574cbc47297dd685f1",
+      "manifest": {
+        "filestores": [
+          {
+            "file": "filestore-0",
+            "resource_container": "__no_name_0",
+            "resource_path": "/",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47"
+          },
+          {
+            "file": "filestore-1",
+            "resource_container": "__no_name_0",
+            "resource_path": "/data",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "a8e9ae09c851a9e65c6f9114ca4eac2c9b4368b8cc0b33689d414bc370daa8bc"
+          }
+        ]
+      },
+      "restored_state": {
+        "counter": 5,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "restore_and_verify_seconds": 0.46054561800008287
+    },
+    {
+      "number": 2,
+      "checkpoint_seconds": 0.06406061200004842,
+      "before": {
+        "counter": 5,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "payload_sha256": "78492d7c11487afe9fd2f6db9d76fb5b5f7df64d12614005578742efe9e0bf3f",
+      "manifest": {
+        "filestores": [
+          {
+            "file": "filestore-0",
+            "resource_container": "__no_name_0",
+            "resource_path": "/",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "75bda33207e7818f1a0e730e66d403fbe65f519f2245d1e14fca64b70b6fb72a"
+          },
+          {
+            "file": "filestore-1",
+            "resource_container": "__no_name_0",
+            "resource_path": "/data",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "a8e9ae09c851a9e65c6f9114ca4eac2c9b4368b8cc0b33689d414bc370daa8bc"
+          }
+        ]
+      },
+      "restored_state": {
+        "counter": 8,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "restore_and_verify_seconds": 0.45213879300001736
+    },
+    {
+      "number": 3,
+      "checkpoint_seconds": 0.06403422100004263,
+      "before": {
+        "counter": 8,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "payload_sha256": "68a4608aed881cda62a4c525aa9076ae7feae933a6bc61e4de496b29e74ea907",
+      "manifest": {
+        "filestores": [
+          {
+            "file": "filestore-0",
+            "resource_container": "__no_name_0",
+            "resource_path": "/",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47"
+          },
+          {
+            "file": "filestore-1",
+            "resource_container": "__no_name_0",
+            "resource_path": "/data",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "a8e9ae09c851a9e65c6f9114ca4eac2c9b4368b8cc0b33689d414bc370daa8bc"
+          }
+        ]
+      },
+      "restored_state": {
+        "counter": 11,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "restore_and_verify_seconds": 0.4520432129999108
+    },
+    {
+      "number": 4,
+      "checkpoint_seconds": 0.06405909900001916,
+      "before": {
+        "counter": 11,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "payload_sha256": "5694e090b8676eec12756ca872bae593a20233c9f600fa66fd790631bdfb51fe",
+      "manifest": {
+        "filestores": [
+          {
+            "file": "filestore-0",
+            "resource_container": "__no_name_0",
+            "resource_path": "/",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "27b7ef6c606352ee1d514fcf4fc7cb72ffd02ba1561b6ab225afc160292ea841"
+          },
+          {
+            "file": "filestore-1",
+            "resource_container": "__no_name_0",
+            "resource_path": "/data",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "a8e9ae09c851a9e65c6f9114ca4eac2c9b4368b8cc0b33689d414bc370daa8bc"
+          }
+        ]
+      },
+      "restored_state": {
+        "counter": 14,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "restore_and_verify_seconds": 0.4518148680000422
+    },
+    {
+      "number": 5,
+      "checkpoint_seconds": 0.06447008200007076,
+      "before": {
+        "counter": 13,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "payload_sha256": "8bb6c6dc80b43ad4ba104555405ee4d12b8ac5e22eef0ecc3a3b6aaa8ba0e7ec",
+      "manifest": {
+        "filestores": [
+          {
+            "file": "filestore-0",
+            "resource_container": "__no_name_0",
+            "resource_path": "/",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "9f1dcbc35c350d6027f98be0f5c8b43b42ca52b7604459c0c42be3aa88913d47"
+          },
+          {
+            "file": "filestore-1",
+            "resource_container": "__no_name_0",
+            "resource_path": "/data",
+            "size_bytes": 1073741824,
+            "chunk_count": 1,
+            "fingerprint": "a8e9ae09c851a9e65c6f9114ca4eac2c9b4368b8cc0b33689d414bc370daa8bc"
+          }
+        ]
+      },
+      "restored_state": {
+        "counter": 16,
+        "fd_offset": 6,
+        "fd_text": "tmpfs-preserved-open-fd",
+        "marker": 1792727758653132303,
+        "pid": 1,
+        "ram_bytes": 8388608,
+        "ram_sha256": "d3d1d9c2694e675bb3473c3e00370aaedd36ff3660eb1adbf083b277ea67e77e"
+      },
+      "restore_and_verify_seconds": 0.4017033929999343
+    }
+  ],
+  "status": "passed",
+  "runsc_version": "runsc version release-20260817.0-12-g31b8e2a86891\nspec: 1.2.1",
+  "without_parent_mountns_expected_exdev": true,
+  "filestore_extent_accounting": {
+    "files": [
+      {
+        "file": "checkpoints/1/filestores/filestore-0",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 4096,
+            "physical": 6444118016,
+            "length": 4096,
+            "flags": 1
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/1/filestores/filestore-1",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 0,
+            "physical": 6444122112,
+            "length": 4096,
+            "flags": 8192
+          },
+          {
+            "logical": 4096,
+            "physical": 6444126208,
+            "length": 1048576,
+            "flags": 0
+          },
+          {
+            "logical": 1052672,
+            "physical": 6445174784,
+            "length": 32505856,
+            "flags": 8193
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/2/filestores/filestore-0",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 0,
+            "physical": 6444113920,
+            "length": 4096,
+            "flags": 1
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/2/filestores/filestore-1",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 0,
+            "physical": 6444122112,
+            "length": 4096,
+            "flags": 8192
+          },
+          {
+            "logical": 4096,
+            "physical": 6477684736,
+            "length": 1048576,
+            "flags": 8192
+          },
+          {
+            "logical": 1052672,
+            "physical": 6445174784,
+            "length": 32505856,
+            "flags": 8193
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/3/filestores/filestore-0",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 4096,
+            "physical": 6478860288,
+            "length": 4096,
+            "flags": 1
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/3/filestores/filestore-1",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 0,
+            "physical": 6444122112,
+            "length": 4096,
+            "flags": 8192
+          },
+          {
+            "logical": 4096,
+            "physical": 6477684736,
+            "length": 1175552,
+            "flags": 8192
+          },
+          {
+            "logical": 1179648,
+            "physical": 6478864384,
+            "length": 921600,
+            "flags": 8192
+          },
+          {
+            "logical": 2101248,
+            "physical": 6446223360,
+            "length": 31457280,
+            "flags": 8193
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/4/filestores/filestore-0",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 0,
+            "physical": 6479912960,
+            "length": 4096,
+            "flags": 1
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/4/filestores/filestore-1",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 0,
+            "physical": 6444122112,
+            "length": 4096,
+            "flags": 8192
+          },
+          {
+            "logical": 4096,
+            "physical": 6477684736,
+            "length": 1175552,
+            "flags": 8192
+          },
+          {
+            "logical": 1179648,
+            "physical": 6478864384,
+            "length": 1048576,
+            "flags": 8192
+          },
+          {
+            "logical": 2228224,
+            "physical": 6479917056,
+            "length": 921600,
+            "flags": 8192
+          },
+          {
+            "logical": 3149824,
+            "physical": 6447271936,
+            "length": 30408704,
+            "flags": 8193
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/5/filestores/filestore-0",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 4096,
+            "physical": 6480965632,
+            "length": 4096,
+            "flags": 1
+          }
+        ]
+      },
+      {
+        "file": "checkpoints/5/filestores/filestore-1",
+        "size": 1073741824,
+        "device": 64784,
+        "extents": [
+          {
+            "logical": 0,
+            "physical": 6444122112,
+            "length": 4096,
+            "flags": 8192
+          },
+          {
+            "logical": 4096,
+            "physical": 6477684736,
+            "length": 1175552,
+            "flags": 8192
+          },
+          {
+            "logical": 1179648,
+            "physical": 6478864384,
+            "length": 1048576,
+            "flags": 8192
+          },
+          {
+            "logical": 2228224,
+            "physical": 6479917056,
+            "length": 1048576,
+            "flags": 8192
+          },
+          {
+            "logical": 3276800,
+            "physical": 6480969728,
+            "length": 921600,
+            "flags": 8192
+          },
+          {
+            "logical": 4198400,
+            "physical": 6448320512,
+            "length": 29360128,
+            "flags": 8193
+          }
+        ]
+      }
+    ],
+    "mapped_bytes_sum": 167813120,
+    "unique_physical_data_bytes": 37773312,
+    "saved_bytes": 130039808,
+    "saving_ratio": 0.7749084696119112,
+    "shared_flag_bytes_sum": 166744064
+  },
+  "independent_root_and_tmpfs_clones": true,
+  "saved_filestores_immutable": true,
+  "checkpoint_after_restore": true,
+  "artifact_deletion_survived": true,
+  "cleanup": "all owned sandboxes, artifacts and state removed"
+}

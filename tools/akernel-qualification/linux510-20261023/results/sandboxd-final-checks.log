@@ -1,0 +1,50 @@
+go vet ./...
+ok  	github.com/inclusionAI/sandboxd/api/runtime/v1	(cached)
+ok  	github.com/inclusionAI/sandboxd/cmd/firecracker-agent	(cached)
+?   	github.com/inclusionAI/sandboxd/cmd/runc-shim	[no test files]
+ok  	github.com/inclusionAI/sandboxd/cmd/sandbox-logger	(cached)
+ok  	github.com/inclusionAI/sandboxd/cmd/sandboxd	(cached)
+ok  	github.com/inclusionAI/sandboxd/cmd/sbox	(cached)
+ok  	github.com/inclusionAI/sandboxd/config	(cached)
+ok  	github.com/inclusionAI/sandboxd/internal/firecrackerproto	(cached)
+ok  	github.com/inclusionAI/sandboxd/internal/langrtmanager	(cached)
+?   	github.com/inclusionAI/sandboxd/internal/metrics	[no test files]
+ok  	github.com/inclusionAI/sandboxd/internal/runcshim	(cached)
+ok  	github.com/inclusionAI/sandboxd/internal/server	(cached)
+?   	github.com/inclusionAI/sandboxd/internal/testregistry	[no test files]
+ok  	github.com/inclusionAI/sandboxd/internal/trace	(cached)
+ok  	github.com/inclusionAI/sandboxd/internal/util	0.018s
+ok  	github.com/inclusionAI/sandboxd/pkg/cgroupmanager	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/errord	(cached)
+?   	github.com/inclusionAI/sandboxd/pkg/imagemanager	[no test files]
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/api	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/diskusage	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/distillfs	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/imageconfig	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/imageregistry	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/imgcgroup	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/nydus	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/oci	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/imagemanager/registryauth	(cached)
+?   	github.com/inclusionAI/sandboxd/pkg/imagemanager/timedtrace	[no test files]
+ok  	github.com/inclusionAI/sandboxd/pkg/loopdevice	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/networkmanager	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/networkmanager/bpfnat	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/networkmanager/bridge	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/networkmanager/networkacl	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/resourcemanager	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/runtime	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/runtime/firecracker	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/runtime/internal/common	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/runtime/kata	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/runtime/runc	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/runtime/runsc	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/sandbox	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/store	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/volumemanager	(cached)
+ok  	github.com/inclusionAI/sandboxd/pkg/xpumanager	(cached)
+ok  	github.com/inclusionAI/sandboxd/test/e2e	0.080s
+ok  	github.com/inclusionAI/sandboxd/test/e2e/checkpoint-restore	(cached)
+?   	github.com/inclusionAI/sandboxd/test/e2e/network-policy-client	[no test files]
+?   	github.com/inclusionAI/sandboxd/test/e2e/oom-hog	[no test files]
+?   	github.com/inclusionAI/sandboxd/version	[no test files]

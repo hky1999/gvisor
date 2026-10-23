@@ -1,0 +1,76 @@
+WARNING: Support for cgroup v1 is deprecated and planned to be removed by no later than May 2029 (https://github.com/moby/moby/issues/51111)
+[e2e-run] preparing Redis network soak fixture
+[e2e-run] running e2e container codex-runsc-kvm
+[e2e] detected v1
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+[e2e] starting isolated direct DNS fixture
+[e2e] testing runsc direct DNS with network ACLs disabled
+[e2e] stopping sandboxd and flushing resource ownership
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+[e2e] crashing sandboxd to exercise recovery
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+time="2026-10-23T04:16:04Z" level=info msg="delete sandbox sbox-e2e-runsc-direct-dns success, client cost: 18 ms"
+[e2e] stopping sandboxd and flushing resource ownership
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+[e2e] runsc direct DNS checks passed
+[e2e] starting sandbox
+[e2e] sandbox started: sbox-e2e-runtime
+[e2e] testing runsc TAP network ACL updates
+[e2e] deleting sandbox
+time="2026-10-23T04:16:07Z" level=info msg="delete sandbox sbox-e2e-runtime success, client cost: 28 ms"
+[e2e] testing runsc DNAT port forwarding
+time="2026-10-23T04:16:09Z" level=info msg="delete sandbox sbox-e2e-runsc-dnat success, client cost: 108 ms"
+[e2e] testing runsc-kvm 10 consecutive checkpoints and restoring the last
+[e2e] checkpointing runsc-kvm source 1/10
+[e2e] checkpointing runsc-kvm source 2/10
+[e2e] checkpointing runsc-kvm source 3/10
+[e2e] checkpointing runsc-kvm source 4/10
+[e2e] checkpointing runsc-kvm source 5/10
+[e2e] checkpointing runsc-kvm source 6/10
+[e2e] checkpointing runsc-kvm source 7/10
+[e2e] checkpointing runsc-kvm source 8/10
+[e2e] checkpointing runsc-kvm source 9/10
+[e2e] checkpointing runsc-kvm source 10/10
+time="2026-10-23T04:16:13Z" level=info msg="delete sandbox sbox-e2e-runsc-kvm-cr-source success, client cost: 32 ms"
+time="2026-10-23T04:16:13Z" level=info msg="delete sandbox sbox-e2e-runsc-kvm-cr-target success, client cost: 34 ms"
+[e2e] testing runsc-kvm writable host mounts, rotation, and checkpoint/restore
+sbox-runsc-kvm-rw-source
+time="2026-10-23T04:16:13Z" level=info msg="delete sandbox sbox-runsc-kvm-rw-source success, client cost: 23 ms"
+sbox-runsc-kvm-rw-restored
+/bin/sh: can't create /readonly/new-file: Read-only file system
+none /app/logs 9p rw,trans=fd,rfdno=5,wfdno=5,aname=/,dfltuid=4294967294,dfltgid=4294967294,dcache=1000,cache=remote_revalidating,disable_fifo_open,directfs 0 0
+none /readonly 9p ro,trans=fd,rfdno=6,wfdno=6,aname=/,dfltuid=4294967294,dfltgid=4294967294,dcache=1000,cache=remote_revalidating,disable_fifo_open,directfs 0 0
+time="2026-10-23T04:16:14Z" level=info msg="delete sandbox sbox-runsc-kvm-rw-restored success, client cost: 33 ms"
+PASS: runsc-kvm-rw RW, RO protection, rotation, local C/R, append FD, read offset, memory and caller-owned directory
+time="2026-10-23T04:16:14Z" level=info msg="delete sandbox sbox-runsc-kvm-rw-source success, client cost: 0 ms"
+time="2026-10-23T04:16:14Z" level=info msg="delete sandbox sbox-runsc-kvm-rw-restored success, client cost: 1 ms"
+[e2e] testing runsc writable-layer storage quota
+time="2026-10-23T04:16:14Z" level=info msg="delete sandbox sbox-e2e-storage success, client cost: 54 ms"
+[e2e] testing OOM of one host task while sandbox init remains alive
+[e2e] partial OOM target sbox-e2e-partial-oom cgroup /sys/fs/cgroup/memory/sandboxd-e2e/e9fL11gTCaQq; guard cgroup /sys/fs/cgroup/memory/sandboxd-e2e/pix5CZNl3zcr
+/usr/local/bin/sandboxd-e2e-run: line 1447:  2661 Killed                  /bin/sh -c 'echo 1000 > /proc/self/oom_score_adj; echo $$ > "$1/cgroup.procs"; exec /usr/local/bin/oom-hog' sh "${child}"
+time="2026-10-23T04:16:15Z" level=info msg="delete sandbox sbox-e2e-oom-guard success, client cost: 30 ms"
+time="2026-10-23T04:16:15Z" level=info msg="delete sandbox sbox-e2e-partial-oom success, client cost: 25 ms"
+[e2e] starting immediate OOM sandbox
+time="2026-10-23T04:16:16Z" level=info msg="delete sandbox sbox-e2e-oom success, client cost: 23 ms"
+[e2e] reusing OOM cgroup with different limits
+time="2026-10-23T04:16:16Z" level=info msg="delete sandbox sbox-e2e-reuse success, client cost: 22 ms"
+[e2e] testing crash recovery and OOM watcher reattachment
+[e2e] crashing sandboxd to exercise recovery
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+time="2026-10-23T04:16:24Z" level=info msg="delete sandbox sbox-e2e-recovery success, client cost: 71 ms"
+[e2e] testing runsc Redis traffic over SNAT and DNAT
+"test","rps","avg_latency_ms","min_latency_ms","p50_latency_ms","p95_latency_ms","p99_latency_ms","max_latency_ms"
+"SET","24906.60","2.367","0.200","0.727","1.839","65.599","75.455"
+"GET","21857.92","2.658","0.232","0.935","1.663","67.455","72.447"
+"test","rps","avg_latency_ms","min_latency_ms","p50_latency_ms","p95_latency_ms","p99_latency_ms","max_latency_ms"
+"SET","21528.53","2.941","0.264","1.023","1.975","67.967","74.559"
+"GET","25575.45","2.265","0.168","0.751","1.703","60.831","71.807"
+time="2026-10-23T04:16:26Z" level=info msg="delete sandbox sbox-e2e-runsc-redis success, client cost: 38 ms"
+[e2e] e2e passed
+[e2e-run] runsc e2e completed

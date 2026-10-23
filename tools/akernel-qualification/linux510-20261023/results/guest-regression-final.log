@@ -1,0 +1,30 @@
+user.max_user_namespaces = 65536
+Verified production-version kernel, cgroup-v1 and XFS
+1 5.10.134-19.8.al8.x86_64
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  81.53MB
+
+Step 1/4 : FROM codex-sandboxd-qualification:20261023
+ ---> 510ab66a90d0
+Step 2/4 : COPY sandboxd /usr/local/bin/sandboxd
+ ---> 5a704de65aa4
+Step 3/4 : COPY sandboxd-e2e-run /usr/local/bin/sandboxd-e2e-run
+ ---> 3155a018061f
+Step 4/4 : RUN mkdir -p /tmp /root /run /proc /sys /dev /home && chmod 1777 /tmp
+ ---> Running in 02b4643d798e
+ ---> Removed intermediate container 02b4643d798e
+ ---> f93fbd60793c
+Successfully built f93fbd60793c
+Successfully tagged codex-sandboxd-qualification:20261023
+Loaded image ID: sha256:8231d3786e10c470840c27963f3d19672dc7ef3e5d5adc512c01d44faada5672
+Test fixtures and complete candidate bundle prepared
+Starting full runsc systrap regression
+PASS runsc systrap
+Starting full runsc kvm regression
+PASS runsc kvm
+Starting full runsc reflink regression
+PASS runsc reflink
+Full runsc regression complete: status=0

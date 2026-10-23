@@ -1,0 +1,102 @@
+WARNING: Support for cgroup v1 is deprecated and planned to be removed by no later than May 2029 (https://github.com/moby/moby/issues/51111)
+[e2e-run] preparing Redis network soak fixture
+[e2e-run] running e2e container codex-runsc-reflink
+[e2e] detected v1
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+[e2e] starting isolated direct DNS fixture
+[e2e] testing runsc direct DNS with network ACLs disabled
+[e2e] stopping sandboxd and flushing resource ownership
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+[e2e] crashing sandboxd to exercise recovery
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+time="2026-10-23T04:16:39Z" level=info msg="delete sandbox sbox-e2e-runsc-direct-dns success, client cost: 12 ms"
+[e2e] stopping sandboxd and flushing resource ownership
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+[e2e] runsc direct DNS checks passed
+[e2e] starting sandbox
+[e2e] sandbox started: sbox-e2e-runtime
+[e2e] testing runsc TAP network ACL updates
+[e2e] deleting sandbox
+time="2026-10-23T04:16:42Z" level=info msg="delete sandbox sbox-e2e-runtime success, client cost: 26 ms"
+[e2e] testing runsc DNAT port forwarding
+time="2026-10-23T04:16:43Z" level=info msg="delete sandbox sbox-e2e-runsc-dnat success, client cost: 102 ms"
+[e2e] testing runsc-systrap 10 consecutive checkpoints and restoring the last
+[e2e] checkpointing runsc-systrap source 1/10
+[e2e] checkpointing runsc-systrap source 2/10
+[e2e] checkpointing runsc-systrap source 3/10
+[e2e] checkpointing runsc-systrap source 4/10
+[e2e] checkpointing runsc-systrap source 5/10
+[e2e] checkpointing runsc-systrap source 6/10
+[e2e] checkpointing runsc-systrap source 7/10
+[e2e] checkpointing runsc-systrap source 8/10
+[e2e] checkpointing runsc-systrap source 9/10
+[e2e] checkpointing runsc-systrap source 10/10
+time="2026-10-23T04:16:46Z" level=info msg="delete sandbox sbox-e2e-runsc-systrap-cr-source success, client cost: 27 ms"
+time="2026-10-23T04:16:52Z" level=info msg="delete sandbox sbox-e2e-runsc-systrap-filestore-clone success, client cost: 26 ms"
+time="2026-10-23T04:16:52Z" level=info msg="delete sandbox sbox-e2e-runsc-systrap-filestore-clone success, client cost: 42 ms"
+time="2026-10-23T04:16:52Z" level=info msg="delete sandbox sbox-e2e-runsc-systrap-cr-target success, client cost: 24 ms"
+[e2e] testing runsc-systrap writable host mounts, rotation, and checkpoint/restore
+sbox-runsc-systrap-rw-source
+time="2026-10-23T04:16:53Z" level=info msg="delete sandbox sbox-runsc-systrap-rw-source success, client cost: 22 ms"
+sbox-runsc-systrap-rw-restored
+/bin/sh: can't create /readonly/new-file: Read-only file system
+none /app/logs 9p rw,trans=fd,rfdno=5,wfdno=5,aname=/,dfltuid=4294967294,dfltgid=4294967294,dcache=1000,cache=remote_revalidating,disable_fifo_open,directfs 0 0
+none /readonly 9p ro,trans=fd,rfdno=6,wfdno=6,aname=/,dfltuid=4294967294,dfltgid=4294967294,dcache=1000,cache=remote_revalidating,disable_fifo_open,directfs 0 0
+time="2026-10-23T04:16:53Z" level=info msg="delete sandbox sbox-runsc-systrap-rw-restored success, client cost: 24 ms"
+PASS: runsc-systrap-rw RW, RO protection, rotation, local C/R, append FD, read offset, memory and caller-owned directory
+time="2026-10-23T04:16:53Z" level=info msg="delete sandbox sbox-runsc-systrap-rw-source success, client cost: 0 ms"
+time="2026-10-23T04:16:53Z" level=info msg="delete sandbox sbox-runsc-systrap-rw-restored success, client cost: 0 ms"
+[e2e] testing runsc writable-layer storage quota
+time="2026-10-23T04:16:53Z" level=info msg="delete sandbox sbox-e2e-storage success, client cost: 54 ms"
+[e2e] testing OOM of one host task while sandbox init remains alive
+[e2e] partial OOM target sbox-e2e-partial-oom cgroup /sys/fs/cgroup/memory/sandboxd-e2e/ZgDpClebCE7J; guard cgroup /sys/fs/cgroup/memory/sandboxd-e2e/kIOt7UzqFT6E
+/usr/local/bin/sandboxd-e2e-run: line 1447:  2812 Killed                  /bin/sh -c 'echo 1000 > /proc/self/oom_score_adj; echo $$ > "$1/cgroup.procs"; exec /usr/local/bin/oom-hog' sh "${child}"
+time="2026-10-23T04:16:54Z" level=info msg="delete sandbox sbox-e2e-oom-guard success, client cost: 23 ms"
+time="2026-10-23T04:16:54Z" level=info msg="delete sandbox sbox-e2e-partial-oom success, client cost: 20 ms"
+[e2e] starting immediate OOM sandbox
+time="2026-10-23T04:16:54Z" level=info msg="delete sandbox sbox-e2e-oom success, client cost: 22 ms"
+[e2e] reusing OOM cgroup with different limits
+time="2026-10-23T04:16:54Z" level=info msg="delete sandbox sbox-e2e-reuse success, client cost: 22 ms"
+[e2e] testing crash recovery and OOM watcher reattachment
+[e2e] crashing sandboxd to exercise recovery
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+time="2026-10-23T04:17:01Z" level=info msg="delete sandbox sbox-e2e-recovery success, client cost: 35 ms"
+[e2e] testing runsc Redis traffic over SNAT and DNAT
+"test","rps","avg_latency_ms","min_latency_ms","p50_latency_ms","p95_latency_ms","p99_latency_ms","max_latency_ms"
+"SET","11904.76","3.597","0.096","0.815","1.807","81.215","84.415"
+"GET","11013.22","3.908","0.168","1.015","1.839","80.383","81.215"
+"test","rps","avg_latency_ms","min_latency_ms","p50_latency_ms","p95_latency_ms","p99_latency_ms","max_latency_ms"
+"SET","11080.33","5.764","0.264","1.287","76.159","82.111","85.375"
+"GET","14174.34","4.502","0.168","1.071","2.239","80.575","81.471"
+time="2026-10-23T04:17:05Z" level=info msg="delete sandbox sbox-e2e-runsc-redis success, client cost: 30 ms"
+[e2e] e2e passed
+[e2e-run] running cgroup-disabled e2e container codex-runsc-reflink-no-cgroup
+[e2e] cgroup management disabled; skipping writable-cgroup preflight
+[e2e] starting sandboxd
+[e2e] sandboxd socket ready
+[e2e] starting sandbox without cgroup management
+time="2026-10-23T04:17:07Z" level=info msg="delete sandbox sbox-e2e-no-cgroup success, client cost: 23 ms"
+[e2e] testing runsc writable-layer storage quota
+time="2026-10-23T04:17:07Z" level=info msg="delete sandbox sbox-e2e-storage success, client cost: 31 ms"
+[e2e] testing runsc-systrap 10 consecutive checkpoints and restoring the last
+[e2e] checkpointing runsc-systrap source 1/10
+[e2e] checkpointing runsc-systrap source 2/10
+[e2e] checkpointing runsc-systrap source 3/10
+[e2e] checkpointing runsc-systrap source 4/10
+[e2e] checkpointing runsc-systrap source 5/10
+[e2e] checkpointing runsc-systrap source 6/10
+[e2e] checkpointing runsc-systrap source 7/10
+[e2e] checkpointing runsc-systrap source 8/10
+[e2e] checkpointing runsc-systrap source 9/10
+[e2e] checkpointing runsc-systrap source 10/10
+time="2026-10-23T04:17:09Z" level=info msg="delete sandbox sbox-e2e-runsc-systrap-cr-source success, client cost: 25 ms"
+time="2026-10-23T04:17:15Z" level=info msg="delete sandbox sbox-e2e-runsc-systrap-filestore-clone success, client cost: 24 ms"
+time="2026-10-23T04:17:16Z" level=info msg="delete sandbox sbox-e2e-runsc-systrap-filestore-clone success, client cost: 23 ms"
+time="2026-10-23T04:17:16Z" level=info msg="delete sandbox sbox-e2e-runsc-systrap-cr-target success, client cost: 22 ms"
+[e2e] e2e passed
+[e2e-run] e2e completed

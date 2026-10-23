@@ -1,0 +1,11 @@
+{
+  "kernel": "5.10.134-19.8.al8.x86_64",
+  "cgroup": "v1",
+  "proc_cgroup": "13:blkio:/\n12:freezer:/\n11:hugetlb:/\n10:perf_event:/\n9:memory:/system.slice/ssh.service\n8:pids:/system.slice/ssh.service\n7:cpuset:/\n6:ioasids:/\n5:rdma:/\n4:devices:/system.slice/ssh.service\n3:net_cls,net_prio:/\n2:cpu,cpuacct:/system.slice/ssh.service\n1:name=systemd:/system.slice/ssh.service\n",
+  "cmdline": "root=/dev/vda rootfstype=ext4 rw console=ttyS0 net.ifnames=0 systemd.unified_cgroup_hierarchy=0 systemd.legacy_systemd_cgroup_controller=true\n",
+  "xfs_info": "meta-data=/dev/vdb               isize=512    agcount=4, agsize=524288 blks\n         =                       sectsz=512   attr=2, projid32bit=1\n         =                       crc=1        finobt=1, sparse=1, rmapbt=1\n         =                       reflink=1    bigtime=0 inobtcount=0 nrext64=0\ndata     =                       bsize=4096   blocks=2097152, imaxpct=25\n         =                       sunit=0      swidth=0 blks\nnaming   =version 2              bsize=4096   ascii-ci=0, ftype=1\nlog      =internal log           bsize=4096   blocks=16384, version=2\n         =                       sectsz=512   sunit=0 blks, lazy-count=1\nrealtime =none                   extsz=4096   blocks=0, rtextents=0\n",
+  "runsc_version": "runsc version release-20260817.0-12-g31b8e2a86891\nspec: 1.2.1\n",
+  "runsc_sha256": "f6416bd37596fb6e468d336765c98374d1d84096d4e29fcf657e84a1fa0e9853",
+  "sandboxd_sha256": "301358dbfc745686d41124c3f28c02ba43db7ad479540c886cb29faecfa96bd6",
+  "kvm_device": true
+}
