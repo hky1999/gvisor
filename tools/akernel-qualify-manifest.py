@@ -33,7 +33,7 @@ def main():
     if url.scheme != "http" or not url.hostname or url.username or url.password:
         raise SystemExit("qualification requires an unauthenticated local HTTP server")
     manifest = json.loads(manifest_path.read_text())
-    if manifest["schema"] != 4 or manifest["repository"] != "hky1999/gvisor":
+    if manifest["schema"] != 4 or manifest["repository"] != "akernel-dev/gvisor":
         raise SystemExit("unexpected candidate provenance")
     if not re.fullmatch(r"[0-9a-f]{40}", manifest["commit"]):
         raise SystemExit("invalid candidate source commit")

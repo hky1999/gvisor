@@ -4,17 +4,17 @@ run-name: Qualify candidate ${{ inputs.candidate_run_id }}
   workflow_dispatch:
     inputs:
       candidate_run_id:
-        description: Successful candidate workflow run in this fork
+        description: Successful candidate workflow run in akernel-dev/gvisor
         required: true
         type: string
       sandboxd_ref:
         description: Exact sandboxd implementation commit
-        default: a5a51064d5e02e1c1c9b04e38549eff2c184d2bc
+        default: 9267dbe5196521c1c62371173012ad7a45dbc7be
         required: true
         type: string
       akernel_ref:
         description: Exact AKernel develop commit
-        default: 55152795cd71f15427982f428e6f2706f241103b
+        default: d498636d6932aa15ac98650cf12f8f8739718482
         required: true
         type: string
 permissions:
@@ -47,14 +47,14 @@ jobs:
       run: |
         set -euo pipefail
         [[ "${CANDIDATE_RUN_ID}" =~ ^[1-9][0-9]*$ ]]
-        gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${CANDIDATE_RUN_ID}" >"${RUNNER_TEMP}/candidate-run.json"
+        gh api "repos/akernel-dev/gvisor/actions/runs/${CANDIDATE_RUN_ID}" >"${RUNNER_TEMP}/candidate-run.json"
         python3 - <<'CHECK'
         import json,os,re
         from pathlib import Path
         run=json.loads((Path(os.environ['RUNNER_TEMP'])/'candidate-run.json').read_text())
         assert run['path']=='.github/workflows/akernel-candidate.yml'
         assert run['event']=='workflow_dispatch' and run['conclusion']=='success'
-        assert run['head_repository']['full_name']==os.environ['GITHUB_REPOSITORY']
+        assert run['head_repository']['full_name']=='akernel-dev/gvisor'
         assert re.fullmatch('[0-9a-f]{40}',run['head_sha'])
         with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('commit='+run['head_sha']+'\n')
         CHECK
@@ -65,6 +65,7 @@ jobs:
         path: ${{ runner.temp }}/candidates
         github-token: ${{ github.token }}
         run-id: ${{ inputs.candidate_run_id }}
+        repository: akernel-dev/gvisor
     - name: Validate archive bytes and assemble provenance
       id: assemble
       env:
@@ -74,11 +75,11 @@ jobs:
       run: |
         set -euo pipefail
         cd gvisor-tools
-        git fetch origin "${CANDIDATE_COMMIT}"
+        git fetch https://github.com/akernel-dev/gvisor.git "${CANDIDATE_COMMIT}"
         upstream_tag="$(jq -er '.upstream_tag' "${RUNNER_TEMP}/candidates/gvisor-candidate-${CANDIDATE_RUN_ID}-amd64/candidate-amd64.json")"
         git fetch --no-tags https://github.com/google/gvisor.git "refs/tags/${upstream_tag}:refs/tags/${upstream_tag}"
         python3 tools/akernel-candidate-manifest.py assemble "${RUNNER_TEMP}/candidates" \
-          "${GITHUB_REPOSITORY}" "${CANDIDATE_COMMIT}" "${CANDIDATE_RUN_ID}" "${RUNNER_TEMP}/manifest.json"
+          "akernel-dev/gvisor" "${CANDIDATE_COMMIT}" "${CANDIDATE_RUN_ID}" "${RUNNER_TEMP}/manifest.json"
         echo "release=$(jq -r .release_tag "${RUNNER_TEMP}/manifest.json")" >>"${GITHUB_OUTPUT}"
         for arch in amd64 arm64; do
           bash tools/akernel-release-archive.sh verify "$arch" \
@@ -196,6 +197,7 @@ jobs:
         path: ${{ runner.temp }}/candidate-bundles
         github-token: ${{ github.token }}
         run-id: ${{ inputs.candidate_run_id }}
+        repository: akernel-dev/gvisor
     - name: Download verified candidate provenance
       uses: actions/download-artifact@v5
       with:
@@ -330,6 +332,7 @@ jobs:
         path: ${{ runner.temp }}/candidate-bundles
         github-token: ${{ github.token }}
         run-id: ${{ inputs.candidate_run_id }}
+        repository: akernel-dev/gvisor
     - name: Download verified candidate provenance
       uses: actions/download-artifact@v5
       with:
@@ -363,7 +366,7 @@ jobs:
         from pathlib import Path
         p=Path('deploy/standalone/config/sandboxd_config.toml')
         s=p.read_text().replace('filestore_dir_size="50G"','filestore_dir_size=""')
-        s+='\n[plugin.runtime.runsc]\ncheckpoint_mode="reflink"\n'
+        s=s.replace('[plugin.runtime.runsc]', '[plugin.runtime.runsc]\ncheckpoint_mode="reflink"')
         p.write_text(s)
         CONFIG
     - name: Build all-in-one image
@@ -489,9 +492,11 @@ jobs:
             for logfile in \
               /home/akernel/logs/sandboxd/sandboxd*.log \
               /home/akernel/adx/logs/*.log \
+              /home/akernel/adx/run/logs/*.log \
+              /home/akernel/adx/run/*/logs/*.log \
               /home/akernel/sandboxd/image_manager/daemons/*/daemon.log; do
               echo "=== ${logfile} ==="
-              tail -n 300 "${logfile}"
+              tail -n 2000 "${logfile}"
             done
           ' || true
         fi
