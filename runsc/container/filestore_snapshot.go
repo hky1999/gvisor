@@ -25,6 +25,7 @@ import (
 	"gvisor.dev/gvisor/pkg/log"
 	"gvisor.dev/gvisor/pkg/sentry/checkpoint"
 	"gvisor.dev/gvisor/runsc/config"
+	"gvisor.dev/gvisor/runsc/park"
 	"gvisor.dev/gvisor/runsc/specutils"
 )
 
@@ -62,6 +63,9 @@ type filestoreAdopter struct {
 }
 
 func newFilestoreAdopter(conf *config.Config, c *Container) (*filestoreAdopter, error) {
+	if err := park.CheckArtifact(conf.FilestoreAdoptDir, "filestores"); err != nil {
+		return nil, err
+	}
 	a := &filestoreAdopter{
 		dir:   conf.FilestoreAdoptDir,
 		clone: conf.FilestoreAdoptMode == config.FilestoreAdoptClone,
@@ -242,43 +246,58 @@ func (c *Container) prepareFilestoreSnapshot(snapDir string) (targets []checkpoi
 		}
 		return nil, nil, nil, cause
 	}
-	// Enumerate filestore mounts in the same order as createGoferFilestores
-	// (root first, then spec mount order). Self-overlay filestores are a
-	// named file inside the mount source, not an anonymous artifact; they
-	// can be neither snapshotted as an artifact nor adopted, so reject at
-	// checkpoint time (mirroring the restore-side guard) instead of
-	// producing a snapshot directory that can never be restored.
-	dests := []string{"/"}
-	if rootfsConf := c.GoferMountConfs[0]; !rootfsConf.IsFilestorePresent() {
-		dests = nil
-	} else if rootfsConf.IsSelfBacked() {
-		return cleanup(fmt.Errorf("--filestore-snapshot-dir supports anonymous filestores only (overlay2 'dir=' medium); the root mount uses the self overlay medium and its named filestore cannot be snapshotted for adoption"))
+	targets, err = c.filestoreTargets()
+	if err != nil {
+		return cleanup(err)
 	}
-	mountIdx := 1 // first one is the root
-	for _, m := range c.Spec.Mounts {
-		if !specutils.HasMountConfig(m) {
-			continue
-		}
-		if c.GoferMountConfs[mountIdx].IsFilestorePresent() {
-			if c.GoferMountConfs[mountIdx].IsSelfBacked() {
-				return cleanup(fmt.Errorf("--filestore-snapshot-dir supports anonymous filestores only (overlay2 'dir=' medium); mount %q uses the self overlay medium and its named filestore cannot be snapshotted for adoption", m.Destination))
-			}
-			dests = append(dests, m.Destination)
-		}
-		mountIdx++
-	}
-	for i, dest := range dests {
+	for i := range targets {
 		name := path.Join(snapDir, "filestore-"+strconv.Itoa(i))
 		f, err := os.OpenFile(name, os.O_RDWR|unix.O_CREAT|os.O_EXCL|unix.O_CLOEXEC, 0600)
 		if err != nil {
-			return cleanup(fmt.Errorf("failed to create filestore snapshot artifact %q (use a fresh --filestore-snapshot-dir for each checkpoint): %w", name, err))
+			return cleanup(err)
 		}
 		destFiles = append(destFiles, f)
-		targets = append(targets, c.filestoreResourceID(dest))
 	}
+
 	sc, err := os.OpenFile(path.Join(snapDir, filestoresSidecarName+".tmp"), os.O_WRONLY|unix.O_CREAT|os.O_EXCL|unix.O_CLOEXEC, 0600)
 	if err != nil {
 		return cleanup(fmt.Errorf("failed to create filestore sidecar temp file in %q: %w", snapDir, err))
 	}
 	return targets, destFiles, sc, nil
+}
+
+// filestoreTargets identifies the configured anonymous private backing files.
+func (c *Container) filestoreTargets() ([]checkpoint.ResourceID, error) {
+	if c.Spec == nil || len(c.GoferMountConfs) == 0 {
+		return nil, fmt.Errorf("container has no filestore mount configuration")
+	}
+	var targets []checkpoint.ResourceID
+	appendMount := func(dest string, index int) error {
+		if index >= len(c.GoferMountConfs) {
+			return fmt.Errorf("incomplete filestore mount configuration")
+		}
+		conf := c.GoferMountConfs[index]
+		if !conf.IsFilestorePresent() {
+			return nil
+		}
+		if conf.IsSelfBacked() {
+			return fmt.Errorf("filestore capture supports anonymous filestores only; mount %q uses the self overlay medium", dest)
+		}
+		targets = append(targets, c.filestoreResourceID(dest))
+		return nil
+	}
+	if err := appendMount("/", 0); err != nil {
+		return nil, err
+	}
+	index := 1
+	for _, mount := range c.Spec.Mounts {
+		if !specutils.HasMountConfig(mount) {
+			continue
+		}
+		if err := appendMount(mount.Destination, index); err != nil {
+			return nil, err
+		}
+		index++
+	}
+	return targets, nil
 }

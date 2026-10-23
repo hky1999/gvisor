@@ -172,6 +172,80 @@ without concurrent application writes. `--candidate-mode=deferred` tests the
 non-resuming FD retention workflow and reports `StoppedCheckpoint` separately
 from `DurableCheckpoint`. Compare the output with `benchstat`.
 
+### Asynchronous park (experimental)
+
+`runsc park` stops a running, single-container sandbox and persists its
+checkpoint on a detached worker. It requires anonymous disk-backed filestores
+and a new job directory on the same reflink-capable filesystem. It does not
+require `--filestore-reflink=enabled` in the Sentry: the worker clones the files
+after the Sentry exits. Paused sources, GPU checkpoints, and `--leave-running`
+are not supported by this command.
+
+```bash
+runsc park --job-dir=/mnt/xfs/parks/job-1 <source container id>
+runsc park-status --job-dir=/mnt/xfs/parks/job-1 --wait=ready
+runsc --filestore-adopt-dir=/mnt/xfs/parks/job-1/filestores restore \
+  --image-path=/mnt/xfs/parks/job-1/image <restored container id>
+```
+
+Provide the sandbox's other runtime flags and restore bundle as usual. The job
+directory must not exist; its parent must exist. The task creates private
+`image/` and `filestores/` output directories. Keep both when moving a completed
+checkpoint. Stored artifact paths are relative to the job directory.
+
+The JSON result distinguishes two completion events:
+
+- `stopped_at` confirms that the source Sentry process exited. By default,
+  `park` returns after this event. The worker still owns the anonymous
+  filestore descriptors, data, and dirty pages that it needs to commit.
+- `state: ready` and `durable_at` confirm that checkpoint files, filestores,
+  manifests, and their directory entries were synchronized. Restore and
+  migration must wait for this event. The restore commands reject managed
+  artifacts from tasks that are still pending or have failed.
+
+Use `--completion=none` to return after starting the worker, or
+`--completion=ready` to wait for persistence in the initial command.
+`park-status --wait=stopped|ready` waits for the corresponding event;
+`--wait=none` reports current progress. A `--timeout` stops waiting and leaves
+the worker running. A missing `stopped_at` means exit has not been confirmed;
+it does not prove that a failed task's original instance is still running.
+
+The worker receives backing files over a private, acknowledged FD transfer
+inside the checkpoint window. It keeps those references across Sentry exit and
+closes them before reporting ready or completing failure cleanup. It can finish
+even if the foreground command exits or the stopped container is deleted.
+Nonterminal progress records are atomic but are not synchronized to disk, so
+reporting stopped does not wait for filestore writeback.
+
+States are `preparing`, `capturing`, `stopped`, `committing`, `ready`, and
+`failed`. `stopped` can be brief; `stopped_at` remains present during commit.
+An abnormal worker exit before ready is detected by the task's ownership lock
+when status is queried. The query records failure and removes incomplete
+outputs. Failed jobs retain diagnostics and report `cleanup_complete` and any
+`cleanup_error`. Unreadable task metadata or filesystem errors fail closed and
+can require operator intervention.
+
+Stopping is irreversible once capture completes. If the worker or host fails
+before ready, the new checkpoint is not guaranteed recoverable. Failure cleanup
+does not restart the original instance. A caller that needs a durable
+checkpoint before acknowledging park must wait for ready. Pending jobs also
+continue to use host memory, FDs, and storage resources; Sentry exit does not
+mean that all of those resources are released.
+
+Application memory and kernel state still need consistent capture before the
+Sentry exits. Existing asynchronous loads and filesystem work can delay that
+barrier. This interface moves filestore cloning and persistence out of the
+stop path; it does not promise a size-independent pause for every workload.
+A future mode that resumes the original instance must establish an independent
+snapshot before resuming it.
+
+The lifecycle harness is
+[`test/benchmarks/filestore/park_lifecycle.py`](../../test/benchmarks/filestore/park_lifecycle.py).
+For performance comparisons, pass `--candidate-mode=runsc-park --sync-artifacts`
+to `benchmark.py`. `StoppedCheckpoint` and `DurableCheckpoint` measure the two
+completion points separately. `--baseline-mode=external` compares against the
+same release's synchronous filestore snapshot path.
+
 ## How to use checkpoint/restore in Docker:
 
 Run a container:

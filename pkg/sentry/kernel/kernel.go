@@ -84,6 +84,7 @@ import (
 	"gvisor.dev/gvisor/pkg/state"
 	"gvisor.dev/gvisor/pkg/sync"
 	"gvisor.dev/gvisor/pkg/timing"
+	"gvisor.dev/gvisor/pkg/unet"
 
 	uspb "gvisor.dev/gvisor/pkg/sentry/unimpl/unimplemented_syscall_go_proto"
 )
@@ -825,6 +826,9 @@ type SaveOpts struct {
 	// fingerprints) written during the freeze window.
 	FilestoreSidecar io.Writer
 
+	// ParkFilestores transfers private backing files before a non-resuming save.
+	ParkFilestores *unet.Socket
+
 	// Resume indicates if the statefile is used for save-resume.
 	Resume bool
 }
@@ -862,6 +866,9 @@ func (k *Kernel) SaveTo(ctx context.Context, stateFile, pagesMetadata io.WriteCl
 		})
 	}
 	defer fsCleanup.Clean()
+	if opts.ParkFilestores != nil && (!opts.PrivateMFExternalContent || opts.Resume || opts.FilestoreSidecar != nil) {
+		return fmt.Errorf("park transfer requires a non-resuming external save without snapshots")
+	}
 	if opts.PrivateMFExternalContent && opts.Resume && opts.FilestoreSidecar == nil {
 		return fmt.Errorf("resuming an external filestore checkpoint requires filestore snapshots")
 	}
@@ -899,6 +906,11 @@ func (k *Kernel) saveToLocked(ctx context.Context, stateFile, pagesMetadata io.W
 
 	for _, mf := range mfsToSave {
 		mf.BeginSaveWindow()
+	}
+	if opts.ParkFilestores != nil {
+		if err := k.transferParkFilestores(mfsToSave, opts.ParkFilestores); err != nil {
+			return &checkpoint.ParkTransferError{Err: err}
+		}
 	}
 	if opts.FilestoreSidecar != nil {
 		if !opts.PrivateMFExternalContent {

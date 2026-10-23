@@ -16,6 +16,8 @@ package kernel
 
 import (
 	"fmt"
+	"gvisor.dev/gvisor/pkg/unet"
+	"os"
 	"sort"
 
 	"gvisor.dev/gvisor/pkg/sentry/checkpoint"
@@ -67,4 +69,27 @@ func (k *Kernel) snapshotFilestores(mfsToSave map[checkpoint.ResourceID]*pgalloc
 	// Deterministic output regardless of caller target order.
 	sort.Slice(entries, func(i, j int) bool { return entries[i].File < entries[j].File })
 	return entries, nil
+}
+
+// transferParkFilestores hands every private backing file to its external owner
+// before saving metadata or permitting the sandbox to exit.
+func (k *Kernel) transferParkFilestores(mfs map[checkpoint.ResourceID]*pgalloc.MemoryFile, socket *unet.Socket) error {
+	ids := make([]checkpoint.ResourceID, 0, len(mfs))
+	for id := range mfs {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool {
+		if ids[i].ContainerName != ids[j].ContainerName {
+			return ids[i].ContainerName < ids[j].ContainerName
+		}
+		return ids[i].Path < ids[j].Path
+	})
+	for _, id := range ids {
+		if err := mfs[id].WithBackingFile(func(file *os.File, chunks int) error {
+			return checkpoint.SendParkFile(socket, checkpoint.ParkFile{ID: id, ChunkCount: uint64(chunks)}, file)
+		}); err != nil {
+			return err
+		}
+	}
+	return checkpoint.FinishParkTransfer(socket)
 }

@@ -25,6 +25,7 @@ go_library(
         "//pkg/sentry/time",
         "//pkg/sentry/watchdog",
         "//pkg/state/statefile",
+        "//pkg/unet",
         "@org_golang_x_sys//unix:go_default_library",
     ],
 )

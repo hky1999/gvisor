@@ -90,7 +90,7 @@ func setSaveOpts(o *controlapi.SaveOpts, saveOpts *state.SaveOpts) error {
 	if len(o.SplitFSCheckpointPaths) > 0 && o.UseCheckpointGofer {
 		return fmt.Errorf("split filesystem checkpoint is not supported with checkpoint gofer")
 	}
-	if o.UseCheckpointGofer && (len(o.FilestoreSnapshot) != 0 || o.FilestoreSidecarFDIndex != 0) {
+	if o.UseCheckpointGofer && (len(o.FilestoreSnapshot) != 0 || o.FilestoreSidecarFDIndex != 0 || o.ParkFilestoreFDIndex != 0) {
 		return fmt.Errorf("filestore snapshots are not supported with checkpoint gofer")
 	}
 	if o.UseCheckpointGofer {
@@ -121,6 +121,12 @@ func setSaveOptsForLocalCheckpointFiles(o *controlapi.SaveOpts, saveOpts *state.
 		if target.FDIndex != snapshotStart+i {
 			return fmt.Errorf("invalid filestore snapshot FD index %d", target.FDIndex)
 		}
+	}
+	if o.ParkFilestoreFDIndex != 0 {
+		if o.ParkFilestoreFDIndex != wantFiles || !o.PrivateMFExternalContent || o.Resume || haveFilestoreSidecar {
+			return fmt.Errorf("invalid park filestore socket or save options")
+		}
+		wantFiles++
 	}
 	if gotFiles := len(o.Files); gotFiles != wantFiles {
 		return fmt.Errorf("got %d files, wanted %d", gotFiles, wantFiles)
@@ -198,6 +204,20 @@ func setSaveOptsForLocalCheckpointFiles(o *controlapi.SaveOpts, saveOpts *state.
 			return err
 		}
 		saveOpts.FilestoreSidecar = sidecar.ReleaseToFile("filestore-sidecar")
+	}
+
+	if o.ParkFilestoreFDIndex != 0 {
+		file, err := o.ReleaseFD(o.ParkFilestoreFDIndex)
+		if err != nil {
+			return err
+		}
+		raw := file.Release()
+		socket, err := unet.NewSocket(raw)
+		if err != nil {
+			unix.Close(raw)
+			return err
+		}
+		saveOpts.ParkFilestores = socket
 	}
 
 	return nil

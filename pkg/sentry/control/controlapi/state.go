@@ -70,6 +70,9 @@ type SaveOpts struct {
 	// A sidecar may be donated even when there are no filestore mounts.
 	FilestoreSidecarFDIndex int `json:"filestore_sidecar_fd_index,omitempty"`
 
+	// ParkFilestoreFDIndex identifies the private transfer socket; zero is absent.
+	ParkFilestoreFDIndex int `json:"park_filestore_fd_index,omitempty"`
+
 	// HavePagesFile indicates whether the pages file and its corresponding
 	// metadata file is provided.
 	HavePagesFile bool `json:"have_pages_file"`

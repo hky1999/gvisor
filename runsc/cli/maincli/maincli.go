@@ -44,6 +44,8 @@ func commands() (map[util.SubCommand]string, []subcommands.Command) {
 	cmds := map[util.SubCommand]string{
 		// Register OCI user-facing runsc commands.
 		new(cmd.Checkpoint): userGroup,
+		new(cmd.Park):       userGroup,
+		new(cmd.ParkStatus): userGroup,
 		new(cmd.Create):     userGroup,
 		new(cmd.Delete):     userGroup,
 		new(cmd.Events):     userGroup,
@@ -91,7 +93,8 @@ func commands() (map[util.SubCommand]string, []subcommands.Command) {
 		new(cmd.MetricServer):   metricGroup,
 
 		// Internal commands.
-		new(cmd.Gofer): internalGroup,
+		new(cmd.Gofer):      internalGroup,
+		new(cmd.ParkWorker): internalGroup,
 	}
 
 	// Merge alias commands.

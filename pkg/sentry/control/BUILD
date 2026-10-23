@@ -113,6 +113,7 @@ go_test(
         "//pkg/sentry/ktime",
         "//pkg/sentry/usage",
         "//pkg/sentry/vfs",
+        "//pkg/unet",
         "//pkg/usermem",
     ],
 )

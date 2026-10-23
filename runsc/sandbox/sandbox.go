@@ -1880,6 +1880,9 @@ type CheckpointOpts struct {
 	// must be captured out-of-band and adopted on restore.
 	SkipFilestorePages bool
 
+	// ParkFilestores is borrowed for the duration of the non-resuming save.
+	ParkFilestores *os.File
+
 	// FilestoreSnapshotDir internalizes the filestore capture: inside the
 	// checkpoint's freeze window, each private MemoryFile's backing file is
 	// reflink-cloned to FilestoreSnapshotFiles[i] (created by the container
@@ -1939,6 +1942,18 @@ func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, 
 	defer opt.FilePayload.Close()
 	if err := s.setCheckpointOptsFiles(conf, imagePath, opts, bundles, &opt); err != nil {
 		return err
+	}
+
+	if opts.ParkFilestores != nil {
+		if opts.Resume || !opts.SkipFilestorePages || opts.FilestoreSnapshotDir != "" || opt.UseCheckpointGofer {
+			return fmt.Errorf("invalid asynchronous park save options")
+		}
+		raw, err := unix.Dup(int(opts.ParkFilestores.Fd()))
+		if err != nil {
+			return err
+		}
+		opt.ParkFilestoreFDIndex = len(opt.Files)
+		opt.Files = append(opt.Files, os.NewFile(uintptr(raw), "park-transfer"))
 	}
 
 	if opts.FilestoreSnapshotDir != "" {

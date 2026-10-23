@@ -424,6 +424,7 @@ go_library(
         "//pkg/tcpip",
         "//pkg/tcpip/stack",
         "//pkg/timing",
+        "//pkg/unet",
         "//pkg/usermem",
         "//pkg/waiter",
         "@org_golang_google_protobuf//proto:go_default_library",

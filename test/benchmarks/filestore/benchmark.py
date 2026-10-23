@@ -63,7 +63,8 @@ def main():
     parser.add_argument("--sizes-mib", type=int, nargs="+", default=[64, 1024, 4096])
     parser.add_argument("--platforms", nargs="+", default=["systrap"])
     parser.add_argument("--memory-mib", type=int, default=0)
-    parser.add_argument("--candidate-mode", choices=["full", "external", "deferred"], default="external")
+    parser.add_argument("--baseline-mode", choices=["full", "external"], default="full")
+    parser.add_argument("--candidate-mode", choices=["full", "external", "deferred", "runsc-park"], default="external")
     parser.add_argument("--leave-running", action="store_true")
     parser.add_argument("--verify-clones", action="store_true")
     parser.add_argument("--split-filesystem", action="store_true")
@@ -81,8 +82,8 @@ def main():
     if args.background_preflush_ms is not None:
         if args.background_preflush_ms < 0 or args.preflush:
             parser.error("background preflush requires a nonnegative delay and cannot be combined with --preflush")
-    if args.candidate_mode == "deferred" and (args.leave_running or not args.sync_artifacts):
-        parser.error("deferred capture requires --sync-artifacts and cannot use --leave-running")
+    if args.candidate_mode in ["deferred", "runsc-park"] and (args.leave_running or not args.sync_artifacts):
+        parser.error("asynchronous capture requires --sync-artifacts and cannot use --leave-running")
     args.work_dir.mkdir(parents=True, exist_ok=False)
     args.output.mkdir(parents=True, exist_ok=True)
     rootfs = args.work_dir / "rootfs"
@@ -124,7 +125,7 @@ def main():
                                 bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/BackgroundPreflush 1 {data['background_preflush']['duration_ns']} ns/op\n")
                             if data["stopped_checkpoint_ns"] is not None:
                                 bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/StoppedCheckpoint 1 {data['stopped_checkpoint_ns']} ns/op\n")
-                        snapshot_phases = data["snapshot_phases"] or data["deferred_snapshot_phases"]
+                        snapshot_phases = data["snapshot_phases"] or data["deferred_snapshot_phases"] or data["park_snapshot_phases"]
                         if snapshot_phases:
                             with (args.output / f"{variant}-phases.txt").open("a") as phases:
                                 for key in snapshot_phases[0]:
@@ -242,14 +243,18 @@ def commit_deferred(files, image, snapshot, trial):
 
 def run_trial(args, trial, rootfs, plat, mib, variant):
     binary = getattr(args, variant)
-    external = variant == "candidate" and args.candidate_mode != "full"
-    deferred = external and args.candidate_mode == "deferred"
+    mode = args.candidate_mode if variant == "candidate" else args.baseline_mode
+    external = mode != "full"
+    deferred = mode == "deferred"
+    runsc_park = mode == "runsc-park"
     bundle = trial / "bundle"
     bundle.mkdir()
     filestores = trial / "filestores"
     filestores.mkdir()
-    image = trial / "image"
-    image.mkdir()
+    job = trial / "park-job"
+    image = job / "image" if runsc_park else trial / "image"
+    if not runsc_park:
+        image.mkdir()
     logs = args.output / trial.name
     logs.mkdir()
     size = mib << 20
@@ -270,7 +275,7 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
     common = [str(binary), f"--root={args.work_dir / ('runtime-' + variant)}", f"--platform={plat}",
               "--network=none", f"--overlay2=all:dir={filestores}", "--debug",
               f"--debug-log={logs}/"]
-    if external and not deferred:
+    if external and not deferred and not runsc_park:
         common.append("--filestore-reflink=enabled")
     prefix = hashlib.sha256(str(trial.resolve()).encode()).hexdigest()[:16]
     ids = {label: f"fsbench-{prefix}-{label}"
@@ -322,7 +327,7 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
             effective_memory_limit = min(limits) if limits else None
             if effective_memory_limit != args.memory_mib << 20:
                 raise RuntimeError(f"effective memory limit is {effective_memory_limit}, wanted {args.memory_mib << 20}")
-        if args.candidate_mode == "deferred":
+        if args.candidate_mode in ["deferred", "runsc-park"]:
             if state is None:
                 state = json.loads(subprocess.check_output(common + ["state", ids["source"]], timeout=30))
             source_pidfd = os.pidfd_open(state['pid'])
@@ -352,6 +357,10 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
             checkpoint.append("--skip-filestore-pages")
             if not deferred:
                 checkpoint.append(f"--filestore-snapshot-dir={trial / 'snapshot'}")
+        if runsc_park:
+            checkpoint = ["park", f"--job-dir={job}", "--completion=stopped"]
+            if args.split_filesystem:
+                checkpoint.append("--fs-checkpoint-paths=/")
         checkpoint.append("source")
         checkpoint_start = time.monotonic_ns()
         checkpoint_ns, _ = run(checkpoint)
@@ -365,6 +374,15 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
                 raise RuntimeError("source Sentry did not exit after non-resuming checkpoint")
             source_exit_wait_ns = time.monotonic_ns() - before
             stopped_checkpoint_ns = time.monotonic_ns() - checkpoint_start
+        park_status = None
+        park_wait_ready_ns = 0
+        if runsc_park:
+            before = time.monotonic_ns()
+            park_status = json.loads(subprocess.check_output(
+                common + ["park-status", f"--job-dir={job}", "--wait=ready"], timeout=180))
+            park_wait_ready_ns = time.monotonic_ns() - before
+            if park_status["state"] != "ready" or not park_status.get("stopped_at"):
+                raise RuntimeError("park did not reach both completion barriers")
         artifact_sync_start = time.monotonic_ns()
         artifact_sync_calls = []
         deferred_phases = []
@@ -374,7 +392,8 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
             preserved_files = []  # The commit worker now owns these descriptors.
             deferred_phases, artifact_sync_calls, artifact_sync_ns = commit_future.result(timeout=180)
         elif args.sync_artifacts:
-            roots = [image, trial / "snapshot"] if external else [image]
+            snapshot = job / "filestores" if runsc_park else trial / "snapshot"
+            roots = [image, snapshot] if external else [image]
             artifact_sync_calls = sync_artifacts(roots, trial)
             artifact_sync_ns = time.monotonic_ns() - artifact_sync_start
         else:
@@ -407,7 +426,8 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
                     raise RuntimeError("second checkpoint did not preserve the newer file state")
                 run(["exec", "newer", "/workload", "verify", str(size)])
         image_bytes = sum(p.stat().st_size for p in image.rglob("*") if p.is_file())
-        extra = [f"--filestore-adopt-dir={trial / 'snapshot'}"] if external else []
+        snapshot = job / "filestores" if runsc_park else trial / "snapshot"
+        extra = [f"--filestore-adopt-dir={snapshot}"] if external else []
         restore_ns, _ = run(["restore", "--detach", f"--bundle={bundle}",
                              f"--image-path={image}", "restored"], extra=extra)
         run(["exec", "restored", "/workload", "verify", str(size)])
@@ -418,7 +438,7 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
                  f"--image-path={image}", "clone"], extra=extra)
             run(["exec", "clone", "/workload", "unmarked"])
             run(["exec", "clone", "/workload", "verify", str(size)])
-        return {"checkpoint_ns": checkpoint_ns, "restore_ns": restore_ns,
+        return {"capture_mode": mode, "checkpoint_ns": checkpoint_ns, "restore_ns": restore_ns,
                 "image_bytes": image_bytes, "verified_bytes": size,
                 "preflush_ns": preflush_ns,
                 "artifact_sync_ns": artifact_sync_ns,
@@ -426,6 +446,8 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
                 "artifact_sync_calls": artifact_sync_calls,
                 "snapshot_phases": snapshots, "manifest_phases": manifest,
                 "deferred_snapshot_phases": deferred_phases,
+                "park_snapshot_phases": [{"ficlone_ns": park_status.get("ficlone_ns", 0), "fsync_ns": park_status.get("snapshot_fsync_ns", 0)}] if park_status else [],
+                "park_status": park_status, "park_wait_ready_ns": park_wait_ready_ns,
                 "stopped_checkpoint_ns": stopped_checkpoint_ns,
                 "source_exit_wait_ns": source_exit_wait_ns,
                 "background_preflush": background_preflush,

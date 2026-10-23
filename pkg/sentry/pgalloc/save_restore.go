@@ -235,6 +235,21 @@ func (f *MemoryFile) BeginSaveWindow() {
 	f.externalSavedFingerprint = ""
 }
 
+// WithBackingFile passes the backing file to fn while it is protected from
+// destruction. fn must not retain or close the file; it may transfer a reference
+// using SCM_RIGHTS. The kernel must be paused throughout the call.
+func (f *MemoryFile) WithBackingFile(fn func(*os.File, int) error) error {
+	if err := f.AwaitLoadAll(); err != nil {
+		return err
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.file == nil {
+		return fmt.Errorf("MemoryFile has no backing file")
+	}
+	return fn(f.file, len(f.chunksLoad()))
+}
+
 // SnapshotToFd reflink-clones (FICLONE) the backing file's current contents to
 // dst, and records the snapshot's size and sampled fingerprint for the ongoing
 // save, so that SaveTo(ExternalContent) embeds values describing the snapshot

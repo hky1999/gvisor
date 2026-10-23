@@ -16,6 +16,7 @@ package control
 
 import (
 	"fmt"
+	"gvisor.dev/gvisor/pkg/unet"
 	"os"
 	"testing"
 
@@ -112,6 +113,82 @@ func TestFilestoreSnapshotFilePayload(t *testing.T) {
 					}
 				})
 			}
+		}
+	}
+}
+
+func TestParkSocketPayloadValidationAndClosure(t *testing.T) {
+	for _, pages := range []bool{false, true} {
+		for _, split := range []int{0, 1, 2} {
+			t.Run(fmt.Sprintf("pages=%t/split=%d", pages, split), func(t *testing.T) {
+				opts := &controlapi.SaveOpts{HavePagesFile: pages, PrivateMFExternalContent: true}
+				addFile := func() {
+					file, err := os.CreateTemp(t.TempDir(), "save")
+					if err != nil {
+						t.Fatal(err)
+					}
+					t.Cleanup(func() { file.Close() })
+					opts.Files = append(opts.Files, file)
+				}
+				addFile()
+				if pages {
+					addFile()
+					addFile()
+				}
+				for i := 0; i < split; i++ {
+					opts.SplitFSCheckpointPaths = append(opts.SplitFSCheckpointPaths, fscheckpoint.Bundle{Prefix: fmt.Sprint(i)})
+					for n := 0; n < 4; n++ {
+						addFile()
+					}
+				}
+				sender, receiver, err := unet.SocketPair(true)
+				if err != nil {
+					t.Fatal(err)
+				}
+				defer receiver.Close()
+				raw, err := sender.Release()
+				if err != nil {
+					t.Fatal(err)
+				}
+				file := os.NewFile(uintptr(raw), "park")
+				defer file.Close()
+				opts.ParkFilestoreFDIndex = len(opts.Files)
+				opts.Files = append(opts.Files, file)
+				converted, err := ConvertToStateSaveOpts(opts)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if converted.ParkFilestores == nil {
+					t.Fatal("socket was not transferred")
+				}
+				socket := converted.ParkFilestores
+				if err := converted.Close(); err != nil {
+					t.Fatal(err)
+				}
+				if _, err := socket.Write([]byte{1}); err == nil {
+					t.Fatal("save options did not close park socket")
+				}
+				if err := converted.Close(); err != nil {
+					t.Fatal(err)
+				}
+			})
+		}
+	}
+	for _, resume := range []bool{false, true} {
+		opts := &controlapi.SaveOpts{PrivateMFExternalContent: true, Resume: resume, ParkFilestoreFDIndex: 1}
+		for i := 0; i < 2; i++ {
+			file, err := os.CreateTemp(t.TempDir(), "save")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer file.Close()
+			opts.Files = append(opts.Files, file)
+		}
+		if !resume {
+			opts.ParkFilestoreFDIndex = 2
+		}
+		if _, err := ConvertToStateSaveOpts(opts); err == nil {
+			t.Fatalf("accepted invalid park payload: %+v", opts)
 		}
 	}
 }

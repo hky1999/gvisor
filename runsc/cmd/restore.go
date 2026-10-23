@@ -28,6 +28,7 @@ import (
 	"gvisor.dev/gvisor/runsc/config"
 	"gvisor.dev/gvisor/runsc/container"
 	"gvisor.dev/gvisor/runsc/flag"
+	"gvisor.dev/gvisor/runsc/park"
 	"gvisor.dev/gvisor/runsc/specutils"
 )
 
@@ -124,6 +125,10 @@ func (r *Restore) Execute(_ context.Context, f *flag.FlagSet, args ...any) subco
 	}
 
 	id := f.Arg(0)
+	if err := park.CheckArtifact(r.imagePath, "image"); err != nil {
+		return util.Errorf("restore: %v", err)
+	}
+
 	conf := args[0].(*config.Config)
 	waitStatus := args[1].(*unix.WaitStatus)
 

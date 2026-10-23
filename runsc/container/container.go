@@ -45,6 +45,7 @@ import (
 	"gvisor.dev/gvisor/runsc/config"
 	"gvisor.dev/gvisor/runsc/console"
 	"gvisor.dev/gvisor/runsc/donation"
+	"gvisor.dev/gvisor/runsc/park"
 	"gvisor.dev/gvisor/runsc/profile"
 	"gvisor.dev/gvisor/runsc/sandbox"
 	"gvisor.dev/gvisor/runsc/specutils"
@@ -505,6 +506,9 @@ func (c *Container) Start(conf *config.Config) error {
 // Restore takes a container and replaces its kernel and file system
 // to restore a container from its state file.
 func (c *Container) Restore(conf *config.Config, imagePath string, direct, background bool, networkArgs *sentryapi.CreateLinksAndRoutesArgs) error {
+	if err := park.CheckArtifact(imagePath, "image"); err != nil {
+		return err
+	}
 	log.Debugf("Restore container, cid: %s", c.ID)
 
 	restore := func(conf *config.Config, spec *specs.Spec) error {

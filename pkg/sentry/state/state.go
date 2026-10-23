@@ -29,6 +29,7 @@ import (
 	"gvisor.dev/gvisor/pkg/sentry/state/stateio"
 	"gvisor.dev/gvisor/pkg/sentry/watchdog"
 	"gvisor.dev/gvisor/pkg/state/statefile"
+	"gvisor.dev/gvisor/pkg/unet"
 )
 
 var previousMetadata map[string]string
@@ -87,6 +88,9 @@ type SaveOpts struct {
 	// fingerprints) written during the freeze window.
 	FilestoreSidecar io.WriteCloser
 
+	// ParkFilestores owns the private filestore transfer connection.
+	ParkFilestores *unet.Socket
+
 	// Resume indicates if the statefile is used for save-resume.
 	Resume bool
 
@@ -111,6 +115,10 @@ type SaveOpts struct {
 // Close releases resources owned by opts.
 func (opts *SaveOpts) Close() error {
 	var err error
+	if opts.ParkFilestores != nil {
+		err = errors.Join(err, opts.ParkFilestores.Close())
+		opts.ParkFilestores = nil
+	}
 	if c, ok := opts.Destination.(io.Closer); ok {
 		err = errors.Join(err, c.Close())
 		opts.Destination = nil
@@ -202,6 +210,7 @@ func (opts *SaveOpts) Save(ctx context.Context, k *kernel.Kernel, w *watchdog.Wa
 			PrivateMFExternalContent:       opts.PrivateMFExternalContent,
 			FilestoreSnapshots:             opts.FilestoreSnapshots,
 			FilestoreSidecar:               opts.FilestoreSidecar,
+			ParkFilestores:                 opts.ParkFilestores,
 			Resume:                         opts.Resume,
 		}, opts.FSSaveOpts) // transfers ownership of wc, opts.PagesMetadata, opts.PagesFile, opts.FSSaveOpts
 		opts.PagesMetadata = nil
@@ -218,7 +227,8 @@ func (opts *SaveOpts) Save(ctx context.Context, k *kernel.Kernel, w *watchdog.Wa
 		log.Warningf("Save failed: exiting... %v", err)
 		k.SetSaveError(err)
 	}
-	if opts.Resume {
+	var transferErr *checkpoint.ParkTransferError
+	if opts.Resume || (opts.ParkFilestores != nil && errors.As(err, &transferErr)) {
 		k.BeforeResume(ctx)
 	} else {
 		// Kill the sandbox.

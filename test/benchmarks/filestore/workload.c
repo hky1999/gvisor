@@ -36,11 +36,11 @@ int main(int argc, char** argv) {
     return close(fd) != 0;
   }
   if (!strcmp(argv[1], "unmarked")) return access("/clone-marker", F_OK) == 0;
-  if (argc != 3) return 2;
+  if (argc != 3 && argc != 4) return 2;
   uint64_t size = strtoull(argv[2], NULL, 10);
   int verify = !strcmp(argv[1], "verify");
-  int fd =
-      open("/payload", verify ? O_RDONLY : O_WRONLY | O_CREAT | O_TRUNC, 0600);
+  int fd = open(argc == 4 ? argv[3] : "/payload",
+                verify ? O_RDONLY : O_WRONLY | O_CREAT | O_TRUNC, 0600);
   if (fd < 0) fail("payload");
   unsigned char expected[65536], actual[65536];
   uint64_t state = 0x9e3779b97f4a7c15ULL;
@@ -73,6 +73,7 @@ int main(int argc, char** argv) {
   }
   if (fsync(fd)) fail("fsync");
   if (close(fd)) fail("close");
+  if (!strcmp(argv[1], "write")) return 0;
   fd = open("/ready", O_WRONLY | O_CREAT | O_EXCL, 0600);
   if (fd < 0) fail("ready");
   if (close(fd)) fail("close ready");
