@@ -169,7 +169,8 @@ func (a *filestoreAdopter) adopt(c *Container, dest string) (*os.File, error) {
 		log.Debugf("Adopting filestore file at %q (consuming)", artifactPath)
 		return src, nil
 	}
-	// Clone-on-adopt: reflink a private CoW copy in the same directory (same
+	defer src.Close()
+	// Clone-on-adopt: create a private copy in the same directory (same
 	// filesystem), unlinked immediately so it is anonymous exactly like a
 	// freshly created filestore. The artifact itself is never truncated or
 	// mutated (pgalloc's LoadFrom truncate lands on the copy), so it stays a
@@ -177,7 +178,6 @@ func (a *filestoreAdopter) adopt(c *Container, dest string) (*os.File, error) {
 	// cannot share writable state.
 	clone, err := os.CreateTemp(a.dir, "runsc-filestore-adopt-")
 	if err != nil {
-		src.Close()
 		return nil, fmt.Errorf("failed to create clone for filestore artifact %q: %w", artifactPath, err)
 	}
 	cloneName := clone.Name()
@@ -188,15 +188,14 @@ func (a *filestoreAdopter) adopt(c *Container, dest string) (*os.File, error) {
 			os.Remove(cloneName)
 		}
 	}()
-	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, clone.Fd(), unix.FICLONE, src.Fd()); errno != 0 {
-		return nil, fmt.Errorf("--filestore-clone-on-adopt: FICLONE of %q failed (%w); the filesystem may not support reflink (e.g. ext4), use --filestore-clone-on-adopt=false for a consuming restore", artifactPath, errno)
+	if err := checkpoint.CloneFilestore(src, clone); err != nil {
+		return nil, fmt.Errorf("--filestore-clone-on-adopt: clone %q: %w", artifactPath, err)
 	}
 	if err := unix.Unlink(cloneName); err != nil {
 		return nil, fmt.Errorf("failed to unlink filestore clone %q: %w", cloneName, err)
 	}
-	src.Close()
 	ok = true
-	log.Debugf("Adopting reflink clone of filestore file at %q", artifactPath)
+	log.Debugf("Adopting private clone of filestore file at %q", artifactPath)
 	return clone, nil
 }
 

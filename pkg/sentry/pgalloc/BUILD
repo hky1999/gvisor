@@ -210,13 +210,18 @@ go_test(
         "pgalloc_64k_test.go",
         "pgalloc_test.go",
         "save_restore_external_test.go",
+        "snapshot_async_load_test.go",
     ],
     library = ":pgalloc",
     deps = [
+        "//pkg/errors/linuxerr",
         "//pkg/hostarch",
         "//pkg/sentry/checkpoint",
         "//pkg/sentry/memmap",
+        "//pkg/sentry/state/stateio",
         "//pkg/sentry/usage",
+        "//pkg/sync",
+        "@org_golang_x_sys//unix:go_default_library",
     ],
 )
 

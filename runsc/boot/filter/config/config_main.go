@@ -115,6 +115,16 @@ var allowedSyscalls = seccomp.MakeSyscallRules(map[uintptr]seccomp.SyscallRule{
 			seccomp.EqualTo(unix.SO_PASSCRED),
 		},
 	},
+	// Copy only between host files already held by the sentry. Used for
+	// native filestore snapshots when FICLONE is unsupported.
+	unix.SYS_COPY_FILE_RANGE: seccomp.PerArg{
+		seccomp.NonNegativeFD{}, /* source */
+		seccomp.AnyValue{},      /* source offset */
+		seccomp.NonNegativeFD{}, /* destination */
+		seccomp.AnyValue{},      /* destination offset */
+		seccomp.AnyValue{},      /* byte count */
+		seccomp.EqualTo(0),      /* flags */
+	},
 	unix.SYS_GETTID:       seccomp.MatchAll{},
 	unix.SYS_GETTIMEOFDAY: seccomp.MatchAll{},
 	unix.SYS_IOCTL: seccomp.Or{
@@ -128,7 +138,7 @@ var allowedSyscalls = seccomp.MakeSyscallRules(map[uintptr]seccomp.SyscallRule{
 		// backing files inside the checkpoint's freeze window
 		// (--filestore-snapshot-dir).
 		seccomp.PerArg{
-			seccomp.NonNegativeFD{},         /* fd (snapshot destination) */
+			seccomp.NonNegativeFD{}, /* fd (snapshot destination) */
 			seccomp.EqualTo(linux.FICLONE),
 			seccomp.NonNegativeFD{}, /* fd (filestore source) */
 		},
@@ -334,8 +344,8 @@ var allowedSyscalls = seccomp.MakeSyscallRules(map[uintptr]seccomp.SyscallRule{
 	},
 	unix.SYS_TIMER_CREATE: seccomp.PerArg{
 		seccomp.EqualTo(unix.CLOCK_THREAD_CPUTIME_ID), /* which */
-		seccomp.AnyValue{}, /* sevp */
-		seccomp.AnyValue{}, /* timerid */
+		seccomp.AnyValue{},                            /* sevp */
+		seccomp.AnyValue{},                            /* timerid */
 	},
 	unix.SYS_TIMER_DELETE: seccomp.MatchAll{},
 	unix.SYS_TIMER_SETTIME: seccomp.PerArg{

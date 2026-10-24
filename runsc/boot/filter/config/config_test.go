@@ -26,6 +26,33 @@ import (
 	"gvisor.dev/gvisor/pkg/sentry/platform/systrap"
 )
 
+func TestCopyFileRangeOnlyUsesHeldFDsAndZeroFlags(t *testing.T) {
+	for name, options := range map[string]Options{
+		"systrap": {Platform: (&systrap.Systrap{}).SeccompInfo()},
+		"kvm":     {Platform: (&kvm.KVM{}).SeccompInfo()},
+	} {
+		t.Run(name, func(t *testing.T) {
+			rules, _ := Rules(options)
+			for arg, want := range map[int]seccomp.ValueMatcher{
+				0: seccomp.NonNegativeFD{},
+				2: seccomp.NonNegativeFD{},
+				5: seccomp.EqualTo(0),
+			} {
+				seen := false
+				if err := rules.ForSingleArgument(unix.SYS_COPY_FILE_RANGE, arg, func(got seccomp.ValueMatcher) error {
+					seen = true
+					if !reflect.DeepEqual(got, want) {
+						return fmt.Errorf("argument %d matcher = %v, want %v", arg, got, want)
+					}
+					return nil
+				}); err != nil || !seen {
+					t.Fatalf("copy_file_range argument %d: %v, rule present=%t", arg, err, seen)
+				}
+			}
+		})
+	}
+}
+
 func TestIoctlFirstArgumentIsNonNegativeFD(t *testing.T) {
 	for name, options := range map[string]Options{
 		"default systrap": {

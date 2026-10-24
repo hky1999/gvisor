@@ -235,7 +235,7 @@ func (f *MemoryFile) BeginSaveWindow() {
 	f.externalSavedFingerprint = ""
 }
 
-// SnapshotToFd reflink-clones (FICLONE) the backing file's current contents to
+// SnapshotToFd clones the backing file's current contents to
 // dst, and records the snapshot's size and sampled fingerprint for the ongoing
 // save, so that SaveTo(ExternalContent) embeds values describing the snapshot
 // rather than the original (which may diverge after the save window).
@@ -246,14 +246,19 @@ func (f *MemoryFile) BeginSaveWindow() {
 //
 // Precondition: the kernel is paused (no writers to the backing file), and
 // SaveTo(ExternalContent) is called on the same MemoryFile afterwards. Both
-// the backing file and dst must be on a filesystem supporting reflink
-// (e.g. XFS/btrfs); otherwise this fails loudly (EOPNOTSUPP/EXDEV).
+// the backing file and dst must be on one filesystem supporting reflink
+// or native copy_file_range (e.g. JuiceFS); unsupported copies fail loudly.
 func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string, err error) {
+	// Pausing tasks does not stop an earlier restore's background page
+	// loader. Finish that input before cloning, not only in the later SaveTo.
+	if err := f.AwaitLoadAll(); err != nil {
+		return 0, "", fmt.Errorf("previous async filestore loading failed: %w", err)
+	}
 	if f.file == nil {
 		return 0, "", fmt.Errorf("MemoryFile %p has no backing file to snapshot", f)
 	}
-	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, dst.Fd(), unix.FICLONE, f.file.Fd()); errno != 0 {
-		return 0, "", fmt.Errorf("FICLONE of filestore backing file to snapshot failed (%w); --filestore-snapshot-dir requires a reflink-capable filesystem (e.g. XFS) for both the backing filestore and the snapshot directory", errno)
+	if err := checkpoint.CloneFilestore(f.file, dst); err != nil {
+		return 0, "", fmt.Errorf("clone filestore backing file into checkpoint: %w", err)
 	}
 	if err := dst.Sync(); err != nil {
 		return 0, "", fmt.Errorf("failed to fsync filestore snapshot: %w", err)

@@ -17,6 +17,7 @@ package pgalloc
 import (
 	"bytes"
 	"context"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -374,12 +375,16 @@ func newTestMemoryFileDecommit(t *testing.T, path string, decommit bool) *Memory
 
 func hostFilePatternOk(t *testing.T, path string, fill byte, length uint64) bool {
 	t.Helper()
-	got, err := os.ReadFile(path)
+	f, err := os.Open(path)
 	if err != nil {
-		t.Fatalf("reading host file %q: %v", path, err)
+		t.Fatalf("opening host file %q: %v", path, err)
 	}
-	if uint64(len(got)) < length {
-		t.Fatalf("host file %q is %d bytes, want >= %d", path, len(got), length)
+	defer f.Close()
+	// MemoryFile grows in 1 GiB sparse chunks. The assertion checks only
+	// length bytes; reading the entire file needlessly exhausts race builds.
+	got := make([]byte, length)
+	if _, err := io.ReadFull(f, got); err != nil {
+		t.Fatalf("reading %d bytes of host file %q: %v", length, path, err)
 	}
 	for i := uint64(0); i < length; i++ {
 		if got[i] != fill {
