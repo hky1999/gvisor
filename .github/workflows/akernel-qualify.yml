@@ -361,9 +361,16 @@ jobs:
         # Enable the new mode only in this isolated standalone profile.
         python3 - <<'CONFIG'
         from pathlib import Path
+        import tomllib
         p=Path('deploy/standalone/config/sandboxd_config.toml')
         s=p.read_text().replace('filestore_dir_size="50G"','filestore_dir_size=""')
-        s+='\n[plugin.runtime.runsc]\ncheckpoint_mode="reflink"\n'
+        header='[plugin.runtime.runsc]'
+        if header in s:
+            s=s.replace(header, header+'\ncheckpoint_mode="reflink"', 1)
+        else:
+            s+='\n'+header+'\ncheckpoint_mode="reflink"\n'
+        config=tomllib.loads(s)
+        assert config['plugin']['runtime']['runsc']['checkpoint_mode']=='reflink'
         p.write_text(s)
         CONFIG
     - name: Build all-in-one image
