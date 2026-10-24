@@ -65,6 +65,39 @@ func testConfig() *config.Config {
 	return conf
 }
 
+// Runtime inventory must remain responsive while restore owns the loader lock.
+// Otherwise one restoring sandbox can block a node-wide runsc list operation.
+func TestContainerRuntimeStateDoesNotWaitForLoader(t *testing.T) {
+	var loader Loader
+	manager := containerManager{l: &loader}
+	cid := "inventory-during-restore"
+	loader.mu.Lock()
+	done := make(chan error, 1)
+	go func() {
+		var state ContainerRuntimeState
+		done <- manager.ContainerRuntimeState(&cid, &state)
+	}()
+	select {
+	case err := <-done:
+		loader.mu.Unlock()
+		if err == nil {
+			t.Fatal("runtime state query succeeded while loader state was unavailable")
+		}
+	case <-time.After(2 * time.Second):
+		loader.mu.Unlock()
+		<-done
+		t.Fatal("runtime state query waited for the loader lock")
+	}
+	// A busy response must not poison future state queries.
+	var state ContainerRuntimeState
+	if err := manager.ContainerRuntimeState(&cid, &state); err != nil {
+		t.Fatalf("runtime state query after transition: %v", err)
+	}
+	if state != RuntimeStateStopped {
+		t.Fatalf("missing container state = %v, want stopped", state)
+	}
+}
+
 // testSpec returns a simple spec that can be used in tests.
 func testSpec() *specs.Spec {
 	return &specs.Spec{

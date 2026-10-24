@@ -2420,31 +2420,37 @@ func (l *Loader) SpecEnviron(containerName string) []string {
 	return spec.Process.Env
 }
 
-func (l *Loader) containerRuntimeState(cid string) ContainerRuntimeState {
-	l.mu.Lock()
+func (l *Loader) containerRuntimeState(cid string) (ContainerRuntimeState, error) {
+	// runsc list queries every container through this RPC. Restore holds mu
+	// while loading the kernel, so waiting here can stall inventory for an
+	// entire node. CheckStopped handles a transient query error by checking
+	// sandbox process liveness and retaining its last known container status.
+	if !l.mu.TryLock() {
+		return RuntimeStateInvalid, fmt.Errorf("container runtime state is temporarily unavailable while the loader is busy")
+	}
 	defer l.mu.Unlock()
 	exec, ok := l.processes[execID{cid: cid}]
 	if !ok {
 		// Can't distinguish between invalid CID and stopped container, assume that
 		// CID is valid.
-		return RuntimeStateStopped
+		return RuntimeStateStopped, nil
 	}
 	if exec.tg == nil {
 		if l.state == restoreFailed {
-			return RuntimeStateStopped
+			return RuntimeStateStopped, nil
 		}
 		if _, ok := l.failedToStart[cid]; ok {
-			return RuntimeStateStopped
+			return RuntimeStateStopped, nil
 		}
 		// Container has no thread group assigned, so it has not started yet.
-		return RuntimeStateCreating
+		return RuntimeStateCreating, nil
 	}
 	if exec.tg.Leader().ExitState() == kernel.TaskExitNone {
 		// Init process is still running.
-		return RuntimeStateRunning
+		return RuntimeStateRunning, nil
 	}
 	// Init process has stopped, but no one has called wait on it yet.
-	return RuntimeStateStopped
+	return RuntimeStateStopped, nil
 }
 
 // GetContainerSpecs returns the container specs map.
