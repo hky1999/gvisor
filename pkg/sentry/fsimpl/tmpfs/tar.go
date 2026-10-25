@@ -723,7 +723,8 @@ func (fs *filesystem) mkdirMergeFromTar(hdr *tar.Header, pathToInode map[string]
 
 // mknodMergeFromTar merges a regular file, FIFO, block device, or character
 // device. If a regular file already exists, it overrides its contents.
-// Updating other existing file types is not supported.
+// Existing overlay whiteouts retain their inode and links. Updating other
+// existing file types is not supported.
 func (fs *filesystem) mknodMergeFromTar(ctx context.Context, hdr *tar.Header, pathToInode map[string]*inode, cb tarReaderCallbacks) error {
 	dir, name := filepath.Split(hdr.Name)
 	parentInode, ok := pathToInode[dir]
@@ -752,6 +753,20 @@ func (fs *filesystem) mknodMergeFromTar(ctx context.Context, hdr *tar.Header, pa
 			}
 			childDentry.inode.mode.Store(uint32(hdr.Mode) | linux.S_IFREG)
 			if err := cb.regularFileSetContents(ctx, hdr, rf); err != nil {
+				return err
+			}
+			pathToInode[hdr.Name] = childDentry.inode
+			return nil
+		case tar.TypeChar:
+			// The writable-layer image and saved tmpfs can both contain the
+			// same overlay deletion. Preserve its inode and every hard link;
+			// replacing it would disconnect the restored overlay's whiteout.
+			dev, ok := childDentry.inode.impl.(*deviceFile)
+			if !ok || dev != fs.ovlWhiteout || hdr.Devmajor != 0 || hdr.Devminor != 0 || hdr.Mode != int64(linux.WHITEOUT_MODE) ||
+				!isOvlWhiteoutDev(linux.FileMode(childDentry.inode.mode.Load()), dev.major, dev.minor) {
+				return fmt.Errorf("%v is not the original overlay whiteout", hdr.Name)
+			}
+			if err := fs.populateInodeFromHeader(hdr, childDentry.inode, true); err != nil {
 				return err
 			}
 			pathToInode[hdr.Name] = childDentry.inode

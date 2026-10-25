@@ -84,3 +84,94 @@ func TestSourceTarLongSymlinkRelease(t *testing.T) {
 	// fs.pagesUsed and panics here.
 	mntns.DecRef(ctx)
 }
+
+// TestMergeTarPreservesOverlayWhiteout reproduces restoring the deleted Git
+// index.lock entry from the writable-layer archive into its saved tmpfs inode.
+func TestMergeTarPreservesOverlayWhiteout(t *testing.T) {
+	ctx := contexttest.Context(t)
+	_, root, cleanup, err := newTmpfsRoot(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer cleanup()
+	fs := root.Mount().Filesystem().Impl().(*filesystem)
+	fs.mu.Lock()
+	defer fs.mu.Unlock()
+	paths := map[string]*inode{"./": fs.root.inode}
+	cb := &tarDefaultReaderCallbacks{headerToContent: make(map[*tar.Header]*bytes.Buffer)}
+	whiteout := &tar.Header{Name: "./index.lock", Typeflag: tar.TypeChar, Mode: 0}
+	if err := fs.mknodFromTar(ctx, whiteout, paths, cb); err != nil {
+		t.Fatal(err)
+	}
+	alias := &tar.Header{Name: "./another.lock", Typeflag: tar.TypeLink, Linkname: whiteout.Name}
+	if err := fs.linkFromTar(alias, paths); err != nil {
+		t.Fatal(err)
+	}
+	original := paths[whiteout.Name]
+	links := original.nlink.Load()
+	var archive bytes.Buffer
+	tw := tar.NewWriter(&archive)
+	for _, hdr := range []*tar.Header{{Name: "./", Typeflag: tar.TypeDir, Mode: 0755}, whiteout, alias} {
+		if err := tw.WriteHeader(hdr); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := tw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	for attempt := 0; attempt < 3; attempt++ {
+		if err := fs.mergeFromTar(ctx, tar.NewReader(bytes.NewReader(archive.Bytes())), cb); err != nil {
+			t.Fatalf("merge %d: %v", attempt, err)
+		}
+		dir := fs.root.inode.impl.(*directory)
+		if dir.childMap["index.lock"].inode != original || dir.childMap["another.lock"].inode != original || original.nlink.Load() != links {
+			t.Fatal("whiteout inode, alias or link count changed during restore")
+		}
+		if dev, ok := original.impl.(*deviceFile); !ok || dev != fs.ovlWhiteout {
+			t.Fatal("restored deletion no longer uses the original overlay whiteout")
+		}
+	}
+}
+
+func TestMergeTarWhiteoutRefusesTypeOrDeviceChange(t *testing.T) {
+	for _, test := range []struct {
+		name               string
+		existing, incoming tar.Header
+	}{
+		{"whiteout-to-device", tar.Header{Typeflag: tar.TypeChar}, tar.Header{Typeflag: tar.TypeChar, Devmajor: 1, Devminor: 3}},
+		{"device-to-whiteout", tar.Header{Typeflag: tar.TypeChar, Mode: 0600, Devmajor: 1, Devminor: 3}, tar.Header{Typeflag: tar.TypeChar}},
+		{"regular-to-whiteout", tar.Header{Typeflag: tar.TypeReg, Mode: 0600}, tar.Header{Typeflag: tar.TypeChar}},
+		{"whiteout-to-block", tar.Header{Typeflag: tar.TypeChar}, tar.Header{Typeflag: tar.TypeBlock}},
+		{"whiteout-to-fifo", tar.Header{Typeflag: tar.TypeChar}, tar.Header{Typeflag: tar.TypeFifo}},
+		{"whiteout-mode-change", tar.Header{Typeflag: tar.TypeChar}, tar.Header{Typeflag: tar.TypeChar, Mode: 0600}},
+		{"whiteout-major-wrap", tar.Header{Typeflag: tar.TypeChar}, tar.Header{Typeflag: tar.TypeChar, Devmajor: 1 << 16}},
+		{"whiteout-minor-wrap", tar.Header{Typeflag: tar.TypeChar}, tar.Header{Typeflag: tar.TypeChar, Devminor: 1 << 32}},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			ctx := contexttest.Context(t)
+			_, root, cleanup, err := newTmpfsRoot(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer cleanup()
+			fs := root.Mount().Filesystem().Impl().(*filesystem)
+			fs.mu.Lock()
+			defer fs.mu.Unlock()
+			paths := map[string]*inode{"./": fs.root.inode}
+			cb := &tarDefaultReaderCallbacks{headerToContent: make(map[*tar.Header]*bytes.Buffer)}
+			test.existing.Name = "./index.lock"
+			test.incoming.Name = test.existing.Name
+			if err := fs.mknodFromTar(ctx, &test.existing, paths, cb); err != nil {
+				t.Fatal(err)
+			}
+			original := paths[test.existing.Name]
+			links, mode := original.nlink.Load(), original.mode.Load()
+			if err := fs.mknodMergeFromTar(ctx, &test.incoming, paths, cb); err == nil {
+				t.Fatal("conflicting type or device was accepted")
+			}
+			if paths[test.existing.Name] != original || original.nlink.Load() != links || original.mode.Load() != mode {
+				t.Fatal("refused merge changed the original inode")
+			}
+		})
+	}
+}
