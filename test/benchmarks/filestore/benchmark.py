@@ -42,6 +42,8 @@ import shutil
 import subprocess
 import time
 
+from cache_stats import file_cache_stats, filestore_fds
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -61,18 +63,31 @@ def main():
                         help="fsync host filestores before the measured checkpoint; report that cost separately")
     parser.add_argument("--sync-artifacts", action="store_true",
                         help="fsync all restore artifacts and their directories")
+    parser.add_argument("--rewrite-mib", type=int,
+                        help="sync the initial layer on the host, then rewrite this many MiB")
+    parser.add_argument("--rewrite-pattern", choices=["prefix", "spread"], default="prefix")
+    parser.add_argument("--observe-cache", action="store_true",
+                        help="sample source filestore cachestat immediately before checkpoint")
+    parser.add_argument("--workload", type=Path,
+                        help="C workload source; defaults to rewrite_workload.c for rewrite trials")
     args = parser.parse_args()
     if os.geteuid() != 0:
         parser.error("run as root")
     if args.pairs < 1 or any(size < 0 for size in args.sizes_mib) or args.memory_mib < 0:
         parser.error("pairs must be positive; sizes and memory limits must be nonnegative")
+    if args.rewrite_mib is not None and (args.rewrite_mib < 0 or any(args.rewrite_mib > size for size in args.sizes_mib)):
+        parser.error("rewrite size must fit in every layer size")
+    args.workload = (args.workload or Path(__file__).with_name(
+        "rewrite_workload.c" if args.rewrite_mib is not None else "workload.c")).resolve()
+    if args.workload.name != "workload.c" and args.verify_clones:
+        parser.error("rewrite trials verify restored bytes; clone-marker checks use the original workload")
     args.work_dir.mkdir(parents=True, exist_ok=False)
     args.output.mkdir(parents=True, exist_ok=True)
     rootfs = args.work_dir / "rootfs"
     rootfs.mkdir()
     (rootfs / "proc").mkdir()
     subprocess.run(
-        ["gcc", "-O2", "-static", str(Path(__file__).with_name("workload.c")),
+        ["gcc", "-O2", "-static", str(args.workload),
          "-o", str(rootfs / "workload")], check=True)
     (args.output / "environment.json").write_text(json.dumps({
         "uname": platform.uname()._asdict(),
@@ -105,6 +120,10 @@ def main():
                                 bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/{phase} 1 {value} ns/op\n")
                             if args.preflush:
                                 bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/Preflush 1 {data['preflush_ns']} ns/op\n")
+                            if data["source_cache"] is not None:
+                                for metric, field in [("Dirty", "dirty_bytes"), ("Writeback", "writeback_bytes")]:
+                                    value = sum(stat[field] for stat in data["source_cache"])
+                                    bench.write(f"BenchmarkFilestore/{plat}/{mib}MiB/{metric} 1 {value} bytes/op\n")
                         print(json.dumps(data), flush=True)
                         shutil.rmtree(trial)
 
@@ -185,6 +204,13 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
     prefix = hashlib.sha256(str(trial.resolve()).encode()).hexdigest()[:16]
     ids = {label: f"fsbench-{prefix}-{label}"
            for label in ["source", "restored", "clone", "newer"]}
+    source_files = []
+    layer_preparation = None
+    source_cache = None
+    rewrite_bytes = (args.rewrite_mib or 0) << 20
+    verify_args = ["/workload", "verify", str(size)]
+    if args.rewrite_mib is not None:
+        verify_args.extend([str(rewrite_bytes), args.rewrite_pattern])
 
     def run(command, extra=(), check=True):
         with (logs / "commands.log").open("ab") as log:
@@ -221,6 +247,23 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
         # required by FICLONE remains inside the checkpoint measurement.
         state = None
         effective_memory_limit = None
+        if args.observe_cache or args.rewrite_mib is not None:
+            state = json.loads(subprocess.check_output(common + ["state", ids["source"]], timeout=30))
+            source_files = filestore_fds(state["pid"])
+        if args.rewrite_mib is not None:
+            before_flush = [file_cache_stats(file) for file in source_files]
+            flush_start = time.monotonic_ns()
+            for file in source_files:
+                os.fsync(file)
+            base_flush_ns = time.monotonic_ns() - flush_start
+            clean_cache = [file_cache_stats(file) for file in source_files]
+            if any(stat["nr_dirty"] or stat["nr_writeback"] for stat in clean_cache):
+                raise RuntimeError("initial host filestore did not become clean after fsync")
+            rewrite_ns, _ = run(["exec", "source", "/workload", "rewrite", str(size),
+                                 str(rewrite_bytes), args.rewrite_pattern])
+            layer_preparation = {"before_base_flush": before_flush, "base_flush_ns": base_flush_ns,
+                                 "after_base_flush": clean_cache, "rewrite_ns": rewrite_ns,
+                                 "requested_rewrite_bytes": rewrite_bytes, "pattern": args.rewrite_pattern}
         if args.memory_mib:
             state = json.loads(subprocess.check_output(common + ["state", ids["source"]], timeout=30))
             cgroups = Path(f"/proc/{state['pid']}/cgroup").read_text().splitlines()
@@ -273,6 +316,8 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
         if external:
             checkpoint.extend(["--skip-filestore-pages", f"--filestore-snapshot-dir={trial / 'snapshot'}"])
         checkpoint.append("source")
+        if source_files:
+            source_cache = [file_cache_stats(file) for file in source_files]
         checkpoint_start = time.monotonic_ns()
         checkpoint_ns, _ = run(checkpoint)
         artifact_sync_ns = None
@@ -284,7 +329,7 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
             sync_calls = sync_artifacts(roots, trial)
             durable_checkpoint_ns = time.monotonic_ns() - checkpoint_start
             artifact_sync_ns = time.monotonic_ns() - sync_start
-        if args.leave_running:
+        if args.leave_running and args.workload.name == "workload.c":
             run(["exec", "source", "/workload", "mark"])
             if args.verify_clones:
                 second_image = trial / "second-image"
@@ -301,19 +346,20 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
                      f"--image-path={second_image}", "newer"], extra=second_extra)
                 if run(["exec", "newer", "/workload", "unmarked"], check=False)[1] != 1:
                     raise RuntimeError("second checkpoint did not preserve the newer file state")
-                run(["exec", "newer", "/workload", "verify", str(size)])
+                run(["exec", "newer"] + verify_args)
         image_bytes = sum(p.stat().st_size for p in image.rglob("*") if p.is_file())
         extra = [f"--filestore-adopt-dir={trial / 'snapshot'}"] if external else []
         restore_ns, _ = run(["restore", "--detach", f"--bundle={bundle}",
                              f"--image-path={image}", "restored"], extra=extra)
-        run(["exec", "restored", "/workload", "verify", str(size)])
-        run(["exec", "restored", "/workload", "unmarked"])
+        run(["exec", "restored"] + verify_args)
+        if args.workload.name == "workload.c":
+            run(["exec", "restored", "/workload", "unmarked"])
         if args.verify_clones:
             run(["exec", "restored", "/workload", "mark"])
             run(["restore", "--detach", f"--bundle={bundle}",
                  f"--image-path={image}", "clone"], extra=extra)
             run(["exec", "clone", "/workload", "unmarked"])
-            run(["exec", "clone", "/workload", "verify", str(size)])
+            run(["exec", "clone"] + verify_args)
         snapshots, manifest = snapshot_timings(logs)
         phases = {key: sum(snapshot.get(key, 0) for snapshot in snapshots)
                   for key in {key for snapshot in snapshots for key in snapshot}}
@@ -322,13 +368,19 @@ def run_trial(args, trial, rootfs, plat, mib, variant):
                 "artifact_sync_ns": artifact_sync_ns,
                 "durable_checkpoint_ns": durable_checkpoint_ns,
                 "artifact_sync_calls": sync_calls, "snapshot_phases": phases,
+                "source_cache": source_cache, "layer_preparation": layer_preparation,
+                "cache_sample_to_checkpoint_ns": checkpoint_start - max(stat["sample_end_ns"] for stat in source_cache) if source_cache else None,
                 "image_bytes": image_bytes, "verified_bytes": size,
                 "preflush_ns": preflush_ns,
                 "effective_memory_limit_bytes": effective_memory_limit,
                 "memory_limit_bytes": args.memory_mib << 20}
     finally:
-        for cid in ids:
-            run(["delete", "--force", cid], check=False)
+        try:
+            for cid in ids:
+                run(["delete", "--force", cid], check=False)
+        finally:
+            for file in source_files:
+                os.close(file)
 
 
 if __name__ == "__main__":
