@@ -17,6 +17,7 @@ package pgalloc
 import (
 	"bytes"
 	"context"
+	"encoding/binary"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -24,9 +25,11 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/protobuf/proto"
 	"gvisor.dev/gvisor/pkg/hostarch"
 	"gvisor.dev/gvisor/pkg/sentry/checkpoint"
 	"gvisor.dev/gvisor/pkg/sentry/memmap"
+	pgallocpb "gvisor.dev/gvisor/pkg/sentry/pgalloc/pgalloc_metadata_go_proto"
 	"gvisor.dev/gvisor/pkg/sentry/usage"
 )
 
@@ -578,6 +581,24 @@ func destroyTestMemoryFile(t *testing.T, mf *MemoryFile) {
 	}
 }
 
+func legacyExternalImage(t *testing.T, image []byte) []byte {
+	t.Helper()
+	length := binary.LittleEndian.Uint64(image[:8])
+	var pb pgallocpb.MemoryFileMetadataProto
+	if err := proto.Unmarshal(image[8:8+length], &pb); err != nil {
+		t.Fatal(err)
+	}
+	pb.ContentExternalFileSize = 0
+	pb.ContentExternalFingerprint = ""
+	data, err := proto.Marshal(&pb)
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := make([]byte, 8, 8+len(data))
+	binary.LittleEndian.PutUint64(out, uint64(len(data)))
+	return append(out, data...)
+}
+
 // TestAdoptedLoadFailurePreservesFile exercises the destroy-on-load-error
 // sequence for disk-backed private MemoryFiles, including partial loads whose
 // chunk metadata has been imported but whose mappings have not been created.
@@ -614,6 +635,7 @@ func TestAdoptedLoadFailurePreservesFile(t *testing.T) {
 		{"oversized", external.Bytes(), info.Size() + int64(hostarch.PageSize), 0x5a, false, "checkpointed filestore size"},
 		{"diverged", external.Bytes(), info.Size(), 0xa5, false, "fingerprint mismatch"},
 		{"mmap_failure", external.Bytes(), info.Size(), 0x5a, true, "failed to mmap"},
+		{"legacy_mmap_failure", legacyExternalImage(t, external.Bytes()), info.Size() + int64(hostarch.PageSize), 0x5a, true, "failed to mmap"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "artifact")
@@ -659,6 +681,9 @@ func TestAdoptedLoadFailurePreservesFile(t *testing.T) {
 			})
 			if err == nil || !strings.Contains(err.Error(), tc.wantErr) || loadErr != err {
 				t.Fatalf("LoadFrom = %v, callback = %v; want %q", err, loadErr, tc.wantErr)
+			}
+			if _, err := input.Stat(); err == nil {
+				t.Fatal("failed load followed by Destroy left the adopted FD open")
 			}
 			got := make([]byte, len(contents))
 			if _, err := file.ReadAt(got, int64(fr.Start)); err != nil {
@@ -706,6 +731,48 @@ func TestSuccessfulAdoptionDecommitsOnDestroy(t *testing.T) {
 	}
 	if !bytes.Equal(got, make([]byte, len(got))) {
 		t.Fatal("successful adoption no longer decommits on destruction")
+	}
+}
+
+func TestLegacyExternalAdoptionDropsTail(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "artifact")
+	source := newTestMemoryFile(t, path, false)
+	fr, err := source.Allocate(hostarch.PageSize, AllocOpts{Kind: usage.Anonymous})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestRange(t, source, fr, 0x5a)
+	var image bytes.Buffer
+	if err := source.SaveTo(context.Background(), &image, &SaveOpts{ExternalContent: true}); err != nil {
+		t.Fatal(err)
+	}
+	destroyTestMemoryFile(t, source)
+	file, err := os.OpenFile(path, os.O_RDWR, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	if _, err := file.WriteAt(bytes.Repeat([]byte{0xa5}, int(hostarch.PageSize)), chunkSize); err != nil {
+		t.Fatal(err)
+	}
+	adopted := newTestMemoryFile(t, path, true)
+	defer adopted.Destroy()
+	if err := adopted.LoadFrom(context.Background(), bytes.NewReader(legacyExternalImage(t, image.Bytes())), &LoadOpts{}); err != nil {
+		t.Fatal(err)
+	}
+	if got := readTestRange(t, adopted, fr); !bytes.Equal(got, bytes.Repeat([]byte{0x5a}, int(fr.Length()))) {
+		t.Fatal("legacy adoption changed saved contents")
+	}
+	newRange, err := adopted.Allocate(chunkSize, AllocOpts{Kind: usage.Anonymous})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if newRange.Start > chunkSize || newRange.End < chunkSize+hostarch.PageSize {
+		t.Fatalf("new allocation %v does not cover the old artifact tail", newRange)
+	}
+	got := readTestRange(t, adopted, memmap.FileRange{Start: chunkSize, End: chunkSize + hostarch.PageSize})
+	if !bytes.Equal(got, make([]byte, len(got))) {
+		t.Fatal("growing restored legacy MemoryFile exposed the old artifact tail")
 	}
 }
 

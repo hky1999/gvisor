@@ -1391,6 +1391,14 @@ func (f *MemoryFile) LoadFrom(ctx context.Context, r io.Reader, opts *LoadOpts) 
 		}()
 	}
 	defer madviseWG.Wait()
+	if pb.ContentExternal {
+		// Complete validation and mapping before changing an adopted file.
+		// Legacy artifacts may extend beyond the saved chunk table; remove
+		// that tail so future chunks cannot expose its old contents.
+		if err := f.file.Truncate(int64(fileSize)); err != nil {
+			return fmt.Errorf("failed to truncate adopted MemoryFile: %w", err)
+		}
+	}
 
 	// Register this MemoryFile with async page loading if a pages file has
 	// been provided. This is skipped for externally-contented MemoryFiles:
