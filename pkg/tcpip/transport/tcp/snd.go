@@ -366,6 +366,15 @@ func (s *sender) initLossRecovery() lossRecovery {
 	return newRenoRecovery(s)
 }
 
+// restoreGSO synchronizes the saved sender with the restored route's GSO mode.
+// +checklocks:s.ep.mu
+func (s *sender) restoreGSO() {
+	s.gso = s.ep.gso.Type != stack.GSONone
+	if s.gso {
+		s.ep.gso.MSS = uint16(s.MaxPayloadSize)
+	}
+}
+
 // updateMaxPayloadSize updates the maximum payload size based on the given
 // MTU. If this is in response to "packet too big" control packets (indicated
 // by the count argument), it also reduces the number of outstanding packets and
