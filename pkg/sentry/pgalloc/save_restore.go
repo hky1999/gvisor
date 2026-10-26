@@ -1274,6 +1274,11 @@ func (f *MemoryFile) LoadFrom(ctx context.Context, r io.Reader, opts *LoadOpts) 
 	defer mfTimeline.End()
 
 	defer func() {
+		if f.opts.AdoptExistingFile {
+			f.mu.Lock()
+			f.adoptedLoadFailed = err != nil
+			f.mu.Unlock()
+		}
 		if opts.DoneCallback != nil {
 			opts.DoneCallback(err)
 		}
@@ -1294,17 +1299,13 @@ func (f *MemoryFile) LoadFrom(ctx context.Context, r io.Reader, opts *LoadOpts) 
 	if err := proto.Unmarshal(data, &pb); err != nil {
 		return fmt.Errorf("failed to unmarshal metadata: %w", err)
 	}
-	if err := f.importMetadataProto(&pb); err != nil {
-		return fmt.Errorf("failed to import metadata: %w", err)
-	}
-	chunks := f.chunksLoad()
-	mfTimeline.Reached("metadata loaded")
-	log.Infof("MemoryFile(%p): loaded metadata in %s", f, time.Duration(gohacks.Nanotime()-timeMetadataStart))
-
 	if f.opts.AdoptExistingFile && !pb.ContentExternal {
 		return fmt.Errorf("cannot load ordinary checkpoint into an adopted backing file")
 	}
-	fileSize := uint64(len(chunks)) * chunkSize
+	if uint64(len(pb.Chunks)) > math.MaxInt64/chunkSize {
+		return fmt.Errorf("MemoryFile chunk table exceeds maximum file size")
+	}
+	fileSize := uint64(len(pb.Chunks)) * chunkSize
 	if pb.ContentExternal {
 		// Contents are expected to already be present in the backing file.
 		// Require that the MemoryFile adopted an existing host file (i.e.
@@ -1340,8 +1341,16 @@ func (f *MemoryFile) LoadFrom(ctx context.Context, r io.Reader, opts *LoadOpts) 
 			}
 		}
 	}
-	if err := f.file.Truncate(int64(fileSize)); err != nil {
-		return fmt.Errorf("failed to truncate MemoryFile: %w", err)
+	if err := f.importMetadataProto(&pb); err != nil {
+		return fmt.Errorf("failed to import metadata: %w", err)
+	}
+	chunks := f.chunksLoad()
+	mfTimeline.Reached("metadata loaded")
+	log.Infof("MemoryFile(%p): loaded metadata in %s", f, time.Duration(gohacks.Nanotime()-timeMetadataStart))
+	if !pb.ContentExternal {
+		if err := f.file.Truncate(int64(fileSize)); err != nil {
+			return fmt.Errorf("failed to truncate MemoryFile: %w", err)
+		}
 	}
 	// Obtain chunk mappings, then madvise them concurrently with loading data.
 	var (

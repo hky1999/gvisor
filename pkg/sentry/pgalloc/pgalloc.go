@@ -202,6 +202,11 @@ type MemoryFile struct {
 	// +checklocks:mu
 	contentExternal bool
 
+	// adoptedLoadFailed prevents destruction from decommitting an input file
+	// whose checkpoint failed to load.
+	// +checklocks:mu
+	adoptedLoadFailed bool
+
 	// externalSavedSize/externalSavedFingerprint record the exact size and
 	// sampled fingerprint of the snapshot taken by SnapshotToFd() during the
 	// current save window (empty fingerprint = no snapshot taken; the backing
@@ -528,7 +533,7 @@ func (f *MemoryFile) releaserDestroyLocked() {
 		panic("destroyed is no longer set")
 	}
 
-	if f.opts.DecommitOnDestroy && !f.contentExternal {
+	if f.opts.DecommitOnDestroy && !f.contentExternal && !f.adoptedLoadFailed {
 		if chunks := f.chunksLoad(); len(chunks) != 0 {
 			if err := f.decommitFile(memmap.FileRange{0, uint64(len(chunks)) * chunkSize}); err != nil {
 				panic(fmt.Sprintf("failed to decommit entire memory file during destruction: %v", err))
@@ -543,6 +548,10 @@ func (f *MemoryFile) releaserDestroyLocked() {
 	chunks := f.chunksLoad()
 	for i := range chunks {
 		chunk := &chunks[i]
+		// Loading may fail after importing metadata but before mmap succeeds.
+		if chunk.mapping == 0 {
+			continue
+		}
 		_, _, errno := unix.Syscall(unix.SYS_MUNMAP, chunk.mapping, chunkSize, 0)
 		if errno != 0 {
 			log.Warningf("Failed to unmap mapping %#x for MemoryFile chunk %d: %v", chunk.mapping, i, errno)

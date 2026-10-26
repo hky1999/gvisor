@@ -560,6 +560,155 @@ func TestOrdinaryCheckpointRejectsAdoptedFile(t *testing.T) {
 	}
 }
 
+func destroyTestMemoryFile(t *testing.T, mf *MemoryFile) {
+	t.Helper()
+	mf.Destroy()
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		mf.mu.Lock()
+		closed := mf.file == nil
+		mf.mu.Unlock()
+		if closed {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("MemoryFile destruction did not complete")
+		}
+		time.Sleep(time.Millisecond)
+	}
+}
+
+// TestAdoptedLoadFailurePreservesFile exercises the destroy-on-load-error
+// sequence for disk-backed private MemoryFiles, including partial loads whose
+// chunk metadata has been imported but whose mappings have not been created.
+func TestAdoptedLoadFailurePreservesFile(t *testing.T) {
+	source := newTestMemoryFile(t, filepath.Join(t.TempDir(), "source"), false)
+	defer source.Destroy()
+	fr, err := source.Allocate(hostarch.PageSize, AllocOpts{Kind: usage.Anonymous})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestRange(t, source, fr, 0x5a)
+	var ordinary, external bytes.Buffer
+	if err := source.SaveTo(context.Background(), &ordinary, &SaveOpts{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := source.SaveTo(context.Background(), &external, &SaveOpts{ExternalContent: true}); err != nil {
+		t.Fatal(err)
+	}
+	info, err := source.file.Stat()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tc := range []struct {
+		name     string
+		image    []byte
+		size     int64
+		fill     byte
+		readOnly bool
+		wantErr  string
+	}{
+		{"ordinary", ordinary.Bytes(), int64(hostarch.PageSize), 0xa5, false, "ordinary checkpoint"},
+		{"truncated_metadata", external.Bytes()[:8], info.Size(), 0x5a, false, "read metadata"},
+		{"undersized", external.Bytes(), int64(hostarch.PageSize), 0x5a, false, "smaller than required"},
+		{"oversized", external.Bytes(), info.Size() + int64(hostarch.PageSize), 0x5a, false, "checkpointed filestore size"},
+		{"diverged", external.Bytes(), info.Size(), 0xa5, false, "fingerprint mismatch"},
+		{"mmap_failure", external.Bytes(), info.Size(), 0x5a, true, "failed to mmap"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "artifact")
+			file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer file.Close()
+			if err := file.Truncate(tc.size); err != nil {
+				t.Fatal(err)
+			}
+			contents := bytes.Repeat([]byte{tc.fill}, int(hostarch.PageSize))
+			if _, err := file.WriteAt(contents, int64(fr.Start)); err != nil {
+				t.Fatal(err)
+			}
+			flags := os.O_RDWR
+			if tc.readOnly {
+				flags = os.O_RDONLY
+			}
+			input, err := os.OpenFile(path, flags, 0)
+			if err != nil {
+				t.Fatal(err)
+			}
+			mf, err := NewMemoryFile(input, MemoryFileOpts{
+				AdoptExistingFile:       true,
+				DiskBackedFile:          true,
+				DecommitOnDestroy:       true,
+				DelayedEviction:         DelayedEvictionManual,
+				DisableIMAWorkAround:    true,
+				DisableMemoryAccounting: true,
+			})
+			if err != nil {
+				input.Close()
+				t.Fatal(err)
+			}
+			var loadErr error
+			// Cleanup may start from DoneCallback, before LoadFrom returns.
+			err = mf.LoadFrom(context.Background(), bytes.NewReader(tc.image), &LoadOpts{
+				DoneCallback: func(err error) {
+					loadErr = err
+					destroyTestMemoryFile(t, mf)
+				},
+			})
+			if err == nil || !strings.Contains(err.Error(), tc.wantErr) || loadErr != err {
+				t.Fatalf("LoadFrom = %v, callback = %v; want %q", err, loadErr, tc.wantErr)
+			}
+			got := make([]byte, len(contents))
+			if _, err := file.ReadAt(got, int64(fr.Start)); err != nil {
+				t.Fatal(err)
+			}
+			if !bytes.Equal(got, contents) {
+				t.Fatal("failed load followed by Destroy changed the adopted file")
+			}
+			if got, err := file.Stat(); err != nil || got.Size() != tc.size {
+				t.Fatalf("file size changed after failed load and Destroy: stat=%v, err=%v", got, err)
+			}
+		})
+	}
+}
+
+func TestSuccessfulAdoptionDecommitsOnDestroy(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "artifact")
+	source := newTestMemoryFile(t, path, false)
+	fr, err := source.Allocate(hostarch.PageSize, AllocOpts{Kind: usage.Anonymous})
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeTestRange(t, source, fr, 0x5a)
+	var image bytes.Buffer
+	if err := source.SaveTo(context.Background(), &image, &SaveOpts{ExternalContent: true}); err != nil {
+		t.Fatal(err)
+	}
+	destroyTestMemoryFile(t, source)
+	adopted := newTestMemoryFile(t, path, true)
+	adopted.opts.DiskBackedFile = true
+	adopted.opts.DecommitOnDestroy = true
+	if err := adopted.LoadFrom(context.Background(), &image, &LoadOpts{}); err != nil {
+		destroyTestMemoryFile(t, adopted)
+		t.Fatal(err)
+	}
+	destroyTestMemoryFile(t, adopted)
+	file, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+	got := make([]byte, hostarch.PageSize)
+	if _, err := file.ReadAt(got, int64(fr.Start)); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, make([]byte, len(got))) {
+		t.Fatal("successful adoption no longer decommits on destruction")
+	}
+}
+
 func TestExternalContentPreservationLifetime(t *testing.T) {
 	for _, resume := range []bool{false, true} {
 		for _, snapshot := range []bool{false, true} {
