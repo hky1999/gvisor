@@ -76,6 +76,7 @@ func (markMarshaler) unmarshal(_ IDMapper, buf []byte, _ stack.IPHeaderFilter) (
 }
 
 // MarkMatcher matches against a packet mark.
+// +stateify savable
 type MarkMatcher struct {
 	mark   uint32
 	mask   uint32

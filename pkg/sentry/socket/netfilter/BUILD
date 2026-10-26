@@ -74,6 +74,7 @@ go_test(
     deps = [
         "//pkg/abi/linux",
         "//pkg/marshal",
+        "//pkg/state",
         "//pkg/syserr",
         "//pkg/tcpip",
         "//pkg/tcpip/header",

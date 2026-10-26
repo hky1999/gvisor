@@ -133,8 +133,8 @@ type Stack struct {
 	handleLocal bool
 
 	// tables are the iptables packet filtering and manipulation rules.
-	// TODO(gvisor.dev/issue/4595): S/R this field.
-	tables *IPTables `state:"nosave"`
+	// Rules and connection state are preserved across checkpoint/restore.
+	tables *IPTables
 
 	// nftables is the nftables interface for packet filtering and manipulation rules.
 	// Using atomic.Pointer for RCU lock-free reads.
@@ -2215,7 +2215,9 @@ func (s *Stack) ReplaceConfig(st *Stack) {
 	defer s.mu.Unlock()
 
 	// Update iptables and nftables.
-	s.tables = st.IPTables()
+	if s.tables == nil {
+		s.tables = st.IPTables()
+	}
 	s.SetNFTables(st.NFTables())
 	for id, nic := range nics {
 		nic.stack = s
@@ -2240,7 +2242,9 @@ func (s *Stack) Restore() {
 // PrepareRestore rebuilds topology before any stack restores endpoints.
 // Call this for every restored network namespace before RestoreEndpoints.
 func (s *Stack) PrepareRestore() {
-
+	if s.tables != nil {
+		s.tables.connections.restore(s.insecureRNG, s.secureRNG.Uint32(), s.secureRNG.Uint32())
+	}
 	s.mu.Lock()
 	if s.nics == nil {
 		s.nics = make(map[tcpip.NICID]*nic, len(s.preservedNICs))
@@ -2329,6 +2333,10 @@ func (s *Stack) CompleteRestore() {
 		p.proto.Restore()
 	}
 
+	// The clock is ready before protocol and conntrack workers restart.
+	if s.tables != nil {
+		s.tables.restoreReaper()
+	}
 }
 
 // Resume resumes the stack after a save.
@@ -2355,7 +2363,12 @@ func (s *Stack) Resume() {
 	for _, p := range s.transportProtocols {
 		p.proto.Resume()
 	}
-
+	// Resume conntrack packet processing and its reaper in a source stack
+	// that continues running after a live checkpoint. Restored stacks use
+	// restoreReaper instead because their locks are newly initialized.
+	if s.tables != nil {
+		s.tables.resumeAfterSave()
+	}
 }
 
 // RegisterPacketEndpoint registers ep with the stack, causing it to receive

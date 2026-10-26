@@ -15,10 +15,14 @@
 package netfilter
 
 import (
+	"bytes"
+	"context"
+	"reflect"
 	"testing"
 
 	"gvisor.dev/gvisor/pkg/abi/linux"
 	"gvisor.dev/gvisor/pkg/marshal"
+	"gvisor.dev/gvisor/pkg/state"
 	"gvisor.dev/gvisor/pkg/syserr"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
 	"gvisor.dev/gvisor/pkg/tcpip/network/ipv4"
@@ -726,6 +730,29 @@ func TestSetEntriesLoopOrder(t *testing.T) {
 			}
 			if err := SetEntries(nil /* mapper */, stack.New(stack.Options{}), marshalReplace(table, filterTable, test.ipv6), test.ipv6); err != syserr.ErrLinkLoop {
 				t.Fatalf("SetEntries expected %v, got %v", syserr.ErrLinkLoop, err)
+			}
+		})
+	}
+}
+
+// Matcher graphs are saved through stack.Matcher interfaces in iptables rules.
+func TestCheckpointMatchers(t *testing.T) {
+	for _, matcher := range []stack.Matcher{
+		&TCPMatcher{}, &UDPMatcher{}, &MarkMatcher{}, &OwnerMatcher{},
+		&OwnerMatcherV1{}, &multiportMatcher{}, &multiportMatcherV1{},
+		&conntrackMatcher{}, &commentMatcher{comment: "checkpoint"},
+	} {
+		t.Run(reflect.TypeOf(matcher).String(), func(t *testing.T) {
+			var encoded bytes.Buffer
+			if _, err := state.Save(context.Background(), &encoded, &matcher); err != nil {
+				t.Fatal(err)
+			}
+			var restored stack.Matcher
+			if _, err := state.Load(context.Background(), &encoded, &restored); err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(matcher, restored) {
+				t.Fatalf("matcher changed: got %#v, want %#v", restored, matcher)
 			}
 		})
 	}

@@ -101,6 +101,7 @@ func (ownerMarshaler) unmarshal(mapper IDMapper, buf []byte, filter stack.IPHead
 }
 
 // OwnerMatcher matches against a UID and/or GID.
+// +stateify savable
 type OwnerMatcher struct {
 	uid       auth.KUID
 	gid       auth.KGID

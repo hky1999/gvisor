@@ -89,6 +89,7 @@ func (tcpMarshaler) unmarshal(_ IDMapper, buf []byte, filter stack.IPHeaderFilte
 }
 
 // TCPMatcher matches TCP packets and their headers. It implements Matcher.
+// +stateify savable
 type TCPMatcher struct {
 	sourcePortStart      uint16
 	sourcePortEnd        uint16

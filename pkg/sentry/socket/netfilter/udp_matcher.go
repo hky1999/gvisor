@@ -82,6 +82,7 @@ func (udpMarshaler) unmarshal(_ IDMapper, buf []byte, filter stack.IPHeaderFilte
 }
 
 // UDPMatcher matches UDP packets and their headers. It implements Matcher.
+// +stateify savable
 type UDPMatcher struct {
 	sourcePortStart      uint16
 	sourcePortEnd        uint16

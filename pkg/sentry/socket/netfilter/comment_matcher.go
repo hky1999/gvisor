@@ -61,6 +61,8 @@ func (commentMarshaler) unmarshal(_ IDMapper, buf []byte, _ stack.IPHeaderFilter
 }
 
 // commentMatcher is a no-op matcher carrying a comment string.
+//
+// +stateify savable
 type commentMatcher struct {
 	comment string
 }
