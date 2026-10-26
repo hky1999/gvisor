@@ -2239,6 +2239,7 @@ func (c *sandboxNetstackCreator) CreateStack() (inet.Stack, error) {
 	opts := stack.NICOptions{
 		Name:               link.Name,
 		DeliverLinkPackets: true,
+		Checkpointable:     true,
 	}
 
 	if err := n.createNICWithAddrs(nicID, linkEP, opts, link.Addresses); err != nil {
