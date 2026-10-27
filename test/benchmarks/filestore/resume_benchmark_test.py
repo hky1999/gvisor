@@ -16,12 +16,15 @@
 """Check that pause measurement selects the freeze gap, not later I/O stalls."""
 
 import datetime
+import os
 from pathlib import Path
+import select
 import tempfile
 import time
+from types import SimpleNamespace
 import unittest
 
-from resume_benchmark import pause_measurement
+from resume_benchmark import Heartbeats, ResumeWriter, pause_measurement
 
 
 class PauseMeasurementTest(unittest.TestCase):
@@ -61,6 +64,44 @@ class PauseMeasurementTest(unittest.TestCase):
             log.write_text("unrelated output\n")
             with self.assertRaisesRegex(RuntimeError, "exactly one"):
                 pause_measurement(log, [], 0, 1)
+
+
+class ResumeWriterTest(unittest.TestCase):
+    def test_partial_utf8_and_partial_capture_message(self):
+        with tempfile.TemporaryDirectory() as directory:
+            log = Path(directory) / "boot.txt"
+            log.write_bytes(b"")
+            heartbeats = Heartbeats()
+            writer = ResumeWriter(log, heartbeats)
+            try:
+                with log.open("ab", buffering=0) as stream:
+                    stream.write(b"timing: 10\xc2")
+                    time.sleep(0.05)
+                    self.assertIsNone(writer.error)
+                    stream.write(b"\xb5s\nOverall save ")
+                    time.sleep(0.02)
+                    self.assertIsNone(writer.sent_ns)
+                    stream.write(b"took [1s].\n")
+                self.assertTrue(select.select([heartbeats.input_read], [], [], 2)[0])
+                self.assertEqual(os.read(heartbeats.input_read, 1), b"W")
+                deadline = time.monotonic() + 2
+                while writer.sent_ns is None and time.monotonic() < deadline:
+                    time.sleep(0.001)
+                self.assertIsNotNone(writer.sent_ns)
+                self.assertIsNone(writer.error)
+            finally:
+                writer.close()
+                heartbeats.close()
+
+    def test_watcher_error_is_reported_without_waiting_for_timeout(self):
+        heartbeats = Heartbeats()
+        error = OSError("failed log read")
+        try:
+            with self.assertRaisesRegex(RuntimeError, "resume log watcher failed") as caught:
+                heartbeats.wait("W", timeout=0, resume_writer=SimpleNamespace(error=error))
+            self.assertIs(caught.exception.__cause__, error)
+        finally:
+            heartbeats.close()
 
 
 if __name__ == "__main__":

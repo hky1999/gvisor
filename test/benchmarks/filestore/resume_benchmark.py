@@ -82,11 +82,13 @@ class Heartbeats:
         os.close(self.output_write)
         self.input_read = self.output_write = -1
 
-    def wait(self, kind, count=1, timeout=30):
+    def wait(self, kind, count=1, timeout=30, resume_writer=None):
         deadline = time.monotonic() + timeout
         while sum(event["kind"] == kind for event in self.events) < count:
             if self.error:
                 raise self.error
+            if resume_writer is not None and resume_writer.error:
+                raise RuntimeError("resume log watcher failed") from resume_writer.error
             if time.monotonic() >= deadline:
                 raise RuntimeError(f"heartbeat deadline waiting for {kind}")
             time.sleep(0.001)
@@ -116,15 +118,17 @@ class ResumeWriter:
 
     def watch(self):
         try:
-            with self.log.open() as stream:
+            with self.log.open("rb") as stream:
                 stream.seek(self.offset)
-                pending = ""
+                pending = b""
+                needle = b"Overall save took ["
                 while not self.stop.is_set():
                     pending += stream.read()
-                    if "Overall save took [" in pending:
+                    if needle in pending:
                         os.write(self.heartbeats.input_write, b"W")
                         self.sent_ns = time.monotonic_ns()
                         return
+                    pending = pending[-len(needle):]
                     self.stop.wait(0.001)
         except BaseException as error:
             self.error = error
@@ -273,7 +277,7 @@ def run_trial(args, rootfs, trial, logs, variant):
         sync_start = time.monotonic_ns()
         sync_calls = sync_artifacts(roots, trial)
         durable_end = time.monotonic_ns()
-        heartbeats.wait("W")
+        heartbeats.wait("W", resume_writer=writer)
         heartbeats.wait("H", count=20)
         if writer.error:
             raise writer.error
@@ -317,6 +321,10 @@ def run_trial(args, rootfs, trial, logs, variant):
         try:
             if writer:
                 writer.close()
+                (logs / "resume-writer.json").write_text(json.dumps({
+                    "log": str(writer.log), "start_offset": writer.offset,
+                    "sent_ns": writer.sent_ns, "error": repr(writer.error) if writer.error else None,
+                }) + "\n")
             for name in ids:
                 run(["delete", "--force", name], check=False)
         finally:
