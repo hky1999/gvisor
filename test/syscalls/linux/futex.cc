@@ -33,16 +33,20 @@
 #include <cstdint>
 #include <ctime>
 #include <iterator>
+#include <limits>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "absl/memory/memory.h"
+#include "absl/strings/str_cat.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "test/util/cleanup.h"
 #include "test/util/file_descriptor.h"
+#include "test/util/fs_util.h"
 #include "test/util/logging.h"
 #include "test/util/memory_util.h"
 #include "test/util/posix_error.h"
@@ -520,6 +524,118 @@ TEST_P(PrivateAndSharedFutexTest, WakeOpCondSignedCompare) {
           FUTEX_OP(FUTEX_OP_OR | FUTEX_OP_OPARG_SHIFT, 31, FUTEX_OP_CMP_LT, 0)),
       SyscallSucceedsWithValue(1));
   EXPECT_EQ(b, kValue);
+}
+
+TEST_P(PrivateAndSharedFutexTest, WakeOpSignedComparisons) {
+  DisableSave ds;
+  for (int const value :
+       {std::numeric_limits<int>::min(), -2147483647, -2048, -1, 0, 1, 2047,
+        4095, std::numeric_limits<int>::max()}) {
+    for (int const arg : {-2048, -1, 0, 2047}) {
+      struct {
+        int op;
+        bool expected;
+      } const comparisons[] = {
+          {FUTEX_OP_CMP_EQ, value == arg}, {FUTEX_OP_CMP_NE, value != arg},
+          {FUTEX_OP_CMP_LT, value < arg},  {FUTEX_OP_CMP_LE, value <= arg},
+          {FUTEX_OP_CMP_GT, value > arg},  {FUTEX_OP_CMP_GE, value >= arg},
+      };
+      for (auto const& comparison : comparisons) {
+        SCOPED_TRACE(::testing::Message() << "value=" << value << " arg=" << arg
+                                          << " comparison=" << comparison.op);
+        std::atomic<int> a(0);
+        std::atomic<int> b(value);
+        std::atomic<pid_t> tid(0);
+        ScopedThread thread([&] {
+          tid.store(gettid());
+          EXPECT_THAT(
+              futex_wait(IsPrivate(), &b, value, kIneffectiveWakeTimeout),
+              SyscallSucceeds());
+        });
+
+        // The waiter can only sleep in FUTEX_WAIT after publishing its TID.
+        // Wait for that state before changing the word or testing a no-wake
+        // condition. The comm field can contain spaces and parentheses.
+        absl::Time const deadline = absl::Now() + kIneffectiveWakeTimeout;
+        bool blocked = false;
+        do {
+          pid_t const waiter_tid = tid.load();
+          if (waiter_tid != 0) {
+            auto stat = GetContents(
+                absl::StrCat("/proc/self/task/", waiter_tid, "/stat"));
+            if (stat.ok()) {
+              std::string const& contents = stat.ValueOrDie();
+              size_t const end = contents.rfind(')');
+              blocked = end != std::string::npos && end + 2 < contents.size() &&
+                        contents[end + 2] == 'S';
+            }
+          }
+          if (blocked) {
+            break;
+          }
+          absl::SleepFor(absl::Milliseconds(1));
+        } while (absl::Now() < deadline);
+        ASSERT_TRUE(blocked);
+
+        // This also exercises Qt's clear-bit-31 operation, and checks that
+        // the comparison uses the old value rather than the updated value.
+        EXPECT_THAT(futex_wake_op(IsPrivate(), &a, &b, 1, 1,
+                                  FUTEX_OP(FUTEX_OP_ANDN | FUTEX_OP_OPARG_SHIFT,
+                                           31, comparison.op, arg)),
+                    SyscallSucceedsWithValue(comparison.expected ? 1 : 0));
+        EXPECT_EQ(b.load(),
+                  static_cast<int>(static_cast<uint32_t>(value) & 0x7fffffff));
+        // Release a waiter whose comparison was false, including on failure.
+        EXPECT_THAT(futex_wake(IsPrivate(), &b, 1),
+                    SyscallSucceedsWithValue(comparison.expected ? 0 : 1));
+      }
+    }
+  }
+}
+
+TEST_P(PrivateAndSharedFutexTest, WakeOpSignedArguments) {
+  for (int const value : {std::numeric_limits<int>::min(), -1, 0, 1,
+                          std::numeric_limits<int>::max()}) {
+    for (int const arg : {-2048, -1, 0, 1, 2047}) {
+      uint32_t const old_value = static_cast<uint32_t>(value);
+      uint32_t const operand = static_cast<uint32_t>(arg);
+      struct {
+        int op;
+        uint32_t expected;
+      } const operations[] = {
+          {FUTEX_OP_SET, operand},
+          {FUTEX_OP_ADD, old_value + operand},
+          {FUTEX_OP_OR, old_value | operand},
+          {FUTEX_OP_ANDN, old_value & ~operand},
+          {FUTEX_OP_XOR, old_value ^ operand},
+      };
+      for (auto const& operation : operations) {
+        SCOPED_TRACE(::testing::Message() << "value=" << value << " arg=" << arg
+                                          << " operation=" << operation.op);
+        std::atomic<int> a(0);
+        std::atomic<int> b(value);
+        EXPECT_THAT(
+            futex_wake_op(IsPrivate(), &a, &b, 0, 0,
+                          FUTEX_OP(operation.op, arg, FUTEX_OP_CMP_EQ, 0)),
+            SyscallSucceedsWithValue(0));
+        EXPECT_EQ(static_cast<uint32_t>(b.load()), operation.expected);
+      }
+    }
+  }
+}
+
+TEST_P(PrivateAndSharedFutexTest, WakeOpShiftArgumentBoundaries) {
+  for (int const shift : {-2048, -33, -1, 0, 1, 31, 32, 33, 2047}) {
+    SCOPED_TRACE(shift);
+    std::atomic<int> a(0);
+    std::atomic<int> b(0);
+    EXPECT_THAT(futex_wake_op(IsPrivate(), &a, &b, 0, 0,
+                              FUTEX_OP(FUTEX_OP_SET | FUTEX_OP_OPARG_SHIFT,
+                                       shift, FUTEX_OP_CMP_EQ, 0)),
+                SyscallSucceedsWithValue(0));
+    EXPECT_EQ(static_cast<uint32_t>(b.load()),
+              uint32_t{1} << (static_cast<uint32_t>(shift) & 31));
+  }
 }
 
 TEST_P(PrivateAndSharedFutexTest, NoWakeInterprocessPrivateAnon) {
