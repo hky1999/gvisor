@@ -72,6 +72,80 @@ func testConfig() *config.Config {
 	return conf
 }
 
+// Runtime inventory must remain responsive while restore owns the loader lock.
+// Otherwise one restoring sandbox can block a node-wide runsc list operation.
+func TestContainerRuntimeStateDoesNotWaitForLoader(t *testing.T) {
+	var loader Loader
+	manager := containerManager{l: &loader}
+	cid := "inventory-during-restore"
+	state := RuntimeStateRunning
+	loader.mu.Lock()
+	done := make(chan error, 1)
+	go func() {
+		done <- manager.ContainerRuntimeState(&cid, &state)
+	}()
+	select {
+	case err := <-done:
+		loader.mu.Unlock()
+		if err == nil {
+			t.Fatal("runtime state query succeeded while loader state was unavailable")
+		}
+		if state != RuntimeStateRunning {
+			t.Fatalf("failed runtime state query changed reply to %v", state)
+		}
+	case <-time.After(2 * time.Second):
+		loader.mu.Unlock()
+		<-done
+		t.Fatal("runtime state query waited for the loader lock")
+	}
+	// A busy response must not poison future state queries.
+	if err := manager.ContainerRuntimeState(&cid, &state); err != nil {
+		t.Fatalf("runtime state query after transition: %v", err)
+	}
+	if state != RuntimeStateStopped {
+		t.Fatalf("missing container state = %v, want stopped", state)
+	}
+}
+
+func TestContainerRuntimeStateWithoutThreadGroup(t *testing.T) {
+	const cid = "not-started"
+	for _, test := range []struct {
+		name        string
+		state       loaderState
+		startFailed bool
+		want        ContainerRuntimeState
+	}{
+		{
+			name: "creating",
+			want: RuntimeStateCreating,
+		},
+		{
+			name:  "restore-failed",
+			state: restoreFailed,
+			want:  RuntimeStateStopped,
+		},
+		{
+			name:        "start-failed",
+			startFailed: true,
+			want:        RuntimeStateStopped,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			loader := Loader{
+				processes: map[execID]*execProcess{{cid: cid}: {}},
+				state:     test.state,
+			}
+			if test.startFailed {
+				loader.failedToStart = map[string]struct{}{cid: {}}
+			}
+			got, err := loader.containerRuntimeState(cid)
+			if err != nil || got != test.want {
+				t.Fatalf("containerRuntimeState(%q) = (%v, %v), want (%v, nil)", cid, got, err, test.want)
+			}
+		})
+	}
+}
+
 // testSpec returns a simple spec that can be used in tests.
 func testSpec() *specs.Spec {
 	return &specs.Spec{
