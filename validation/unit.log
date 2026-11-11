@@ -1,0 +1,153 @@
+Starting local Bazel server (9.3.1) and connecting to it...
+INFO: Invocation ID: 8a57ba8d-1d1b-4ca8-bf48-1346bd4cfe8f
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Loading: 
+Loading: 4 packages loaded
+DEBUG: /root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/external/gazelle+/internal/bzlmod/go_deps.bzl:705:36: The following Go modules were required by the root module at the given versions, but were implicitly updated to higher versions due to transitive dependencies:
+ 
+  go.opentelemetry.io/auto/sdk: v1.1.0 -> v1.2.1 
+  go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc: v0.61.0 -> v0.67.0 
+  go.opentelemetry.io/otel: v1.37.0 -> v1.43.0 
+  go.opentelemetry.io/otel/metric: v1.28.0 -> v1.43.0 
+  github.com/felixge/httpsnoop: v1.0.2 -> v1.0.4 
+  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp: v0.53.0 -> v0.67.0 
+  go.opentelemetry.io/otel/trace: v1.28.0 -> v1.43.0 
+  github.com/opencontainers/image-spec: v1.0.2 -> v1.1.1 
+  cloud.google.com/go: v0.105.0 -> v0.123.0 
+  cloud.google.com/go/iam: v0.8.0 -> v1.7.0 
+  github.com/googleapis/enterprise-certificate-proxy: v0.3.6 -> v0.3.14 
+  golang.org/x/oauth2: v0.30.0 -> v0.36.0 
+  google.golang.org/genproto: v0.0.0-20250707201910-8d1bb00bc6a7 -> v0.0.0-20260319201613-d00831a3d3e7 
+
+Update the root module's dependencies to match the resolved versions via:
+
+  bazel run @io_bazel_rules_go//go -- get go.opentelemetry.io/auto/sdk@v1.2.1 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc@v0.67.0 go.opentelemetry.io/otel@v1.43.0 go.opentelemetry.io/otel/metric@v1.43.0 github.com/felixge/httpsnoop@v1.0.4 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.67.0 go.opentelemetry.io/otel/trace@v1.43.0 github.com/opencontainers/image-spec@v1.1.1 cloud.google.com/go@v0.123.0 cloud.google.com/go/iam@v1.7.0 github.com/googleapis/enterprise-certificate-proxy@v0.3.14 golang.org/x/oauth2@v0.36.0 google.golang.org/genproto@v0.0.0-20260319201613-d00831a3d3e7 
+
+WARNING: /root/filestore-publish-20261111/source/MODULE.bazel:390:24: The module extension go_deps defined in @bazel_gazelle//:extensions.bzl reported incorrect imports of repositories via use_repo():
+
+Imported, but reported as indirect dependencies by the extension:
+    org_golang_x_text
+
+Fix the use_repo calls by running 'bazel mod tidy'.
+Loading: 4 packages loaded
+    currently loading: runsc/boot ... (4 packages)
+Analyzing: 4 targets (12 packages loaded, 6 targets configured)
+Analyzing: 4 targets (12 packages loaded, 6 targets configured)
+
+Analyzing: 4 targets (407 packages loaded, 4895 targets configured)
+
+Analyzing: 4 targets (453 packages loaded, 24886 targets configured)
+
+Analyzing: 4 targets (454 packages loaded, 24886 targets configured)
+
+Analyzing: 4 targets (455 packages loaded, 36088 targets configured)
+
+Analyzing: 4 targets (455 packages loaded, 36088 targets configured)
+
+Analyzing: 4 targets (756 packages loaded, 38334 targets configured)
+
+INFO: Analyzed 4 targets (818 packages loaded, 39335 targets configured, 132 aspect applications).
+INFO: From Executing genrule //pkg/sentry/platform/systrap/sysmsg:sighandler_object:
+/usr/bin/x86_64-linux-gnu-ld.bfd: warning: bazel-out/k8-opt-ST-17ef5880da81/bin/pkg/sentry/platform/systrap/sysmsg/sighandler.built-in.bin.o has a LOAD segment with RWX permissions
+INFO: From Executing genrule //pkg/sentry/platform/systrap/sysmsg:sighandler_go:
++ set -e
++ set -u
++ FILE=sighandler
++ NAME=Sighandler
++ PREFIX=Sighandler_blob_offset__
++ BLOB=Sighandler_blob
++ OBJNAME=bazel-out/k8-opt-ST-17ef5880da81/bin/pkg/sentry/platform/systrap/sysmsg/sighandler.built-in.bin.o
++ NM=/usr/bin/x86_64-linux-gnu-nm
++ AWK_CMD='$2 ~ /^[tBCTA]$/ { print "var Sighandler_blob_offset__" $3 " = 0x" $1 }'
++ cat
++ /usr/bin/x86_64-linux-gnu-nm bazel-out/k8-opt-ST-17ef5880da81/bin/pkg/sentry/platform/systrap/sysmsg/sighandler.built-in.bin.o
++ grep __export_
++ tr . _
++ awk '$2 ~ /^[tBCTA]$/ { print "var Sighandler_blob_offset__" $3 " = 0x" $1 }'
+[1,055 / 3,301] GoToolchainBinaryBuild external/rules_go++go_sdk+main___download_0_linux_amd64/builder [for tool]; 0s disk-cache, linux-sandbox
+[1,055 / 3,301] GoToolchainBinaryBuild external/rules_go++go_sdk+main___download_0_linux_amd64/builder [for tool]; 10s disk-cache, linux-sandbox
+[1,056 / 3,301] [Prepa] Creating symlink external/rules_go++go_sdk+main___download_0_linux_amd64/builder_reset/builder [for tool] ... (4 actions, 0 running)
+[1,060 / 3,301] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 1s disk-cache, linux-sandbox ... (3 actions running)
+[1,061 / 3,301] GoStdlib external/rules_go+/stdlib_/pkg; 9s disk-cache, linux-sandbox ... (2 actions running)
+[1,091 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_x_sys/unix/unix.a; 0s disk-cache, linux-sandbox ... (16 actions running)
+[1,159 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_x_tools/internal/imports/imports.a [for tool]; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,222 / 3,301] GoCompilePkg external/gazelle++go_deps+com_github_google_go_cmp/cmp/cmp.a; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,280 / 3,301] GoCompilePkg pkg/state/state.a [for tool]; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,306 / 3,301] GoImports pkg/eventchannel/eventchannel_state_autogen_with_imports.go; 1s disk-cache, linux-sandbox ... (16 actions, 14 running)
+[1,320 / 3,301] GoImports tools/checkconst/checkconst_state_autogen_with_imports.go [for tool]; 2s disk-cache, linux-sandbox ... (12 actions, 11 running)
+[1,331 / 3,301] GoImports pkg/sentry/devices/tpuproxy/vfio/vfio_state_autogen_with_imports.go; 3s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,343 / 3,301] GoImports pkg/sentry/devices/tpuproxy/vfio/vfio_state_autogen_with_imports.go; 4s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,359 / 3,301] GoImports pkg/sentry/memmap/memmap_state_autogen_with_imports.go; 4s disk-cache, linux-sandbox ... (15 actions, 13 running)
+[1,389 / 3,301] GoImports pkg/sentry/time/time_unsafe_state_autogen_with_imports.go; 3s disk-cache, linux-sandbox ... (16 actions, 15 running)
+INFO: From go_marshal: @@//pkg/sentry/loader:loader_abi_autogen:
+stdout (/root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/_tmp/actions/stdout-1388) 1906336 exceeds maximum size of --experimental_ui_max_stdouterr_bytes=1048576 bytes; skipping
+[1,435 / 3,301] GoImports pkg/sentry/state/stateipc/stateipc_unsafe_state_autogen_with_imports.go; 0s disk-cache, linux-sandbox ... (15 actions, 14 running)
+[1,499 / 3,301] GoCompilePkg external/gazelle++go_deps+co_honnef_go_tools/go/ir/ir.a [for tool]; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,574 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_google_protobuf/internal/impl/impl.a; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,639 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_x_sys/unix/unix.a; 0s disk-cache, linux-sandbox ... (12 actions, 10 running)
+[1,700 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_google_protobuf/internal/filedesc/filedesc.a; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,763 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_google_protobuf/internal/impl/impl.a; 0s disk-cache, linux-sandbox ... (15 actions, 13 running)
+[1,824 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_x_tools/go/analysis/passes/unusedresult/unusedresult.a [for tool]; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,898 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_x_tools/go/ssa/ssa.a [for tool]; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,961 / 3,301] GoCompilePkg pkg/prometheus/prometheus.a; 0s disk-cache, linux-sandbox ... (13 actions, 11 running)
+[2,026 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_google_protobuf/types/gofeaturespb/gofeaturespb.a; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[2,097 / 3,301] GoCompilePkg external/gazelle++go_deps+org_golang_google_protobuf/types/pluginpb/pluginpb.a; 0s disk-cache, linux-sandbox ... (16 actions, 12 running)
+[2,158 / 3,301] Generating state library @@//pkg/sentry/state/stateipc:stateipc_state_autogen_with_imports; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[2,225 / 3,301] Generating state library @@//pkg/abi/linux:linux_state_autogen_with_imports; 0s disk-cache, linux-sandbox ... (15 actions, 13 running)
+[2,289 / 3,301] Generating state library @@//pkg/sentry/vfs:vfs_state_autogen_with_imports; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[2,353 / 3,301] GoCompilePkg pkg/abi/nvgpu/nvgpu.a; 0s disk-cache, linux-sandbox ... (16 actions running)
+[2,404 / 3,301] GoImports pkg/syserr/syserr_state_autogen_with_imports.go; 0s disk-cache, linux-sandbox ... (16 actions, 11 running)
+[2,433 / 3,301] GoImports pkg/tcpip/stack/stack_unsafe_state_autogen_with_imports.go; 1s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[2,458 / 3,301] GoImports pkg/tcpip/stack/stack_unsafe_state_autogen_with_imports.go; 2s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[2,475 / 3,301] GoImports pkg/tcpip/tcpip_linux_state_autogen_with_imports.go; 2s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[2,530 / 3,301] Analyzing Go Standard Library; 0s local, disk-cache ... (16 actions, 15 running)
+[2,584 / 3,301] Analyzing Go Standard Library; 1s local, disk-cache ... (15 actions, 14 running)
+[2,634 / 3,301] Analyzing Go Standard Library; 2s local, disk-cache ... (16 actions, 15 running)
+[2,691 / 3,301] Analyzing Go Standard Library; 3s local, disk-cache ... (16 actions, 15 running)
+[2,752 / 3,301] Analyzing Go Standard Library; 4s local, disk-cache ... (16 actions, 15 running)
+[2,805 / 3,301] Analyzing Go Standard Library; 5s local, disk-cache ... (14 actions, 10 running)
+[2,855 / 3,301] Analyzing Go Standard Library; 6s local, disk-cache ... (16 actions, 15 running)
+[2,915 / 3,301] Analyzing Go Standard Library; 8s local, disk-cache ... (16 actions, 15 running)
+[2,943 / 3,301] Analyzing Go Standard Library; 9s local, disk-cache ... (2 actions running)
+[2,943 / 3,301] Analyzing Go Standard Library; 20s local, disk-cache ... (2 actions running)
+[2,943 / 3,301] Analyzing Go Standard Library; 50s local, disk-cache ... (2 actions running)
+[2,944 / 3,301] Analyzing Go Standard Library; 96s local, disk-cache ... (2 actions, 1 running)
+[2,968 / 3,301] Analyzing @@gazelle++go_deps+org_golang_x_sys//unix:unix; 1s local, disk-cache ... (13 actions, 7 running)
+[2,987 / 3,301] Analyzing @@//pkg/state:state; 1s local, disk-cache ... (12 actions, 5 running)
+[3,035 / 3,301] Analyzing @@gazelle++go_deps+org_golang_google_protobuf//internal/filedesc:filedesc; 0s local, disk-cache ... (10 actions, 9 running)
+[3,057 / 3,301] GoCompilePkg pkg/abi/linux/linux.a; 1s disk-cache, linux-sandbox ... (3 actions, 2 running)
+[3,094 / 3,301] Analyzing @@gazelle++go_deps+org_golang_google_protobuf//internal/impl:impl; 1s local, disk-cache ... (14 actions, 13 running)
+[3,150 / 3,301] Analyzing @@gazelle++go_deps+org_golang_google_protobuf//internal/impl:impl; 2s local, disk-cache ... (16 actions, 15 running)
+[3,192 / 3,301] Analyzing @@//pkg/abi/linux:linux; 3s local, disk-cache ... (6 actions running)
+[3,206 / 3,302] 1 / 4 tests; Analyzing @@//pkg/abi/linux:linux; 4s local, disk-cache ... (3 actions running)
+[3,216 / 3,302] 1 / 4 tests; Analyzing @@//pkg/abi/linux:linux; 5s local, disk-cache ... (3 actions, 2 running)
+[3,224 / 3,302] 1 / 4 tests; [Prepa] Analyzing @@//pkg/unet:unet
+[3,227 / 3,302] 1 / 4 tests; [Prepa] Generating @@//pkg/sentry/time:vdso_asm_render
+[3,231 / 3,302] 1 / 4 tests; GoCompilePkg pkg/sentry/kernel/kernel.a; 1s disk-cache, linux-sandbox
+[3,241 / 3,302] 1 / 4 tests; GoCompilePkg pkg/sentry/devices/rdmaproxy/rdmaproxy.a; 0s disk-cache, linux-sandbox ... (12 actions running)
+[3,262 / 3,302] 1 / 4 tests; GoCompilePkg pkg/sentry/socket/netstack/netstack.a; 0s disk-cache, linux-sandbox ... (3 actions, 1 running)
+[3,279 / 3,302] 1 / 4 tests; GoCompilePkg pkg/sentry/fsimpl/proc/proc.a; 1s disk-cache, linux-sandbox ... (5 actions, 4 running)
+[3,286 / 3,303] 1 / 4 tests; PrecompileSeccomp runsc/boot/filter/filter_precompiled.go; 0s disk-cache, linux-sandbox ... (3 actions running)
+[3,292 / 3,303] 1 / 4 tests; Testing //runsc/boot/filter/config:config_test; 2s disk-cache, linux-sandbox ... (3 actions, 2 running)
+[3,297 / 3,304] 2 / 4 tests; Testing //runsc/boot/filter/config:config_test; 3s disk-cache, linux-sandbox ... (2 actions running)
+[3,298 / 3,304] 2 / 4 tests; Testing //runsc/boot/filter/config:config_test; 10s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[3,299 / 3,304] 2 / 4 tests; Testing //runsc/boot/filter/config:config_test; 11s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[3,301 / 3,304] 2 / 4 tests; Testing //runsc/boot/filter/config:config_test; 12s disk-cache, linux-sandbox ... (2 actions running)
+[3,303 / 3,305] 2 / 4 tests; Testing //runsc/boot/filter/config:config_test; 13s disk-cache, linux-sandbox ... (2 actions running)
+[3,303 / 3,305] 3 / 4 tests; Testing //runsc/boot/filter/config:config_test; 15s disk-cache, linux-sandbox ... (2 actions running)
+[3,304 / 3,305] 3 / 4 tests; Testing //runsc/boot/filter/config:config_test; 16s disk-cache, linux-sandbox
+[3,304 / 3,305] 4 / 4 tests; Testing //runsc/boot/filter/config:config_test; 19s disk-cache, linux-sandbox
+INFO: Found 4 test targets...
+INFO: Elapsed time: 224.472s, Critical Path: 179.86s
+INFO: 3305 processes: 25 disk cache hit, 1041 internal, 2170 linux-sandbox, 69 local.
+INFO: Build completed successfully, 3305 total actions
+//pkg/sentry/control:control_test                                        PASSED in 0.1s
+//pkg/sentry/pgalloc:pgalloc_test                                        PASSED in 0.1s
+//runsc/boot:boot_test                                                   PASSED in 1.7s
+//runsc/boot/filter/config:config_test                                   PASSED in 19.5s
+
+Executed 4 out of 4 tests: 4 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

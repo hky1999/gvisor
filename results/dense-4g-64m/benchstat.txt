@@ -1,0 +1,18 @@
+                                          │ /root/filestore-publish-20261111/final-performance/dense-4g-64m/baseline-dirty.txt │ /root/filestore-publish-20261111/final-performance/dense-4g-64m/candidate-dirty.txt │
+                                          │                                       sec/op                                       │                           sec/op                             vs base                │
+Resume/4096MiB/ApplicationPause                                                                                  1583.40m ± 3%                                                   70.24m ± 8%  -95.56% (p=0.000 n=12)
+Resume/4096MiB/PauseLogWindow                                                                                    1581.96m ± 3%                                                   68.71m ± 9%  -95.66% (p=0.000 n=12)
+Resume/4096MiB/Checkpoint                                                                                        1588.71m ± 3%                                                   79.31m ± 8%  -95.01% (p=0.000 n=12)
+Resume/4096MiB/DurableCheckpoint                                                                                 6046.66m ± 1%                                                   81.24m ± 8%  -98.66% (p=0.000 n=12)
+Resume/4096MiB/EndToEnd                                                                                          6054.87m ± 1%                                                   90.63m ± 6%  -98.50% (p=0.000 n=12)
+Resume/4096MiB/Restore                                                                                             70.12m ± 2%                                                   81.19m ± 4%  +15.79% (p=0.000 n=12)
+Resume/4096MiB/ficlone_ns                                                                                                                                                        64.54m ± 8%
+Resume/4096MiB/state_pages_fsync_ns                                                                                                                                              2.337m ± 7%
+Resume/4096MiB/snapshot_fsync_ns                                                                                                                                                 29.34µ ± 7%
+Resume/4096MiB/post_resume_persistence_ns                                                                                                                                        3.492m ± 7%
+geomean                                                                                                             1.473                                                        17.98m       -94.69%
+
+                        │ /root/filestore-publish-20261111/final-performance/dense-4g-64m/baseline-dirty.txt │ /root/filestore-publish-20261111/final-performance/dense-4g-64m/candidate-dirty.txt │
+                        │                                       ns/op                                        │                              ns/op                               vs base            │
+Resume/4096MiB/Preflush                                                                           0.000 ± 0%                                                        0.000 ± 0%  ~ (p=1.000 n=12) ¹
+¹ all samples are equal

@@ -1,0 +1,136 @@
+INFO: Invocation ID: 6ed89e6b-a170-4e2e-ab51-d1ee7d58e26b
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --@@rules_go+//go/config:pure, --@@rules_go+//go/config:race, --host_linkopt, and 1 more have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+
+Analyzing: 2 targets (736 packages loaded, 38583 targets configured, 74 aspect applications)
+
+INFO: Analyzed 2 targets (737 packages loaded, 38663 targets configured, 132 aspect applications).
+[840 / 2,823] GoToolchainBinaryBuild external/rules_go++go_sdk+main___download_0_linux_amd64/builder [for tool]; 0s disk-cache, linux-sandbox
+[840 / 2,823] GoToolchainBinaryBuild external/rules_go++go_sdk+main___download_0_linux_amd64/builder [for tool]; 10s disk-cache, linux-sandbox
+[841 / 2,823] [Prepa] Creating symlink external/rules_go++go_sdk+main___download_0_linux_amd64/builder_reset/builder [for tool] ... (6 actions, 0 running)
+[849 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg; 1s disk-cache, linux-sandbox ... (5 actions running)
+[850 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg; 9s disk-cache, linux-sandbox ... (9 actions, 4 running)
+[857 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg; 10s disk-cache, linux-sandbox ... (7 actions, 3 running)
+[886 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 11s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[936 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 12s disk-cache, linux-sandbox ... (16 actions, 14 running)
+[993 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 13s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,064 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 14s disk-cache, linux-sandbox ... (15 actions, 14 running)
+[1,119 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 15s disk-cache, linux-sandbox ... (15 actions, 14 running)
+[1,182 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 16s disk-cache, linux-sandbox ... (16 actions running)
+[1,232 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 17s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,287 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 18s disk-cache, linux-sandbox ... (15 actions, 14 running)
+[1,344 / 2,823] GoStdlib external/rules_go+/stdlib_/pkg [for tool]; 19s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,405 / 2,823] GoCompilePkg external/gazelle++go_deps+org_golang_x_mod/semver/semver.a; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,468 / 2,823] GoCompilePkg external/rules_go+/go/tools/bzltestutil/bzltestutil.a; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,523 / 2,823] GoCompilePkg external/gazelle++go_deps+org_golang_x_sys/unix/unix.a; 1s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,551 / 2,823] Building Go template @@//pkg/segment:generic_set; 1s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,571 / 2,823] Generating state library @@//pkg/sentry/strace:strace_amd64_state_autogen_with_imports; 1s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[1,586 / 2,823] Analyzing Go Standard Library; 1s local, disk-cache ... (16 actions, 15 running)
+[1,600 / 2,823] Analyzing Go Standard Library; 2s local, disk-cache ... (16 actions, 15 running)
+[1,619 / 2,823] Analyzing Go Standard Library; 3s local, disk-cache ... (16 actions, 15 running)
+[1,641 / 2,823] Analyzing Go Standard Library; 4s local, disk-cache ... (16 actions, 15 running)
+[1,656 / 2,823] Analyzing Go Standard Library; 5s local, disk-cache ... (16 actions, 15 running)
+[1,671 / 2,823] Analyzing Go Standard Library; 6s local, disk-cache ... (16 actions, 15 running)
+INFO: From go_marshal: @@//pkg/sentry/loader:loader_abi_autogen:
+stdout (/root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/_tmp/actions/stdout-987) 1906336 exceeds maximum size of --experimental_ui_max_stdouterr_bytes=1048576 bytes; skipping
+[1,689 / 2,823] Analyzing Go Standard Library; 7s local, disk-cache ... (16 actions, 15 running)
+[1,708 / 2,823] Analyzing Go Standard Library; 8s local, disk-cache ... (16 actions running)
+[1,726 / 2,823] Analyzing Go Standard Library; 9s local, disk-cache ... (16 actions, 15 running)
+[1,741 / 2,823] Analyzing Go Standard Library; 10s local, disk-cache ... (16 actions, 15 running)
+[1,756 / 2,823] Analyzing Go Standard Library; 11s local, disk-cache ... (16 actions, 15 running)
+[1,769 / 2,823] Analyzing Go Standard Library; 12s local, disk-cache ... (16 actions, 15 running)
+[1,783 / 2,823] Analyzing Go Standard Library; 13s local, disk-cache ... (16 actions, 15 running)
+[1,798 / 2,823] Analyzing Go Standard Library; 15s local, disk-cache ... (16 actions, 15 running)
+[1,813 / 2,823] Analyzing Go Standard Library; 16s local, disk-cache ... (16 actions, 15 running)
+[1,828 / 2,823] Analyzing Go Standard Library; 17s local, disk-cache ... (16 actions, 15 running)
+[1,843 / 2,823] Analyzing Go Standard Library; 18s local, disk-cache ... (16 actions, 15 running)
+[1,857 / 2,823] Analyzing Go Standard Library; 19s local, disk-cache ... (16 actions, 15 running)
+[1,871 / 2,823] Analyzing Go Standard Library; 20s local, disk-cache ... (16 actions, 15 running)
+[1,879 / 2,823] Analyzing Go Standard Library; 21s local, disk-cache ... (16 actions, 15 running)
+[1,892 / 2,823] Analyzing Go Standard Library; 22s local, disk-cache ... (16 actions, 15 running)
+[1,906 / 2,823] Analyzing Go Standard Library; 23s local, disk-cache ... (16 actions running)
+[1,920 / 2,823] Analyzing Go Standard Library; 24s local, disk-cache ... (16 actions, 15 running)
+[1,934 / 2,823] Analyzing Go Standard Library; 25s local, disk-cache ... (16 actions, 15 running)
+[1,948 / 2,823] Analyzing Go Standard Library; 26s local, disk-cache ... (16 actions, 15 running)
+[1,963 / 2,823] Analyzing Go Standard Library; 27s local, disk-cache ... (16 actions, 15 running)
+[1,978 / 2,823] Analyzing Go Standard Library; 28s local, disk-cache ... (16 actions, 15 running)
+[1,992 / 2,823] Analyzing Go Standard Library; 29s local, disk-cache ... (16 actions, 15 running)
+[2,006 / 2,823] Analyzing Go Standard Library; 30s local, disk-cache ... (16 actions, 15 running)
+[2,020 / 2,823] Analyzing Go Standard Library; 32s local, disk-cache ... (16 actions, 15 running)
+[2,033 / 2,823] Analyzing Go Standard Library; 33s local, disk-cache ... (16 actions, 15 running)
+[2,046 / 2,823] Analyzing Go Standard Library; 34s local, disk-cache ... (16 actions, 15 running)
+[2,051 / 2,823] Analyzing Go Standard Library; 35s local, disk-cache ... (16 actions, 15 running)
+[2,067 / 2,823] Analyzing Go Standard Library; 36s local, disk-cache ... (16 actions, 15 running)
+[2,080 / 2,823] Analyzing Go Standard Library; 37s local, disk-cache ... (16 actions running)
+[2,097 / 2,823] Analyzing Go Standard Library; 38s local, disk-cache ... (16 actions running)
+[2,112 / 2,823] Analyzing Go Standard Library; 39s local, disk-cache ... (16 actions, 15 running)
+[2,128 / 2,823] Analyzing Go Standard Library; 41s local, disk-cache ... (16 actions, 15 running)
+[2,142 / 2,823] Analyzing Go Standard Library; 42s local, disk-cache ... (16 actions, 15 running)
+[2,157 / 2,823] Analyzing Go Standard Library; 43s local, disk-cache ... (16 actions, 14 running)
+[2,169 / 2,823] Analyzing Go Standard Library; 44s local, disk-cache ... (16 actions running)
+[2,184 / 2,823] Analyzing Go Standard Library; 45s local, disk-cache ... (16 actions running)
+[2,201 / 2,823] Analyzing Go Standard Library; 47s local, disk-cache ... (15 actions, 14 running)
+[2,215 / 2,823] Analyzing Go Standard Library; 48s local, disk-cache ... (15 actions, 14 running)
+[2,228 / 2,823] Analyzing Go Standard Library; 49s local, disk-cache ... (16 actions, 15 running)
+[2,241 / 2,823] Analyzing Go Standard Library; 50s local, disk-cache ... (16 actions running)
+[2,255 / 2,823] Analyzing Go Standard Library; 51s local, disk-cache ... (16 actions running)
+[2,271 / 2,823] Analyzing Go Standard Library; 53s local, disk-cache ... (16 actions, 15 running)
+[2,286 / 2,823] Analyzing Go Standard Library; 54s local, disk-cache ... (16 actions, 15 running)
+[2,306 / 2,823] Analyzing Go Standard Library; 55s local, disk-cache ... (16 actions, 15 running)
+[2,322 / 2,823] Analyzing Go Standard Library; 56s local, disk-cache ... (16 actions, 15 running)
+[2,336 / 2,823] Analyzing Go Standard Library; 57s local, disk-cache ... (16 actions running)
+[2,352 / 2,823] Analyzing Go Standard Library; 58s local, disk-cache ... (16 actions, 15 running)
+[2,366 / 2,823] Analyzing Go Standard Library; 60s local, disk-cache ... (16 actions, 15 running)
+[2,382 / 2,823] Analyzing Go Standard Library; 61s local, disk-cache ... (16 actions, 15 running)
+[2,397 / 2,823] Analyzing Go Standard Library; 62s local, disk-cache ... (16 actions, 15 running)
+[2,410 / 2,823] Analyzing Go Standard Library; 63s local, disk-cache ... (16 actions, 15 running)
+[2,415 / 2,823] Analyzing Go Standard Library; 64s local, disk-cache ... (16 actions, 15 running)
+[2,430 / 2,823] Analyzing Go Standard Library; 65s local, disk-cache ... (16 actions, 15 running)
+[2,444 / 2,823] Analyzing Go Standard Library; 66s local, disk-cache ... (16 actions running)
+[2,459 / 2,823] Analyzing Go Standard Library; 67s local, disk-cache ... (16 actions, 15 running)
+[2,473 / 2,823] Analyzing Go Standard Library; 68s local, disk-cache ... (16 actions, 15 running)
+[2,486 / 2,823] Analyzing Go Standard Library; 69s local, disk-cache ... (14 actions, 13 running)
+[2,494 / 2,823] Analyzing Go Standard Library; 70s local, disk-cache ... (13 actions, 12 running)
+[2,518 / 2,823] Analyzing Go Standard Library; 72s local, disk-cache ... (6 actions, 4 running)
+[2,523 / 2,823] Analyzing Go Standard Library; 73s local, disk-cache ... (10 actions, 9 running)
+[2,531 / 2,823] Analyzing Go Standard Library; 74s local, disk-cache ... (2 actions running)
+[2,531 / 2,823] Analyzing Go Standard Library; 84s local, disk-cache ... (2 actions running)
+[2,532 / 2,823] Analyzing Go Standard Library; 88s local, disk-cache ... (2 actions, 1 running)
+[2,533 / 2,823] Analyzing Go Standard Library; 90s local, disk-cache
+[2,534 / 2,823] [Prepa] Analyzing @@gazelle++go_deps+org_golang_google_protobuf//internal/flags:flags ... (13 actions, 0 running)
+[2,567 / 2,823] Analyzing @@gazelle++go_deps+org_golang_x_sys//unix:unix; 0s local, disk-cache ... (14 actions, 13 running)
+[2,614 / 2,823] Analyzing @@//pkg/state:state; 1s local, disk-cache ... (11 actions, 6 running)
+[2,644 / 2,823] GoCompilePkg pkg/abi/linux/linux.a; 1s disk-cache, linux-sandbox ... (8 actions, 7 running)
+[2,665 / 2,823] GoCompilePkg pkg/abi/linux/linux.a; 2s disk-cache, linux-sandbox ... (6 actions, 4 running)
+[2,674 / 2,823] Analyzing @@gazelle++go_deps+org_golang_google_protobuf//internal/impl:impl; 2s local, disk-cache ... (16 actions, 15 running)
+[2,704 / 2,823] Analyzing @@//pkg/abi/linux:linux; 2s local, disk-cache ... (13 actions, 12 running)
+[2,743 / 2,823] Analyzing @@//pkg/abi/linux:linux; 3s local, disk-cache ... (10 actions, 9 running)
+[2,751 / 2,823] GoCompilePkg pkg/sentry/pgalloc/pgalloc.a; 1s disk-cache, linux-sandbox ... (12 actions, 4 running)
+[2,774 / 2,823] GoLink pkg/sentry/pgalloc/pgalloc_test_/pgalloc_test; 0s disk-cache, linux-sandbox ... (3 actions, 2 running)
+[2,779 / 2,824] Testing //pkg/sentry/pgalloc:pgalloc_test; 0s disk-cache, linux-sandbox ... (4 actions running)
+[2,784 / 2,824] Testing //pkg/sentry/pgalloc:pgalloc_test; 1s disk-cache, linux-sandbox ... (2 actions running)
+[2,788 / 2,824] 1 / 2 tests; GoCompilePkg pkg/sentry/fsimpl/tmpfs/tmpfs.a; 0s disk-cache, linux-sandbox ... (5 actions, 1 running)
+[2,794 / 2,824] 1 / 2 tests; GoCompilePkg pkg/sentry/kernel/kernel.a; 1s disk-cache, linux-sandbox
+[2,795 / 2,824] 1 / 2 tests; [Prepa] GoCompilePkg pkg/sentry/socket/socket.a ... (11 actions, 0 running)
+[2,804 / 2,824] 1 / 2 tests; GoCompilePkg pkg/sentry/socket/netfilter/netfilter.a; 1s disk-cache, linux-sandbox ... (7 actions running)
+[2,812 / 2,824] 1 / 2 tests; GoCompilePkg pkg/sentry/devices/nvproxy/nvproxy.a; 2s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[2,816 / 2,824] 1 / 2 tests; [Prepa] GoCompilePkg pkg/sentry/fdimport/fdimport.a
+[2,817 / 2,824] 1 / 2 tests; GoCompilePkg pkg/sentry/syscalls/linux/linux.a; 1s disk-cache, linux-sandbox
+[2,818 / 2,824] 1 / 2 tests; GoCompilePkg pkg/sentry/strace/strace.a; 0s disk-cache, linux-sandbox
+[2,820 / 2,824] 1 / 2 tests; [Prepa] GoCompilePkgExternal pkg/sentry/control/control_test_test.external.a
+[2,822 / 2,824] 1 / 2 tests; GoLink pkg/sentry/control/control_test_/control_test; 1s disk-cache, linux-sandbox
+[2,823 / 2,824] 1 / 2 tests; [Prepa] runfiles for //pkg/sentry/control:control_test
+[2,824 / 2,825] 1 / 2 tests; Testing //pkg/sentry/control:control_test; 1s disk-cache, linux-sandbox
+[2,824 / 2,825] 2 / 2 tests; Testing //pkg/sentry/control:control_test; 2s disk-cache, linux-sandbox
+INFO: Found 2 test targets...
+INFO: Elapsed time: 196.332s, Critical Path: 184.14s
+INFO: 2162 processes: 663 action cache hit, 8 disk cache hit, 188 internal, 1897 linux-sandbox, 69 local.
+INFO: Build completed successfully, 2162 total actions
+//pkg/sentry/control:control_test                                        PASSED in 2.2s
+//pkg/sentry/pgalloc:pgalloc_test                                        PASSED in 2.1s
+
+Executed 2 out of 2 tests: 2 tests pass.

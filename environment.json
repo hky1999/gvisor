@@ -1,0 +1,18 @@
+{
+  "kernel": "7.0.0-31-generic",
+  "machine": "x86_64",
+  "logical_cpus": 104,
+  "python": "3.14.4",
+  "cpu_model": "Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz",
+  "mem_total": "MemTotal:       196504412 kB",
+  "xfs": "meta-data=/dev/vdb               isize=512    agcount=4, agsize=82640896 blks\n         =                       sectsz=512   attr=2, projid32bit=1\n         =                       crc=1        finobt=1, sparse=1, rmapbt=1\n         =                       reflink=1    bigtime=1 inobtcount=1 nrext64=1\n         =                       exchange=0   metadir=0\ndata     =                       bsize=4096   blocks=330563584, imaxpct=5\n         =                       sunit=0      swidth=0 blks\nnaming   =version 2              bsize=4096   ascii-ci=0, ftype=1, parent=0\nlog      =internal log           bsize=4096   blocks=161408, version=2\n         =                       sectsz=512   sunit=0 blks, lazy-count=1\nrealtime =none                   extsz=4096   blocks=0, rtextents=0\n         =                       rgcount=0    rgsize=0 extents\n         =                       zoned=0      start=0 reserved=0\n",
+  "mount": "/dev/vdb xfs rw,relatime,inode64,logbufs=8,logbsize=32k,noquota\n",
+  "vm": {
+    "dirty_background_ratio": "10",
+    "dirty_ratio": "30",
+    "dirty_bytes": "0",
+    "dirty_background_bytes": "0",
+    "dirty_expire_centisecs": "3000",
+    "dirty_writeback_centisecs": "500"
+  }
+}

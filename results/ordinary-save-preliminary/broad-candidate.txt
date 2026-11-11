@@ -1,0 +1,672 @@
+I1111 14:56:09.110173  3837417 save_restore.go:546] MemoryFile(0x31bc9a768008): save scanning took 75.238647ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:09.113067  3837417 save_restore.go:581] MemoryFile(0x31bc9a768008): saved metadata in 2.776343ms
+I1111 14:56:09.113368  3837417 save_restore.go:611] MemoryFile(0x31bc9a768008): saved pages in 237.714µs (16777216 bytes, 70577.316 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  78477606 ns/op	3420.54 MB/s
+I1111 14:56:09.289627  3837417 save_restore.go:546] MemoryFile(0x31bc9a769008): save scanning took 27.292976ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:09.291064  3837417 save_restore.go:581] MemoryFile(0x31bc9a769008): saved metadata in 1.374366ms
+I1111 14:56:09.291279  3837417 save_restore.go:611] MemoryFile(0x31bc9a769008): saved pages in 191.092µs (16777216 bytes, 87796.538 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  28980338 ns/op	9262.68 MB/s
+I1111 14:56:09.305769  3837417 save_restore.go:546] MemoryFile(0x31bc9a768008): save scanning took 1.011318ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:09.306015  3837417 save_restore.go:581] MemoryFile(0x31bc9a768008): saved metadata in 184.803µs
+I1111 14:56:09.306061  3837417 save_restore.go:611] MemoryFile(0x31bc9a768008): saved pages in 32.345µs (2686976 bytes, 83072.376 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1331943 ns/op
+I1111 14:56:09.463867  3837417 save_restore.go:546] MemoryFile(0x31bc9a858008): save scanning took 8.107069ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:09.463976  3837417 save_restore.go:581] MemoryFile(0x31bc9a858008): saved metadata in 21.302µs
+I1111 14:56:09.463992  3837417 save_restore.go:611] MemoryFile(0x31bc9a858008): saved pages in 1.544µs (268435456 bytes, 173857160.622 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   8269180 ns/op
+I1111 14:56:09.574218  3837417 save_restore.go:546] MemoryFile(0x31bc9a859008): save scanning took 980.112µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:09.574482  3837417 save_restore.go:581] MemoryFile(0x31bc9a859008): saved metadata in 192.074µs
+I1111 14:56:09.574521  3837417 save_restore.go:611] MemoryFile(0x31bc9a859008): saved pages in 23.939µs (2686976 bytes, 112242.617 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1314401 ns/op
+I1111 14:56:09.654430  3837417 save_restore.go:546] MemoryFile(0x31bc9a858008): save scanning took 3.237665ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:09.654558  3837417 save_restore.go:581] MemoryFile(0x31bc9a858008): saved metadata in 19.784µs
+I1111 14:56:09.654574  3837417 save_restore.go:611] MemoryFile(0x31bc9a858008): saved pages in 1.928µs (268435456 bytes, 139230008.299 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3414214 ns/op
+PASS
+I1111 14:56:10.109493  3837521 save_restore.go:546] MemoryFile(0x1386bb0ce008): save scanning took 71.426719ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:10.112069  3837521 save_restore.go:581] MemoryFile(0x1386bb0ce008): saved metadata in 2.466124ms
+I1111 14:56:10.112297  3837521 save_restore.go:611] MemoryFile(0x1386bb0ce008): saved pages in 176.452µs (16777216 bytes, 95080.906 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  74274838 ns/op	3614.08 MB/s
+I1111 14:56:10.288812  3837521 save_restore.go:546] MemoryFile(0x1386bb0cf008): save scanning took 28.317036ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:10.290398  3837521 save_restore.go:581] MemoryFile(0x1386bb0cf008): saved metadata in 1.520954ms
+I1111 14:56:10.290605  3837521 save_restore.go:611] MemoryFile(0x1386bb0cf008): saved pages in 183.239µs (16777216 bytes, 91559.199 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  30148899 ns/op	8903.66 MB/s
+I1111 14:56:10.307360  3837521 save_restore.go:546] MemoryFile(0x1386bb0ce008): save scanning took 1.028758ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:10.307602  3837521 save_restore.go:581] MemoryFile(0x1386bb0ce008): saved metadata in 177.484µs
+I1111 14:56:10.307640  3837521 save_restore.go:611] MemoryFile(0x1386bb0ce008): saved pages in 24.176µs (2686976 bytes, 111142.290 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1334366 ns/op
+I1111 14:56:10.463521  3837521 save_restore.go:546] MemoryFile(0x1386bb2fe008): save scanning took 7.086885ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:10.463630  3837521 save_restore.go:581] MemoryFile(0x1386bb2fe008): saved metadata in 22.183µs
+I1111 14:56:10.463645  3837521 save_restore.go:611] MemoryFile(0x1386bb2fe008): saved pages in 1.529µs (268435456 bytes, 175562757.358 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   7248685 ns/op
+I1111 14:56:10.571527  3837521 save_restore.go:546] MemoryFile(0x1386bb2ff008): save scanning took 993.794µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:10.571795  3837521 save_restore.go:581] MemoryFile(0x1386bb2ff008): saved metadata in 190.624µs
+I1111 14:56:10.571833  3837521 save_restore.go:611] MemoryFile(0x1386bb2ff008): saved pages in 24.181µs (2686976 bytes, 111119.309 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1343319 ns/op
+I1111 14:56:10.651760  3837521 save_restore.go:546] MemoryFile(0x1386bb2fe008): save scanning took 3.284383ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:10.651857  3837521 save_restore.go:581] MemoryFile(0x1386bb2fe008): saved metadata in 19.538µs
+I1111 14:56:10.651872  3837521 save_restore.go:611] MemoryFile(0x1386bb2fe008): saved pages in 1.425µs (268435456 bytes, 188375758.596 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3428500 ns/op
+PASS
+I1111 14:56:13.303474  3837971 save_restore.go:546] MemoryFile(0x29b0a4594008): save scanning took 68.207556ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:13.306198  3837971 save_restore.go:581] MemoryFile(0x29b0a4594008): saved metadata in 2.620443ms
+I1111 14:56:13.306438  3837971 save_restore.go:611] MemoryFile(0x29b0a4594008): saved pages in 186.853µs (16777216 bytes, 89788.315 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  71213347 ns/op	3769.45 MB/s
+I1111 14:56:13.477913  3837971 save_restore.go:546] MemoryFile(0x29b0a4595008): save scanning took 24.805164ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:13.479300  3837971 save_restore.go:581] MemoryFile(0x29b0a4595008): saved metadata in 1.325061ms
+I1111 14:56:13.479498  3837971 save_restore.go:611] MemoryFile(0x29b0a4595008): saved pages in 170.45µs (16777216 bytes, 98428.959 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  26431349 ns/op	10155.95 MB/s
+I1111 14:56:13.492356  3837971 save_restore.go:546] MemoryFile(0x29b0a4594008): save scanning took 999.958µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:13.492610  3837971 save_restore.go:581] MemoryFile(0x29b0a4594008): saved metadata in 176.211µs
+I1111 14:56:13.492647  3837971 save_restore.go:611] MemoryFile(0x29b0a4594008): saved pages in 23.692µs (2686976 bytes, 113412.798 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1316357 ns/op
+I1111 14:56:13.648248  3837971 save_restore.go:546] MemoryFile(0x29b0a4774008): save scanning took 6.439407ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:13.648375  3837971 save_restore.go:581] MemoryFile(0x29b0a4774008): saved metadata in 22.204µs
+I1111 14:56:13.648390  3837971 save_restore.go:611] MemoryFile(0x29b0a4774008): saved pages in 1.759µs (268435456 bytes, 152606853.894 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   6619435 ns/op
+I1111 14:56:13.759015  3837971 save_restore.go:546] MemoryFile(0x29b0a4775008): save scanning took 966.256µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:13.759315  3837971 save_restore.go:581] MemoryFile(0x29b0a4775008): saved metadata in 206.283µs
+I1111 14:56:13.759354  3837971 save_restore.go:611] MemoryFile(0x29b0a4775008): saved pages in 24.419µs (2686976 bytes, 110036.283 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1343660 ns/op
+I1111 14:56:13.879654  3837971 save_restore.go:546] MemoryFile(0x29b0a4774008): save scanning took 4.959215ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:13.879742  3837971 save_restore.go:581] MemoryFile(0x29b0a4774008): saved metadata in 18.996µs
+I1111 14:56:13.879758  3837971 save_restore.go:611] MemoryFile(0x29b0a4774008): saved pages in 1.428µs (268435456 bytes, 187980011.204 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   5094823 ns/op
+PASS
+I1111 14:56:14.349766  3838058 save_restore.go:546] MemoryFile(0x16206a6fe008): save scanning took 81.13956ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:14.352565  3838058 save_restore.go:581] MemoryFile(0x16206a6fe008): saved metadata in 2.696638ms
+I1111 14:56:14.352808  3838058 save_restore.go:611] MemoryFile(0x16206a6fe008): saved pages in 197.963µs (16777216 bytes, 84749.251 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  84225563 ns/op	3187.10 MB/s
+I1111 14:56:14.535061  3838058 save_restore.go:546] MemoryFile(0x16206a6ff008): save scanning took 33.128189ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:14.536640  3838058 save_restore.go:581] MemoryFile(0x16206a6ff008): saved metadata in 1.516609ms
+I1111 14:56:14.536867  3838058 save_restore.go:611] MemoryFile(0x16206a6ff008): saved pages in 203.256µs (16777216 bytes, 82542.291 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  34975246 ns/op	7675.01 MB/s
+I1111 14:56:14.549095  3838058 save_restore.go:546] MemoryFile(0x16206a6fe008): save scanning took 1.026065ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:14.549368  3838058 save_restore.go:581] MemoryFile(0x16206a6fe008): saved metadata in 199.643µs
+I1111 14:56:14.549406  3838058 save_restore.go:611] MemoryFile(0x16206a6fe008): saved pages in 24.133µs (2686976 bytes, 111340.322 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1366318 ns/op
+I1111 14:56:14.712439  3838058 save_restore.go:546] MemoryFile(0x16206a2e0008): save scanning took 9.46348ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:14.712548  3838058 save_restore.go:581] MemoryFile(0x16206a2e0008): saved metadata in 19.226µs
+I1111 14:56:14.712573  3838058 save_restore.go:611] MemoryFile(0x16206a2e0008): saved pages in 1.681µs (268435456 bytes, 159687957.168 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   9640345 ns/op
+I1111 14:56:14.829362  3838058 save_restore.go:546] MemoryFile(0x16206a2e1008): save scanning took 976.939µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:14.829669  3838058 save_restore.go:581] MemoryFile(0x16206a2e1008): saved metadata in 228.974µs
+I1111 14:56:14.829709  3838058 save_restore.go:611] MemoryFile(0x16206a2e1008): saved pages in 24.438µs (2686976 bytes, 109950.732 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1360624 ns/op
+I1111 14:56:14.911560  3838058 save_restore.go:546] MemoryFile(0x16206a2e0008): save scanning took 3.29037ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:14.911667  3838058 save_restore.go:581] MemoryFile(0x16206a2e0008): saved metadata in 21.326µs
+I1111 14:56:14.911682  3838058 save_restore.go:611] MemoryFile(0x16206a2e0008): saved pages in 1.445µs (268435456 bytes, 185768481.661 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3450075 ns/op
+PASS
+I1111 14:56:17.419795  3838473 save_restore.go:546] MemoryFile(0x3b96b2114008): save scanning took 74.342416ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:17.422563  3838473 save_restore.go:581] MemoryFile(0x3b96b2114008): saved metadata in 2.668219ms
+I1111 14:56:17.422823  3838473 save_restore.go:611] MemoryFile(0x3b96b2114008): saved pages in 193.42µs (16777216 bytes, 86739.820 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  77412059 ns/op	3467.62 MB/s
+I1111 14:56:17.600416  3838473 save_restore.go:546] MemoryFile(0x3b96b2115008): save scanning took 28.738444ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:17.601971  3838473 save_restore.go:581] MemoryFile(0x3b96b2115008): saved metadata in 1.485782ms
+I1111 14:56:17.602175  3838473 save_restore.go:611] MemoryFile(0x3b96b2115008): saved pages in 179.973µs (16777216 bytes, 93220.739 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  30544362 ns/op	8788.38 MB/s
+I1111 14:56:17.616525  3838473 save_restore.go:546] MemoryFile(0x3b96b2114008): save scanning took 1.043252ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:17.616799  3838473 save_restore.go:581] MemoryFile(0x3b96b2114008): saved metadata in 189.196µs
+I1111 14:56:17.616838  3838473 save_restore.go:611] MemoryFile(0x3b96b2114008): saved pages in 24.362µs (2686976 bytes, 110293.736 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1383744 ns/op
+I1111 14:56:17.775846  3838473 save_restore.go:546] MemoryFile(0x3b96b23c4008): save scanning took 8.866691ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:17.775942  3838473 save_restore.go:581] MemoryFile(0x3b96b23c4008): saved metadata in 18.987µs
+I1111 14:56:17.775957  3838473 save_restore.go:611] MemoryFile(0x3b96b23c4008): saved pages in 1.289µs (268435456 bytes, 208250935.609 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   9011823 ns/op
+I1111 14:56:17.888833  3838473 save_restore.go:546] MemoryFile(0x3b96b23c5008): save scanning took 977.026µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:17.889116  3838473 save_restore.go:581] MemoryFile(0x3b96b23c5008): saved metadata in 207.035µs
+I1111 14:56:17.889156  3838473 save_restore.go:611] MemoryFile(0x3b96b23c5008): saved pages in 24.368µs (2686976 bytes, 110266.579 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1336593 ns/op
+I1111 14:56:17.969612  3838473 save_restore.go:546] MemoryFile(0x3b96b23c4008): save scanning took 3.162131ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:17.969702  3838473 save_restore.go:581] MemoryFile(0x3b96b23c4008): saved metadata in 19.708µs
+I1111 14:56:17.969717  3838473 save_restore.go:611] MemoryFile(0x3b96b23c4008): saved pages in 1.61µs (268435456 bytes, 166730096.894 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3301356 ns/op
+PASS
+I1111 14:56:18.435265  3838549 save_restore.go:546] MemoryFile(0x345f59c08008): save scanning took 74.338911ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:18.437943  3838549 save_restore.go:581] MemoryFile(0x345f59c08008): saved metadata in 2.571583ms
+I1111 14:56:18.438189  3838549 save_restore.go:611] MemoryFile(0x345f59c08008): saved pages in 195.229µs (16777216 bytes, 85936.085 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  77310938 ns/op	3472.15 MB/s
+I1111 14:56:18.613990  3838549 save_restore.go:546] MemoryFile(0x345f59c09008): save scanning took 27.805242ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:18.615479  3838549 save_restore.go:581] MemoryFile(0x345f59c09008): saved metadata in 1.416594ms
+I1111 14:56:18.615672  3838549 save_restore.go:611] MemoryFile(0x345f59c09008): saved pages in 169.041µs (16777216 bytes, 99249.389 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  29525623 ns/op	9091.61 MB/s
+I1111 14:56:18.628402  3838549 save_restore.go:546] MemoryFile(0x345f59c08008): save scanning took 990.68µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:18.628641  3838549 save_restore.go:581] MemoryFile(0x345f59c08008): saved metadata in 176.977µs
+I1111 14:56:18.628679  3838549 save_restore.go:611] MemoryFile(0x345f59c08008): saved pages in 23.804µs (2686976 bytes, 112879.180 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1293299 ns/op
+I1111 14:56:18.786297  3838549 save_restore.go:546] MemoryFile(0x345f59602008): save scanning took 8.225792ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:18.786402  3838549 save_restore.go:581] MemoryFile(0x345f59602008): saved metadata in 19.886µs
+I1111 14:56:18.786418  3838549 save_restore.go:611] MemoryFile(0x345f59602008): saved pages in 1.626µs (268435456 bytes, 165089456.335 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   8383824 ns/op
+I1111 14:56:18.900266  3838549 save_restore.go:546] MemoryFile(0x345f59603008): save scanning took 992.126µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:18.900542  3838549 save_restore.go:581] MemoryFile(0x345f59603008): saved metadata in 199.726µs
+I1111 14:56:18.900580  3838549 save_restore.go:611] MemoryFile(0x345f59603008): saved pages in 23.878µs (2686976 bytes, 112529.358 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1338731 ns/op
+I1111 14:56:18.979375  3838549 save_restore.go:546] MemoryFile(0x345f59602008): save scanning took 3.111941ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:18.979481  3838549 save_restore.go:581] MemoryFile(0x345f59602008): saved metadata in 21.796µs
+I1111 14:56:18.979497  3838549 save_restore.go:611] MemoryFile(0x345f59602008): saved pages in 1.677µs (268435456 bytes, 160068846.750 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3269770 ns/op
+PASS
+I1111 14:56:21.598385  3839050 save_restore.go:546] MemoryFile(0x194e38b00008): save scanning took 68.54261ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:21.601132  3839050 save_restore.go:581] MemoryFile(0x194e38b00008): saved metadata in 2.640579ms
+I1111 14:56:21.601362  3839050 save_restore.go:611] MemoryFile(0x194e38b00008): saved pages in 183.035µs (16777216 bytes, 91661.245 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  71564931 ns/op	3750.94 MB/s
+I1111 14:56:21.778812  3839050 save_restore.go:546] MemoryFile(0x194e38b01008): save scanning took 30.167658ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:21.780364  3839050 save_restore.go:581] MemoryFile(0x194e38b01008): saved metadata in 1.481925ms
+I1111 14:56:21.780567  3839050 save_restore.go:611] MemoryFile(0x194e38b01008): saved pages in 180.355µs (16777216 bytes, 93023.293 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  31959362 ns/op	8399.27 MB/s
+I1111 14:56:21.796612  3839050 save_restore.go:546] MemoryFile(0x194e38b00008): save scanning took 994.271µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:21.796857  3839050 save_restore.go:581] MemoryFile(0x194e38b00008): saved metadata in 183.428µs
+I1111 14:56:21.796895  3839050 save_restore.go:611] MemoryFile(0x194e38b00008): saved pages in 23.958µs (2686976 bytes, 112153.602 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1306166 ns/op
+I1111 14:56:21.956396  3839050 save_restore.go:546] MemoryFile(0x194e38d4a008): save scanning took 7.921026ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:21.956509  3839050 save_restore.go:581] MemoryFile(0x194e38d4a008): saved metadata in 18.379µs
+I1111 14:56:21.956523  3839050 save_restore.go:611] MemoryFile(0x194e38d4a008): saved pages in 1.373µs (268435456 bytes, 195510164.603 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   8086965 ns/op
+I1111 14:56:22.071606  3839050 save_restore.go:546] MemoryFile(0x194e38d4b008): save scanning took 1.034698ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:22.071868  3839050 save_restore.go:581] MemoryFile(0x194e38d4b008): saved metadata in 197.976µs
+I1111 14:56:22.071906  3839050 save_restore.go:611] MemoryFile(0x194e38d4b008): saved pages in 24.03µs (2686976 bytes, 111817.561 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1365999 ns/op
+I1111 14:56:22.188666  3839050 save_restore.go:546] MemoryFile(0x194e38d4a008): save scanning took 4.818726ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:22.188760  3839050 save_restore.go:581] MemoryFile(0x194e38d4a008): saved metadata in 18.733µs
+I1111 14:56:22.188774  3839050 save_restore.go:611] MemoryFile(0x194e38d4a008): saved pages in 1.354µs (268435456 bytes, 198253660.266 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   4958785 ns/op
+PASS
+I1111 14:56:22.642405  3839195 save_restore.go:546] MemoryFile(0x3a7bb9838008): save scanning took 66.523646ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:22.645391  3839195 save_restore.go:581] MemoryFile(0x3a7bb9838008): saved metadata in 2.887229ms
+I1111 14:56:22.645615  3839195 save_restore.go:611] MemoryFile(0x3a7bb9838008): saved pages in 178.567µs (16777216 bytes, 93954.740 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  69775868 ns/op	3847.11 MB/s
+I1111 14:56:22.822141  3839195 save_restore.go:546] MemoryFile(0x3a7bb9839008): save scanning took 28.204308ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:22.823679  3839195 save_restore.go:581] MemoryFile(0x3a7bb9839008): saved metadata in 1.463844ms
+I1111 14:56:22.823887  3839195 save_restore.go:611] MemoryFile(0x3a7bb9839008): saved pages in 184.952µs (16777216 bytes, 90711.190 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  29988966 ns/op	8951.14 MB/s
+I1111 14:56:22.841563  3839195 save_restore.go:546] MemoryFile(0x3a7bb9838008): save scanning took 1.083777ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:22.841871  3839195 save_restore.go:581] MemoryFile(0x3a7bb9838008): saved metadata in 236.899µs
+I1111 14:56:22.841920  3839195 save_restore.go:611] MemoryFile(0x3a7bb9838008): saved pages in 30.697µs (2686976 bytes, 87532.202 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1468597 ns/op
+I1111 14:56:22.997551  3839195 save_restore.go:546] MemoryFile(0x3a7bb97d0008): save scanning took 6.740143ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:22.997670  3839195 save_restore.go:581] MemoryFile(0x3a7bb97d0008): saved metadata in 21.674µs
+I1111 14:56:22.997686  3839195 save_restore.go:611] MemoryFile(0x3a7bb97d0008): saved pages in 1.926µs (268435456 bytes, 139374587.747 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   6927078 ns/op
+I1111 14:56:23.108754  3839195 save_restore.go:546] MemoryFile(0x3a7bb97d1008): save scanning took 975.556µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:23.109025  3839195 save_restore.go:581] MemoryFile(0x3a7bb97d1008): saved metadata in 198.929µs
+I1111 14:56:23.109075  3839195 save_restore.go:611] MemoryFile(0x3a7bb97d1008): saved pages in 24.903µs (2686976 bytes, 107897.683 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1327561 ns/op
+I1111 14:56:23.188796  3839195 save_restore.go:546] MemoryFile(0x3a7bb97d0008): save scanning took 3.203076ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:23.188907  3839195 save_restore.go:581] MemoryFile(0x3a7bb97d0008): saved metadata in 23.107µs
+I1111 14:56:23.188922  3839195 save_restore.go:611] MemoryFile(0x3a7bb97d0008): saved pages in 1.554µs (268435456 bytes, 172738388.674 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3370174 ns/op
+PASS
+I1111 14:56:25.649339  3839452 save_restore.go:546] MemoryFile(0x39bfce3b2008): save scanning took 70.939645ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:25.652054  3839452 save_restore.go:581] MemoryFile(0x39bfce3b2008): saved metadata in 2.611411ms
+I1111 14:56:25.652278  3839452 save_restore.go:611] MemoryFile(0x39bfce3b2008): saved pages in 180.08µs (16777216 bytes, 93165.349 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  73930660 ns/op	3630.91 MB/s
+I1111 14:56:25.823193  3839452 save_restore.go:546] MemoryFile(0x39bfce3b3008): save scanning took 26.216899ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:25.824680  3839452 save_restore.go:581] MemoryFile(0x39bfce3b3008): saved metadata in 1.422961ms
+I1111 14:56:25.824881  3839452 save_restore.go:611] MemoryFile(0x39bfce3b3008): saved pages in 177.823µs (16777216 bytes, 94347.840 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  27943457 ns/op	9606.38 MB/s
+I1111 14:56:25.836004  3839452 save_restore.go:546] MemoryFile(0x39bfce3b2008): save scanning took 1.082269ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:25.836293  3839452 save_restore.go:581] MemoryFile(0x39bfce3b2008): saved metadata in 196.497µs
+I1111 14:56:25.836331  3839452 save_restore.go:611] MemoryFile(0x39bfce3b2008): saved pages in 24.18µs (2686976 bytes, 111123.904 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1434480 ns/op
+I1111 14:56:25.996105  3839452 save_restore.go:546] MemoryFile(0x39bfce33e008): save scanning took 8.873989ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:25.996199  3839452 save_restore.go:581] MemoryFile(0x39bfce33e008): saved metadata in 16.742µs
+I1111 14:56:25.996213  3839452 save_restore.go:611] MemoryFile(0x39bfce33e008): saved pages in 1.299µs (268435456 bytes, 206647772.132 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   9014948 ns/op
+I1111 14:56:26.103119  3839452 save_restore.go:546] MemoryFile(0x39bfce33f008): save scanning took 1.000634ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:26.103386  3839452 save_restore.go:581] MemoryFile(0x39bfce33f008): saved metadata in 199.105µs
+I1111 14:56:26.103426  3839452 save_restore.go:611] MemoryFile(0x39bfce33f008): saved pages in 25.045µs (2686976 bytes, 107285.925 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1341606 ns/op
+I1111 14:56:26.217927  3839452 save_restore.go:546] MemoryFile(0x39bfce33e008): save scanning took 4.855974ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:26.218022  3839452 save_restore.go:581] MemoryFile(0x39bfce33e008): saved metadata in 18.46µs
+I1111 14:56:26.218040  3839452 save_restore.go:611] MemoryFile(0x39bfce33e008): saved pages in 1.353µs (268435456 bytes, 198400189.209 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   5001906 ns/op
+PASS
+I1111 14:56:26.672768  3839683 save_restore.go:546] MemoryFile(0x13c0e59e4008): save scanning took 68.389029ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:26.675298  3839683 save_restore.go:581] MemoryFile(0x13c0e59e4008): saved metadata in 2.421089ms
+I1111 14:56:26.675544  3839683 save_restore.go:611] MemoryFile(0x13c0e59e4008): saved pages in 177.286µs (16777216 bytes, 94633.620 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  71205992 ns/op	3769.84 MB/s
+I1111 14:56:26.848212  3839683 save_restore.go:546] MemoryFile(0x13c0e59e5008): save scanning took 25.32824ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:26.849644  3839683 save_restore.go:581] MemoryFile(0x13c0e59e5008): saved metadata in 1.364982ms
+I1111 14:56:26.849839  3839683 save_restore.go:611] MemoryFile(0x13c0e59e5008): saved pages in 170.403µs (16777216 bytes, 98456.107 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  26996313 ns/op	9943.41 MB/s
+I1111 14:56:26.862170  3839683 save_restore.go:546] MemoryFile(0x13c0e59e4008): save scanning took 1.058719ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:26.862399  3839683 save_restore.go:581] MemoryFile(0x13c0e59e4008): saved metadata in 176.096µs
+I1111 14:56:26.862436  3839683 save_restore.go:611] MemoryFile(0x13c0e59e4008): saved pages in 23.911µs (2686976 bytes, 112374.054 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1352374 ns/op
+I1111 14:56:27.016709  3839683 save_restore.go:546] MemoryFile(0x13c0e5df6008): save scanning took 6.274244ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:27.016808  3839683 save_restore.go:581] MemoryFile(0x13c0e5df6008): saved metadata in 21.35µs
+I1111 14:56:27.016823  3839683 save_restore.go:611] MemoryFile(0x13c0e5df6008): saved pages in 1.601µs (268435456 bytes, 167667367.895 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   6426730 ns/op
+I1111 14:56:27.127084  3839683 save_restore.go:546] MemoryFile(0x13c0e5df7008): save scanning took 1.000501ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:27.127346  3839683 save_restore.go:581] MemoryFile(0x13c0e5df7008): saved metadata in 187.661µs
+I1111 14:56:27.127384  3839683 save_restore.go:611] MemoryFile(0x13c0e5df7008): saved pages in 24.009µs (2686976 bytes, 111915.365 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1333248 ns/op
+I1111 14:56:27.241417  3839683 save_restore.go:546] MemoryFile(0x13c0e5df6008): save scanning took 4.839404ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:27.241514  3839683 save_restore.go:581] MemoryFile(0x13c0e5df6008): saved metadata in 18.084µs
+I1111 14:56:27.241528  3839683 save_restore.go:611] MemoryFile(0x13c0e5df6008): saved pages in 1.214µs (268435456 bytes, 221116520.593 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   4999692 ns/op
+PASS
+I1111 14:56:29.720027  3840160 save_restore.go:546] MemoryFile(0x2e221ed32008): save scanning took 72.8671ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:29.722871  3840160 save_restore.go:581] MemoryFile(0x2e221ed32008): saved metadata in 2.735134ms
+I1111 14:56:29.723165  3840160 save_restore.go:611] MemoryFile(0x2e221ed32008): saved pages in 235.952µs (16777216 bytes, 71104.360 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  76050333 ns/op	3529.71 MB/s
+I1111 14:56:29.900701  3840160 save_restore.go:546] MemoryFile(0x2e221ed33008): save scanning took 28.782895ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:29.902104  3840160 save_restore.go:581] MemoryFile(0x2e221ed33008): saved metadata in 1.338147ms
+I1111 14:56:29.902306  3840160 save_restore.go:611] MemoryFile(0x2e221ed33008): saved pages in 178.152µs (16777216 bytes, 94173.605 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  30429432 ns/op	8821.57 MB/s
+I1111 14:56:29.921470  3840160 save_restore.go:546] MemoryFile(0x2e221ed32008): save scanning took 1.038962ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:29.921735  3840160 save_restore.go:581] MemoryFile(0x2e221ed32008): saved metadata in 195.478µs
+I1111 14:56:29.921773  3840160 save_restore.go:611] MemoryFile(0x2e221ed32008): saved pages in 24.059µs (2686976 bytes, 111682.780 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1367832 ns/op
+I1111 14:56:30.086732  3840160 save_restore.go:546] MemoryFile(0x2e221ed20008): save scanning took 8.042237ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:30.086831  3840160 save_restore.go:581] MemoryFile(0x2e221ed20008): saved metadata in 19.777µs
+I1111 14:56:30.086846  3840160 save_restore.go:611] MemoryFile(0x2e221ed20008): saved pages in 1.609µs (268435456 bytes, 166833720.323 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   8191680 ns/op
+I1111 14:56:30.208939  3840160 save_restore.go:546] MemoryFile(0x2e221ed21008): save scanning took 997.312µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:30.209238  3840160 save_restore.go:581] MemoryFile(0x2e221ed21008): saved metadata in 220.719µs
+I1111 14:56:30.209280  3840160 save_restore.go:611] MemoryFile(0x2e221ed21008): saved pages in 24.574µs (2686976 bytes, 109342.232 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1370832 ns/op
+I1111 14:56:30.289134  3840160 save_restore.go:546] MemoryFile(0x2e221ed20008): save scanning took 3.078547ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:30.289242  3840160 save_restore.go:581] MemoryFile(0x2e221ed20008): saved metadata in 21.556µs
+I1111 14:56:30.289258  3840160 save_restore.go:611] MemoryFile(0x2e221ed20008): saved pages in 1.606µs (268435456 bytes, 167145364.882 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3242033 ns/op
+PASS
+I1111 14:56:30.749738  3840320 save_restore.go:546] MemoryFile(0xf635e97e008): save scanning took 74.278544ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:30.752565  3840320 save_restore.go:581] MemoryFile(0xf635e97e008): saved metadata in 2.72602ms
+I1111 14:56:30.752832  3840320 save_restore.go:611] MemoryFile(0xf635e97e008): saved pages in 206.921µs (16777216 bytes, 81080.296 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  77415608 ns/op	3467.46 MB/s
+I1111 14:56:30.930046  3840320 save_restore.go:546] MemoryFile(0xf635e97f008): save scanning took 29.217033ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:30.931616  3840320 save_restore.go:581] MemoryFile(0xf635e97f008): saved metadata in 1.502057ms
+I1111 14:56:30.931819  3840320 save_restore.go:611] MemoryFile(0xf635e97f008): saved pages in 179.772µs (16777216 bytes, 93324.967 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  31026653 ns/op	8651.77 MB/s
+I1111 14:56:30.952717  3840320 save_restore.go:546] MemoryFile(0xf635e97e008): save scanning took 1.07377ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:30.953023  3840320 save_restore.go:581] MemoryFile(0xf635e97e008): saved metadata in 228.123µs
+I1111 14:56:30.953071  3840320 save_restore.go:611] MemoryFile(0xf635e97e008): saved pages in 25.586µs (2686976 bytes, 105017.431 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1457921 ns/op
+I1111 14:56:31.119632  3840320 save_restore.go:546] MemoryFile(0xf635e616008): save scanning took 9.062582ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:31.119737  3840320 save_restore.go:581] MemoryFile(0xf635e616008): saved metadata in 19.055µs
+I1111 14:56:31.119752  3840320 save_restore.go:611] MemoryFile(0xf635e616008): saved pages in 1.336µs (268435456 bytes, 200924742.515 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   9220062 ns/op
+I1111 14:56:31.239722  3840320 save_restore.go:546] MemoryFile(0xf635e617008): save scanning took 1.043038ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:31.239975  3840320 save_restore.go:581] MemoryFile(0xf635e617008): saved metadata in 194.628µs
+I1111 14:56:31.240023  3840320 save_restore.go:611] MemoryFile(0xf635e617008): saved pages in 24.041µs (2686976 bytes, 111766.399 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1384038 ns/op
+I1111 14:56:31.319629  3840320 save_restore.go:546] MemoryFile(0xf635e616008): save scanning took 3.100212ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:31.319729  3840320 save_restore.go:581] MemoryFile(0xf635e616008): saved metadata in 20.096µs
+I1111 14:56:31.319744  3840320 save_restore.go:611] MemoryFile(0xf635e616008): saved pages in 1.754µs (268435456 bytes, 153041879.133 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3250443 ns/op
+PASS
+I1111 14:56:33.848946  3840644 save_restore.go:546] MemoryFile(0x1b114ebb0008): save scanning took 71.899394ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:33.851607  3840644 save_restore.go:581] MemoryFile(0x1b114ebb0008): saved metadata in 2.548641ms
+I1111 14:56:33.851833  3840644 save_restore.go:611] MemoryFile(0x1b114ebb0008): saved pages in 179.512µs (16777216 bytes, 93460.136 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  74836000 ns/op	3586.98 MB/s
+I1111 14:56:34.024646  3840644 save_restore.go:546] MemoryFile(0x1b114ebb1008): save scanning took 25.627288ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:34.026150  3840644 save_restore.go:581] MemoryFile(0x1b114ebb1008): saved metadata in 1.437235ms
+I1111 14:56:34.026356  3840644 save_restore.go:611] MemoryFile(0x1b114ebb1008): saved pages in 178.678µs (16777216 bytes, 93896.372 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  27375374 ns/op	9805.73 MB/s
+I1111 14:56:34.038043  3840644 save_restore.go:546] MemoryFile(0x1b114ebb0008): save scanning took 1.009393ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:34.038295  3840644 save_restore.go:581] MemoryFile(0x1b114ebb0008): saved metadata in 185.527µs
+I1111 14:56:34.038333  3840644 save_restore.go:611] MemoryFile(0x1b114ebb0008): saved pages in 24.289µs (2686976 bytes, 110625.221 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1328866 ns/op
+I1111 14:56:34.192291  3840644 save_restore.go:546] MemoryFile(0x1b114ebda008): save scanning took 6.831468ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:34.192401  3840644 save_restore.go:581] MemoryFile(0x1b114ebda008): saved metadata in 19.839µs
+I1111 14:56:34.192416  3840644 save_restore.go:611] MemoryFile(0x1b114ebda008): saved pages in 1.619µs (268435456 bytes, 165803246.448 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   6994032 ns/op
+I1111 14:56:34.299377  3840644 save_restore.go:546] MemoryFile(0x1b114ebdb008): save scanning took 972.264µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:34.299650  3840644 save_restore.go:581] MemoryFile(0x1b114ebdb008): saved metadata in 198.158µs
+I1111 14:56:34.299688  3840644 save_restore.go:611] MemoryFile(0x1b114ebdb008): saved pages in 24.322µs (2686976 bytes, 110475.125 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1317045 ns/op
+I1111 14:56:34.379060  3840644 save_restore.go:546] MemoryFile(0x1b114ebda008): save scanning took 3.134762ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:34.379168  3840644 save_restore.go:581] MemoryFile(0x1b114ebda008): saved metadata in 19.84µs
+I1111 14:56:34.379183  3840644 save_restore.go:611] MemoryFile(0x1b114ebda008): saved pages in 1.381µs (268435456 bytes, 194377593.049 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3298415 ns/op
+PASS
+I1111 14:56:34.850325  3840753 save_restore.go:546] MemoryFile(0xb2046f32008): save scanning took 74.201254ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:34.853396  3840753 save_restore.go:581] MemoryFile(0xb2046f32008): saved metadata in 2.966281ms
+I1111 14:56:34.853634  3840753 save_restore.go:611] MemoryFile(0xb2046f32008): saved pages in 182.404µs (16777216 bytes, 91978.334 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  77552966 ns/op	3461.32 MB/s
+I1111 14:56:35.026446  3840753 save_restore.go:546] MemoryFile(0xb2046f33008): save scanning took 26.53364ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:35.027979  3840753 save_restore.go:581] MemoryFile(0xb2046f33008): saved metadata in 1.462558ms
+I1111 14:56:35.028205  3840753 save_restore.go:611] MemoryFile(0xb2046f33008): saved pages in 201.859µs (16777216 bytes, 83113.540 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  28332591 ns/op	9474.44 MB/s
+I1111 14:56:35.041685  3840753 save_restore.go:546] MemoryFile(0xb2046f32008): save scanning took 976.032µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:35.041951  3840753 save_restore.go:581] MemoryFile(0xb2046f32008): saved metadata in 195.915µs
+I1111 14:56:35.041990  3840753 save_restore.go:611] MemoryFile(0xb2046f32008): saved pages in 24.342µs (2686976 bytes, 110384.356 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1306971 ns/op
+I1111 14:56:35.197489  3840753 save_restore.go:546] MemoryFile(0xb2046f34008): save scanning took 7.127225ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:35.197601  3840753 save_restore.go:581] MemoryFile(0xb2046f34008): saved metadata in 24.451µs
+I1111 14:56:35.197617  3840753 save_restore.go:611] MemoryFile(0xb2046f34008): saved pages in 2.037µs (268435456 bytes, 131779801.669 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   7293763 ns/op
+I1111 14:56:35.306848  3840753 save_restore.go:546] MemoryFile(0xb2046f35008): save scanning took 987.909µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:35.307140  3840753 save_restore.go:581] MemoryFile(0xb2046f35008): saved metadata in 211.466µs
+I1111 14:56:35.307584  3840753 save_restore.go:611] MemoryFile(0xb2046f35008): saved pages in 27.814µs (2686976 bytes, 96605.163 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1758963 ns/op
+I1111 14:56:35.426013  3840753 save_restore.go:546] MemoryFile(0xb2046f34008): save scanning took 4.764983ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:35.426121  3840753 save_restore.go:581] MemoryFile(0xb2046f34008): saved metadata in 18.214µs
+I1111 14:56:35.426136  3840753 save_restore.go:611] MemoryFile(0xb2046f34008): saved pages in 1.453µs (268435456 bytes, 184745668.273 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   4919837 ns/op
+PASS
+I1111 14:56:37.930183  3841052 save_restore.go:546] MemoryFile(0x319c09104008): save scanning took 85.876696ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:37.932739  3841052 save_restore.go:581] MemoryFile(0x319c09104008): saved metadata in 2.454301ms
+I1111 14:56:37.932985  3841052 save_restore.go:611] MemoryFile(0x319c09104008): saved pages in 197.948µs (16777216 bytes, 84755.673 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  88719323 ns/op	3025.67 MB/s
+I1111 14:56:38.107107  3841052 save_restore.go:546] MemoryFile(0x319c09105008): save scanning took 27.251896ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:38.108356  3841052 save_restore.go:581] MemoryFile(0x319c09105008): saved metadata in 1.18611ms
+I1111 14:56:38.108553  3841052 save_restore.go:611] MemoryFile(0x319c09105008): saved pages in 171.714µs (16777216 bytes, 97704.415 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  28738863 ns/op	9340.50 MB/s
+I1111 14:56:38.121732  3841052 save_restore.go:546] MemoryFile(0x319c09104008): save scanning took 974.989µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:38.122000  3841052 save_restore.go:581] MemoryFile(0x319c09104008): saved metadata in 179.902µs
+I1111 14:56:38.122044  3841052 save_restore.go:611] MemoryFile(0x319c09104008): saved pages in 29.886µs (2686976 bytes, 89907.515 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1325813 ns/op
+I1111 14:56:38.277231  3841052 save_restore.go:546] MemoryFile(0x319c091c0008): save scanning took 7.546482ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:38.277333  3841052 save_restore.go:581] MemoryFile(0x319c091c0008): saved metadata in 20.146µs
+I1111 14:56:38.277348  3841052 save_restore.go:611] MemoryFile(0x319c091c0008): saved pages in 1.969µs (268435456 bytes, 136330856.272 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   7699656 ns/op
+I1111 14:56:38.387963  3841052 save_restore.go:546] MemoryFile(0x319c091c1008): save scanning took 1.008913ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:38.388215  3841052 save_restore.go:581] MemoryFile(0x319c091c1008): saved metadata in 194.504µs
+I1111 14:56:38.388255  3841052 save_restore.go:611] MemoryFile(0x319c091c1008): saved pages in 24.052µs (2686976 bytes, 111715.284 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1335496 ns/op
+I1111 14:56:38.470399  3841052 save_restore.go:546] MemoryFile(0x319c091c0008): save scanning took 3.169321ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:38.470491  3841052 save_restore.go:581] MemoryFile(0x319c091c0008): saved metadata in 20.513µs
+I1111 14:56:38.470506  3841052 save_restore.go:611] MemoryFile(0x319c091c0008): saved pages in 1.881µs (268435456 bytes, 142708908.028 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3311018 ns/op
+PASS
+I1111 14:56:38.932559  3841165 save_restore.go:546] MemoryFile(0x3e7a7f11a008): save scanning took 72.890692ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:38.935435  3841165 save_restore.go:581] MemoryFile(0x3e7a7f11a008): saved metadata in 2.767353ms
+I1111 14:56:38.935678  3841165 save_restore.go:611] MemoryFile(0x3e7a7f11a008): saved pages in 196.633µs (16777216 bytes, 85322.484 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  76050559 ns/op	3529.70 MB/s
+I1111 14:56:39.107846  3841165 save_restore.go:546] MemoryFile(0x3e7a7f11b008): save scanning took 27.035512ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:39.109231  3841165 save_restore.go:581] MemoryFile(0x3e7a7f11b008): saved metadata in 1.312662ms
+I1111 14:56:39.109425  3841165 save_restore.go:611] MemoryFile(0x3e7a7f11b008): saved pages in 171.721µs (16777216 bytes, 97700.433 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  28653154 ns/op	9368.44 MB/s
+I1111 14:56:39.120689  3841165 save_restore.go:546] MemoryFile(0x3e7a7f11a008): save scanning took 1.070648ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:39.121003  3841165 save_restore.go:581] MemoryFile(0x3e7a7f11a008): saved metadata in 231.185µs
+I1111 14:56:39.121054  3841165 save_restore.go:611] MemoryFile(0x3e7a7f11a008): saved pages in 36.925µs (2686976 bytes, 72768.477 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1464481 ns/op
+I1111 14:56:39.280985  3841165 save_restore.go:546] MemoryFile(0x3e7a7f37a008): save scanning took 8.666346ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:39.281088  3841165 save_restore.go:581] MemoryFile(0x3e7a7f37a008): saved metadata in 20.984µs
+I1111 14:56:39.281103  3841165 save_restore.go:611] MemoryFile(0x3e7a7f37a008): saved pages in 1.299µs (268435456 bytes, 206647772.132 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   8821390 ns/op
+I1111 14:56:39.395935  3841165 save_restore.go:546] MemoryFile(0x3e7a7f37b008): save scanning took 1.020909ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:39.396218  3841165 save_restore.go:581] MemoryFile(0x3e7a7f37b008): saved metadata in 205.247µs
+I1111 14:56:39.396259  3841165 save_restore.go:611] MemoryFile(0x3e7a7f37b008): saved pages in 24.426µs (2686976 bytes, 110004.749 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1379127 ns/op
+I1111 14:56:39.510603  3841165 save_restore.go:546] MemoryFile(0x3e7a7f37a008): save scanning took 4.654999ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:39.510691  3841165 save_restore.go:581] MemoryFile(0x3e7a7f37a008): saved metadata in 17.601µs
+I1111 14:56:39.510705  3841165 save_restore.go:611] MemoryFile(0x3e7a7f37a008): saved pages in 1.195µs (268435456 bytes, 224632180.753 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   4787819 ns/op
+PASS
+I1111 14:56:42.030128  3841579 save_restore.go:546] MemoryFile(0x218e8d03a008): save scanning took 73.624041ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:42.032615  3841579 save_restore.go:581] MemoryFile(0x218e8d03a008): saved metadata in 2.356435ms
+I1111 14:56:42.032835  3841579 save_restore.go:611] MemoryFile(0x218e8d03a008): saved pages in 183.222µs (16777216 bytes, 91567.694 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  76377284 ns/op	3514.60 MB/s
+I1111 14:56:42.209485  3841579 save_restore.go:546] MemoryFile(0x218e8d03b008): save scanning took 29.301736ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:42.210868  3841579 save_restore.go:581] MemoryFile(0x218e8d03b008): saved metadata in 1.325489ms
+I1111 14:56:42.211100  3841579 save_restore.go:611] MemoryFile(0x218e8d03b008): saved pages in 208.403µs (16777216 bytes, 80503.716 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  30967453 ns/op	8668.31 MB/s
+I1111 14:56:42.227857  3841579 save_restore.go:546] MemoryFile(0x218e8d03a008): save scanning took 1.040198ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:42.228122  3841579 save_restore.go:581] MemoryFile(0x218e8d03a008): saved metadata in 200.801µs
+I1111 14:56:42.228163  3841579 save_restore.go:611] MemoryFile(0x218e8d03a008): saved pages in 24.273µs (2686976 bytes, 110698.142 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1369371 ns/op
+I1111 14:56:42.381903  3841579 save_restore.go:546] MemoryFile(0x218e8cff6008): save scanning took 6.601063ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:42.382024  3841579 save_restore.go:581] MemoryFile(0x218e8cff6008): saved metadata in 20.688µs
+I1111 14:56:42.382048  3841579 save_restore.go:611] MemoryFile(0x218e8cff6008): saved pages in 1.688µs (268435456 bytes, 159025744.076 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   6784238 ns/op
+I1111 14:56:42.491094  3841579 save_restore.go:546] MemoryFile(0x218e8cff7008): save scanning took 1.021337ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:42.491352  3841579 save_restore.go:581] MemoryFile(0x218e8cff7008): saved metadata in 188.055µs
+I1111 14:56:42.491392  3841579 save_restore.go:611] MemoryFile(0x218e8cff7008): saved pages in 25.9µs (2686976 bytes, 103744.247 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1352600 ns/op
+I1111 14:56:42.569898  3841579 save_restore.go:546] MemoryFile(0x218e8cff6008): save scanning took 3.087208ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:42.569984  3841579 save_restore.go:581] MemoryFile(0x218e8cff6008): saved metadata in 17.622µs
+I1111 14:56:42.569998  3841579 save_restore.go:611] MemoryFile(0x218e8cff6008): saved pages in 1.598µs (268435456 bytes, 167982137.672 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3220153 ns/op
+PASS
+I1111 14:56:43.018973  3841665 save_restore.go:546] MemoryFile(0x17b3db564008): save scanning took 67.642082ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:43.021551  3841665 save_restore.go:581] MemoryFile(0x17b3db564008): saved metadata in 2.468973ms
+I1111 14:56:43.021792  3841665 save_restore.go:611] MemoryFile(0x17b3db564008): saved pages in 190.919µs (16777216 bytes, 87876.094 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  70503747 ns/op	3807.39 MB/s
+I1111 14:56:43.198095  3841665 save_restore.go:546] MemoryFile(0x17b3db565008): save scanning took 28.2162ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:43.199565  3841665 save_restore.go:581] MemoryFile(0x17b3db565008): saved metadata in 1.398223ms
+I1111 14:56:43.199786  3841665 save_restore.go:611] MemoryFile(0x17b3db565008): saved pages in 197.907µs (16777216 bytes, 84773.232 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  29945343 ns/op	8964.18 MB/s
+I1111 14:56:43.216065  3841665 save_restore.go:546] MemoryFile(0x17b3db564008): save scanning took 1.002867ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:43.216328  3841665 save_restore.go:581] MemoryFile(0x17b3db564008): saved metadata in 193.476µs
+I1111 14:56:43.216366  3841665 save_restore.go:611] MemoryFile(0x17b3db564008): saved pages in 24.483µs (2686976 bytes, 109748.642 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1330666 ns/op
+I1111 14:56:43.371108  3841665 save_restore.go:546] MemoryFile(0x17b3db798008): save scanning took 7.045506ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:43.371210  3841665 save_restore.go:581] MemoryFile(0x17b3db798008): saved metadata in 20.341µs
+I1111 14:56:43.371226  3841665 save_restore.go:611] MemoryFile(0x17b3db798008): saved pages in 2.423µs (268435456 bytes, 110786403.632 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   7200412 ns/op
+I1111 14:56:43.483145  3841665 save_restore.go:546] MemoryFile(0x17b3db799008): save scanning took 1.034104ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:43.483459  3841665 save_restore.go:581] MemoryFile(0x17b3db799008): saved metadata in 212.293µs
+I1111 14:56:43.483498  3841665 save_restore.go:611] MemoryFile(0x17b3db799008): saved pages in 24.047µs (2686976 bytes, 111738.512 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1419948 ns/op
+I1111 14:56:43.563145  3841665 save_restore.go:546] MemoryFile(0x17b3db798008): save scanning took 3.316897ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:43.563236  3841665 save_restore.go:581] MemoryFile(0x17b3db798008): saved metadata in 20.347µs
+I1111 14:56:43.563251  3841665 save_restore.go:611] MemoryFile(0x17b3db798008): saved pages in 1.381µs (268435456 bytes, 194377593.049 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3454644 ns/op
+PASS
+I1111 14:56:46.120744  3841940 save_restore.go:546] MemoryFile(0x2be49e22008): save scanning took 83.187121ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:46.123519  3841940 save_restore.go:581] MemoryFile(0x2be49e22008): saved metadata in 2.668427ms
+I1111 14:56:46.123791  3841940 save_restore.go:611] MemoryFile(0x2be49e22008): saved pages in 213.043µs (16777216 bytes, 78750.374 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  86278369 ns/op	3111.27 MB/s
+I1111 14:56:46.298401  3841940 save_restore.go:546] MemoryFile(0x2be49e23008): save scanning took 27.2738ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:46.299711  3841940 save_restore.go:581] MemoryFile(0x2be49e23008): saved metadata in 1.246163ms
+I1111 14:56:46.299911  3841940 save_restore.go:611] MemoryFile(0x2be49e23008): saved pages in 172.979µs (16777216 bytes, 96989.901 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  28821795 ns/op	9313.63 MB/s
+I1111 14:56:46.315672  3841940 save_restore.go:546] MemoryFile(0x2be49e22008): save scanning took 1.037397ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:46.315965  3841940 save_restore.go:581] MemoryFile(0x2be49e22008): saved metadata in 210.681µs
+I1111 14:56:46.316004  3841940 save_restore.go:611] MemoryFile(0x2be49e22008): saved pages in 24.15µs (2686976 bytes, 111261.946 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1400994 ns/op
+I1111 14:56:46.475854  3841940 save_restore.go:546] MemoryFile(0x2be4a044008): save scanning took 8.717906ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:46.475967  3841940 save_restore.go:581] MemoryFile(0x2be4a044008): saved metadata in 21.14µs
+I1111 14:56:46.475983  3841940 save_restore.go:611] MemoryFile(0x2be4a044008): saved pages in 1.426µs (268435456 bytes, 188243657.784 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   8886512 ns/op
+I1111 14:56:46.593839  3841940 save_restore.go:546] MemoryFile(0x2be4a045008): save scanning took 1.063464ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:46.594101  3841940 save_restore.go:581] MemoryFile(0x2be4a045008): saved metadata in 195.125µs
+I1111 14:56:46.594141  3841940 save_restore.go:611] MemoryFile(0x2be4a045008): saved pages in 24.404µs (2686976 bytes, 110103.917 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1399241 ns/op
+I1111 14:56:46.677808  3841940 save_restore.go:546] MemoryFile(0x2be4a044008): save scanning took 4.903389ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:46.677912  3841940 save_restore.go:581] MemoryFile(0x2be4a044008): saved metadata in 20.89µs
+I1111 14:56:46.677927  3841940 save_restore.go:611] MemoryFile(0x2be4a044008): saved pages in 1.622µs (268435456 bytes, 165496581.998 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   5060451 ns/op
+PASS
+I1111 14:56:47.172546  3842155 save_restore.go:546] MemoryFile(0x38525f968008): save scanning took 80.539619ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:47.175348  3842155 save_restore.go:581] MemoryFile(0x38525f968008): saved metadata in 2.693504ms
+I1111 14:56:47.175574  3842155 save_restore.go:611] MemoryFile(0x38525f968008): saved pages in 179.26µs (16777216 bytes, 93591.521 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  83609306 ns/op	3210.59 MB/s
+I1111 14:56:47.348976  3842155 save_restore.go:546] MemoryFile(0x38525f969008): save scanning took 27.345049ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:47.350222  3842155 save_restore.go:581] MemoryFile(0x38525f969008): saved metadata in 1.169322ms
+I1111 14:56:47.350421  3842155 save_restore.go:611] MemoryFile(0x38525f969008): saved pages in 175.88µs (16777216 bytes, 95390.130 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  28829398 ns/op	9311.17 MB/s
+I1111 14:56:47.364377  3842155 save_restore.go:546] MemoryFile(0x38525f968008): save scanning took 1.012283ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:47.364605  3842155 save_restore.go:581] MemoryFile(0x38525f968008): saved metadata in 175.781µs
+I1111 14:56:47.364643  3842155 save_restore.go:611] MemoryFile(0x38525f968008): saved pages in 24.166µs (2686976 bytes, 111188.281 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1302894 ns/op
+I1111 14:56:47.526504  3842155 save_restore.go:546] MemoryFile(0x38525f4da008): save scanning took 11.009764ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:47.526611  3842155 save_restore.go:581] MemoryFile(0x38525f4da008): saved metadata in 20.15µs
+I1111 14:56:47.526626  3842155 save_restore.go:611] MemoryFile(0x38525f4da008): saved pages in 1.317µs (268435456 bytes, 203823429.005 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	  11170260 ns/op
+I1111 14:56:47.637657  3842155 save_restore.go:546] MemoryFile(0x38525f4db008): save scanning took 997.068µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:47.637929  3842155 save_restore.go:581] MemoryFile(0x38525f4db008): saved metadata in 195.855µs
+I1111 14:56:47.637967  3842155 save_restore.go:611] MemoryFile(0x38525f4db008): saved pages in 24.445µs (2686976 bytes, 109919.247 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1339268 ns/op
+I1111 14:56:47.756261  3842155 save_restore.go:546] MemoryFile(0x38525f4da008): save scanning took 4.781535ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:47.756369  3842155 save_restore.go:581] MemoryFile(0x38525f4da008): saved metadata in 17.834µs
+I1111 14:56:47.756384  3842155 save_restore.go:611] MemoryFile(0x38525f4da008): saved pages in 1.31µs (268435456 bytes, 204912561.832 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   4935796 ns/op
+PASS
+I1111 14:56:50.270665  3842493 save_restore.go:546] MemoryFile(0x1c011af08008): save scanning took 70.124619ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:50.273190  3842493 save_restore.go:581] MemoryFile(0x1c011af08008): saved metadata in 2.424431ms
+I1111 14:56:50.273426  3842493 save_restore.go:611] MemoryFile(0x1c011af08008): saved pages in 188.064µs (16777216 bytes, 89210.141 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  72926324 ns/op	3680.91 MB/s
+I1111 14:56:50.444594  3842493 save_restore.go:546] MemoryFile(0x1c011af09008): save scanning took 25.835871ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:50.446076  3842493 save_restore.go:581] MemoryFile(0x1c011af09008): saved metadata in 1.421253ms
+I1111 14:56:50.446286  3842493 save_restore.go:611] MemoryFile(0x1c011af09008): saved pages in 180.643µs (16777216 bytes, 92874.985 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  27568357 ns/op	9737.09 MB/s
+I1111 14:56:50.458752  3842493 save_restore.go:546] MemoryFile(0x1c011af08008): save scanning took 1.001792ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:50.459011  3842493 save_restore.go:581] MemoryFile(0x1c011af08008): saved metadata in 197.815µs
+I1111 14:56:50.459057  3842493 save_restore.go:611] MemoryFile(0x1c011af08008): saved pages in 31.245µs (2686976 bytes, 85996.992 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1332168 ns/op
+I1111 14:56:50.613856  3842493 save_restore.go:546] MemoryFile(0x1c011acdc008): save scanning took 7.173389ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:50.613953  3842493 save_restore.go:581] MemoryFile(0x1c011acdc008): saved metadata in 21.717µs
+I1111 14:56:50.613968  3842493 save_restore.go:611] MemoryFile(0x1c011acdc008): saved pages in 1.807µs (268435456 bytes, 148553102.380 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   7322177 ns/op
+I1111 14:56:50.727989  3842493 save_restore.go:546] MemoryFile(0x1c011acdd008): save scanning took 1.01603ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:50.728277  3842493 save_restore.go:581] MemoryFile(0x1c011acdd008): saved metadata in 208.625µs
+I1111 14:56:50.728315  3842493 save_restore.go:611] MemoryFile(0x1c011acdd008): saved pages in 23.927µs (2686976 bytes, 112298.909 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1375946 ns/op
+I1111 14:56:50.810328  3842493 save_restore.go:546] MemoryFile(0x1c011acdc008): save scanning took 3.205236ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:50.810436  3842493 save_restore.go:581] MemoryFile(0x1c011acdc008): saved metadata in 18.772µs
+I1111 14:56:50.810450  3842493 save_restore.go:611] MemoryFile(0x1c011acdc008): saved pages in 1.256µs (268435456 bytes, 213722496.815 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3360350 ns/op
+PASS
+I1111 14:56:51.258545  3842586 save_restore.go:546] MemoryFile(0xa789ecae008): save scanning took 69.110259ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:51.261285  3842586 save_restore.go:581] MemoryFile(0xa789ecae008): saved metadata in 2.633866ms
+I1111 14:56:51.261559  3842586 save_restore.go:611] MemoryFile(0xa789ecae008): saved pages in 209.674µs (16777216 bytes, 80015.720 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  72166561 ns/op	3719.67 MB/s
+I1111 14:56:51.430651  3842586 save_restore.go:546] MemoryFile(0xa789ecaf008): save scanning took 25.274885ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:51.432167  3842586 save_restore.go:581] MemoryFile(0xa789ecaf008): saved metadata in 1.449231ms
+I1111 14:56:51.432370  3842586 save_restore.go:611] MemoryFile(0xa789ecaf008): saved pages in 177.671µs (16777216 bytes, 94428.556 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  27035636 ns/op	9928.95 MB/s
+I1111 14:56:51.442946  3842586 save_restore.go:546] MemoryFile(0xa789ecae008): save scanning took 1.112417ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:51.443260  3842586 save_restore.go:581] MemoryFile(0xa789ecae008): saved metadata in 198.87µs
+I1111 14:56:51.443301  3842586 save_restore.go:611] MemoryFile(0xa789ecae008): saved pages in 24.308µs (2686976 bytes, 110538.753 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1497472 ns/op
+I1111 14:56:51.602867  3842586 save_restore.go:546] MemoryFile(0xa789efd0008): save scanning took 8.783816ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:51.602956  3842586 save_restore.go:581] MemoryFile(0xa789efd0008): saved metadata in 20.863µs
+I1111 14:56:51.602972  3842586 save_restore.go:611] MemoryFile(0xa789efd0008): saved pages in 1.38µs (268435456 bytes, 194518446.377 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   8922891 ns/op
+I1111 14:56:51.720679  3842586 save_restore.go:546] MemoryFile(0xa789efd1008): save scanning took 980.439µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:51.720964  3842586 save_restore.go:581] MemoryFile(0xa789efd1008): saved metadata in 201.625µs
+I1111 14:56:51.721003  3842586 save_restore.go:611] MemoryFile(0xa789efd1008): saved pages in 24.768µs (2686976 bytes, 108485.788 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1335359 ns/op
+I1111 14:56:51.800681  3842586 save_restore.go:546] MemoryFile(0xa789efd0008): save scanning took 3.235133ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:51.800787  3842586 save_restore.go:581] MemoryFile(0xa789efd0008): saved metadata in 21.339µs
+I1111 14:56:51.800802  3842586 save_restore.go:611] MemoryFile(0xa789efd0008): saved pages in 1.954µs (268435456 bytes, 137377408.393 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   3388333 ns/op
+PASS
+I1111 14:56:54.341712  3842986 save_restore.go:546] MemoryFile(0x1a63949e6008): save scanning took 70.69908ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:54.344515  3842986 save_restore.go:581] MemoryFile(0x1a63949e6008): saved metadata in 2.707069ms
+I1111 14:56:54.344775  3842986 save_restore.go:611] MemoryFile(0x1a63949e6008): saved pages in 206.375µs (16777216 bytes, 81294.808 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  73801446 ns/op	3637.27 MB/s
+I1111 14:56:54.532739  3842986 save_restore.go:546] MemoryFile(0x1a63949e7008): save scanning took 30.06334ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:54.534172  3842986 save_restore.go:581] MemoryFile(0x1a63949e7008): saved metadata in 1.368492ms
+I1111 14:56:54.534365  3842986 save_restore.go:611] MemoryFile(0x1a63949e7008): saved pages in 169.682µs (16777216 bytes, 98874.459 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  31726537 ns/op	8460.91 MB/s
+I1111 14:56:54.548594  3842986 save_restore.go:546] MemoryFile(0x1a63949e6008): save scanning took 1.034075ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:54.548849  3842986 save_restore.go:581] MemoryFile(0x1a63949e6008): saved metadata in 201.133µs
+I1111 14:56:54.548887  3842986 save_restore.go:611] MemoryFile(0x1a63949e6008): saved pages in 24.119µs (2686976 bytes, 111404.950 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1350426 ns/op
+I1111 14:56:54.707358  3842986 save_restore.go:546] MemoryFile(0x1a6395888008): save scanning took 8.765335ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:54.707467  3842986 save_restore.go:581] MemoryFile(0x1a6395888008): saved metadata in 18.051µs
+I1111 14:56:54.707482  3842986 save_restore.go:611] MemoryFile(0x1a6395888008): saved pages in 1.576µs (268435456 bytes, 170327065.990 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	   8933825 ns/op
+I1111 14:56:54.825415  3842986 save_restore.go:546] MemoryFile(0x1a6395889008): save scanning took 1.002547ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:54.825666  3842986 save_restore.go:581] MemoryFile(0x1a6395889008): saved metadata in 187.992µs
+I1111 14:56:54.825704  3842986 save_restore.go:611] MemoryFile(0x1a6395889008): saved pages in 24.169µs (2686976 bytes, 111174.480 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1322546 ns/op
+I1111 14:56:54.941771  3842986 save_restore.go:546] MemoryFile(0x1a6395888008): save scanning took 4.744697ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:54.941859  3842986 save_restore.go:581] MemoryFile(0x1a6395888008): saved metadata in 16.501µs
+I1111 14:56:54.941873  3842986 save_restore.go:611] MemoryFile(0x1a6395888008): saved pages in 1.205µs (268435456 bytes, 222768013.278 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   4877846 ns/op
+PASS
+I1111 14:56:55.404491  3843092 save_restore.go:546] MemoryFile(0xe2d0ba70008): save scanning took 73.09931ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 4096 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:55.407366  3843092 save_restore.go:581] MemoryFile(0xe2d0ba70008): saved metadata in 2.776659ms
+I1111 14:56:55.407628  3843092 save_restore.go:611] MemoryFile(0xe2d0ba70008): saved pages in 205.109µs (16777216 bytes, 81796.586 MB/s)
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       1	  76275786 ns/op	3519.27 MB/s
+I1111 14:56:55.586917  3843092 save_restore.go:546] MemoryFile(0xe2d0ba71008): save scanning took 27.741951ms for 268435456 allocated bytes: 251658240 bytes of zero pages (251658240 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 16777216 bytes of non-zero pages (0 bytes expected + 16777216 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1111 14:56:55.588503  3843092 save_restore.go:581] MemoryFile(0xe2d0ba71008): saved metadata in 1.511426ms
+I1111 14:56:55.588712  3843092 save_restore.go:611] MemoryFile(0xe2d0ba71008): saved pages in 183.142µs (16777216 bytes, 91607.692 MB/s)
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       1	  29575645 ns/op	9076.23 MB/s
+I1111 14:56:55.608399  3843092 save_restore.go:546] MemoryFile(0xe2d0ba70008): save scanning took 1.002354ms for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:55.608666  3843092 save_restore.go:581] MemoryFile(0xe2d0ba70008): saved metadata in 205.548µs
+I1111 14:56:55.608705  3843092 save_restore.go:611] MemoryFile(0xe2d0ba70008): saved pages in 24.516µs (2686976 bytes, 109600.914 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       1	   1331858 ns/op
+I1111 14:56:55.772299  3843092 save_restore.go:546] MemoryFile(0xe2d0bce2008): save scanning took 10.301504ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:55.772424  3843092 save_restore.go:581] MemoryFile(0xe2d0bce2008): saved metadata in 20.296µs
+I1111 14:56:55.772438  3843092 save_restore.go:611] MemoryFile(0xe2d0bce2008): saved pages in 1.301µs (268435456 bytes, 206330096.849 MB/s)
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       1	  10479140 ns/op
+I1111 14:56:55.891143  3843092 save_restore.go:546] MemoryFile(0xe2d0bce3008): save scanning took 984.459µs for 268435456 allocated bytes: 265748480 bytes of zero pages (265748480 bytes expected including 265748480 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 2686976 bytes of non-zero pages (0 bytes expected + 2686976 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:55.891416  3843092 save_restore.go:581] MemoryFile(0xe2d0bce3008): saved metadata in 196.969µs
+I1111 14:56:55.891454  3843092 save_restore.go:611] MemoryFile(0xe2d0bce3008): saved pages in 24.171µs (2686976 bytes, 111165.281 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       1	   1340697 ns/op
+I1111 14:56:56.032348  3843092 save_restore.go:546] MemoryFile(0xe2d0bce2008): save scanning took 9.199519ms for 268435456 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 268435456 bytes of non-zero pages (0 bytes expected + 268435456 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:56:56.032485  3843092 save_restore.go:581] MemoryFile(0xe2d0bce2008): saved metadata in 22.066µs
+I1111 14:56:56.032508  3843092 save_restore.go:611] MemoryFile(0xe2d0bce2008): saved pages in 1.504µs (268435456 bytes, 178481021.277 MB/s)
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       1	   9409055 ns/op
+PASS

@@ -1,0 +1,18 @@
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+                                                 │ /root/filestore-publish-20261111/final-performance/broad-upstream.txt │ /root/filestore-publish-20261111/final-performance/broad-candidate.txt │
+                                                 │                                sec/op                                 │                     sec/op                       vs base               │
+SaveToCommittedZeroPages/resume-104                                                                         74.50m ±  3%                                      76.05m ±  3%       ~ (p=0.480 n=24)
+SaveToCommittedZeroPages/exit-after-saving-104                                                              29.82m ±  4%                                      29.25m ±  4%       ~ (p=0.443 n=24)
+SaveToDiskBacked/file=memfd/written=1pct-104                                                                1.369m ±  4%                                      1.342m ±  3%       ~ (p=0.493 n=24)
+SaveToDiskBacked/file=memfd/written=100pct-104                                                              8.386m ±  7%                                      8.230m ± 11%       ~ (p=0.574 n=24)
+SaveToDiskBacked/file=tempdir/written=1pct-104                                                              1.352m ±  1%                                      1.342m ±  2%       ~ (p=0.814 n=24)
+SaveToDiskBacked/file=tempdir/written=100pct-104                                                            3.648m ± 32%                                      3.439m ± 44%       ~ (p=0.443 n=24)
+geomean                                                                                                     7.079m                                            6.958m        -1.70%
+
+                                               │ /root/filestore-publish-20261111/final-performance/broad-upstream.txt │ /root/filestore-publish-20261111/final-performance/broad-candidate.txt │
+                                               │                                  B/s                                  │                       B/s                        vs base               │
+SaveToCommittedZeroPages/resume-104                                                                       3.356Gi ± 3%                                      3.287Gi ± 4%       ~ (p=0.480 n=24)
+SaveToCommittedZeroPages/exit-after-saving-104                                                            8.383Gi ± 4%                                      8.547Gi ± 3%       ~ (p=0.443 n=24)
+geomean                                                                                                   5.304Gi                                           5.301Gi       -0.06%

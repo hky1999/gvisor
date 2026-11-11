@@ -1,0 +1,25 @@
+INFO: Invocation ID: 37009ede-c5d4-49db-9133-fec952a1e854
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //runsc/container:container_test (0 packages loaded, 0 targets configured)
+Analyzing: target //runsc/container:container_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //runsc/container:container_test (19 packages loaded, 122 targets configured).
+[4,241 / 4,254] GoCompilePkg pkg/sentry/seccheck/sinks/remote/server/server.a; 0s local, disk-cache ... (4 actions, 3 running)
+[4,250 / 4,254] [Prepa] GoCompilePkgExternal runsc/container/container_test_test.external.a
+[4,253 / 4,254] [Prepa] runfiles for //runsc/container:container_test
+[4,254 / 4,255] Testing //runsc/container:container_test; 1s local, disk-cache
+[4,254 / 4,255] Testing //runsc/container:container_test; 10s local, disk-cache
+[4,254 / 4,255] Testing //runsc/container:container_test; 40s local, disk-cache
+[4,254 / 4,255] Testing //runsc/container:container_test; 57s local, disk-cache
+INFO: Found 1 test target...
+Target //runsc/container:container_test up-to-date:
+  bazel-bin/runsc/container/container_test_/container_test
+INFO: Elapsed time: 61.577s, Critical Path: 60.21s
+INFO: 55 processes: 20 internal, 35 local.
+INFO: Build completed successfully, 55 total actions
+//runsc/container:container_test                                         PASSED in 57.1s
+
+Executed 1 out of 1 test: 1 test passes.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

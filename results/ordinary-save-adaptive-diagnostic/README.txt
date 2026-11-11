@@ -1,0 +1,1 @@
+Incomplete adaptive-window diagnostic, not used in the reported comparisons. Stopped because fixture setup scaled disproportionately and merged stderr broke benchmark records. See the complete fixed-iteration follow-up.

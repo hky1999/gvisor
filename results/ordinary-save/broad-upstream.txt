@@ -1,0 +1,240 @@
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  73838254 ns/op	3635.45 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  29858672 ns/op	8990.20 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1271074 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   8931205 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1331510 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3247105 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  76094150 ns/op	3527.68 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  31447544 ns/op	8535.98 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1284442 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9185224 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1346054 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3833586 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  75451113 ns/op	3557.74 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  29633139 ns/op	9058.62 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1283734 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9375266 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1312303 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3308478 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  82259156 ns/op	3263.29 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  29932201 ns/op	8968.12 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1251625 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   8836622 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1301328 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3933081 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  74799134 ns/op	3588.75 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  31762650 ns/op	8451.29 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1332185 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   8932237 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1306864 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4248443 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  86208363 ns/op	3113.80 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  31519984 ns/op	8516.36 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1289953 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9024267 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1315248 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3315134 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  74685187 ns/op	3594.23 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  31583979 ns/op	8499.10 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1255738 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9110648 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1480592 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3474373 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  73780747 ns/op	3638.29 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  31249079 ns/op	8590.19 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1263970 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9236452 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1318250 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4132438 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  75632978 ns/op	3549.19 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  30179072 ns/op	8894.76 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1272392 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   8833951 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1605550 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3891760 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  75797053 ns/op	3541.50 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  29959360 ns/op	8959.99 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1253551 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9577736 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1327514 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4013795 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  75803757 ns/op	3541.19 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  30439472 ns/op	8818.66 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1282190 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	  10058373 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1315488 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4415386 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  74634198 ns/op	3596.68 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  29644547 ns/op	9055.14 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1298975 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9238353 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1370679 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3312481 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  75200638 ns/op	3569.59 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  31060382 ns/op	8642.37 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1284945 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9629152 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1374613 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3374253 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  80964406 ns/op	3315.47 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  32192706 ns/op	8338.39 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1302007 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9057793 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1370959 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4920533 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  78886734 ns/op	3402.80 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  34054827 ns/op	7882.45 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1258440 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9134816 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1476985 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4094002 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  77039686 ns/op	3484.38 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  35075706 ns/op	7653.03 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1292258 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   8781846 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1309993 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3876545 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  78267841 ns/op	3429.70 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  32038058 ns/op	8378.64 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1402350 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9001775 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1413139 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3409025 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  74321070 ns/op	3611.84 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  33226833 ns/op	8078.88 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1276687 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9294526 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1320800 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4171675 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  76151952 ns/op	3525.00 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  30046759 ns/op	8933.92 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1269752 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9124620 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1343867 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4005090 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  77979983 ns/op	3442.36 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  29559324 ns/op	9081.24 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1290585 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   8903676 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1309148 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3387488 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  77738245 ns/op	3453.07 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  30077201 ns/op	8924.88 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1356656 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9643498 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1312726 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3343486 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  74958825 ns/op	3581.11 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  30550181 ns/op	8786.71 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1262537 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   9150257 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1339234 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3262478 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  77123467 ns/op	3480.59 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  30936075 ns/op	8677.10 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1264990 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   8949852 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1303901 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   3733363 ns/op
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSaveToCommittedZeroPages/resume-104         	       5	  81651634 ns/op	3287.57 MB/s
+BenchmarkSaveToCommittedZeroPages/exit-after-saving-104         	       5	  30433987 ns/op	8820.25 MB/s
+BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104           	       5	   1327973 ns/op
+BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104         	       5	   8916934 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104         	       5	   1297972 ns/op
+BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104       	       5	   4073874 ns/op
+PASS

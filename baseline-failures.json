@@ -1,0 +1,12 @@
+{
+  "candidate": [
+    "TestCollectLinksAndRoutes_SingleInterface",
+    "TestCollectLinksAndRoutes_MultipleInterfaces",
+    "TestCollectLinksAndRoutes_IPv6Disabled"
+  ],
+  "upstream": [
+    "TestCollectLinksAndRoutes_SingleInterface",
+    "TestCollectLinksAndRoutes_MultipleInterfaces",
+    "TestCollectLinksAndRoutes_IPv6Disabled"
+  ]
+}

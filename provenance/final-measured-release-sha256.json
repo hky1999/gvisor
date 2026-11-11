@@ -1,0 +1,11 @@
+{
+  "containerd-shim-runsc-v1": "bda71938e512951ff5e3b43264686b5ca48eaadb9bdc7f0b10839b52bb688203",
+  "gvisor-bin/checkpointgofer": "2f9bd3ab65eeb060053dc9e9f09ca0d32b31d0dc018ff45aa3cd106b8e81782f",
+  "gvisor-bin/gvisor-proc-umounter": "2d91f016e9827bd723ea891ba5489d74de2bd4a0620eb47ebbcb8800e0f505eb",
+  "gvisor-bin/gvisor-sentry-prewarmer": "40e6cd6a4899440b567e1a052e28eca7dd8630d8b3b901844197500c9df0ccce",
+  "gvisor-bin/gvisor_sentry": "8402ae19a8a8d4981d6e934ab2cf1b51b6f844083af510acaad5b8c880620789",
+  "gvisor-bin/runsc-fd-parking": "a5cf9c989cf13a18486eb36e3e7621dcf3fec735e2119087a772439fe2602d41",
+  "gvisor-bin/runsc-metric-server": "f8c77f261251fdf1be4dc5a9c8bb8f65e7fea69007b3c0ac35dbd433848d0d1b",
+  "gvisor-bin/runsc-netgofer": "52008588470ca5dad265862de769b16719bf55b544b7493cf49dbb6074b34e7b",
+  "runsc": "e62d544a961a0a3dd2c929e302545d8f78390e017678eeec240d7330d8c00fb5"
+}

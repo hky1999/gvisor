@@ -1,0 +1,231 @@
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.470147  3776239 save_restore.go:1225] MemoryFile(0xab6dc78c008): loaded metadata in 36.399µs
+I1111 14:54:09.470232  3776239 save_restore.go:1392] MemoryFile(0xab6dc78c008): loaded pages in 341ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.480453  3776239 save_restore.go:1225] MemoryFile(0xab6dc78d008): loaded metadata in 19.118µs
+I1111 14:54:09.480486  3776239 save_restore.go:1392] MemoryFile(0xab6dc78d008): loaded pages in 119ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.02s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.484876  3776239 save_restore.go:546] MemoryFile(0xab6dc687008): save scanning took 117.272µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.484933  3776239 save_restore.go:581] MemoryFile(0xab6dc687008): saved metadata in 14.607µs
+I1111 14:54:09.484954  3776239 save_restore.go:611] MemoryFile(0xab6dc687008): saved pages in 7.473µs (4096 bytes, 548.107 MB/s)
+I1111 14:54:09.485047  3776239 save_restore.go:1225] MemoryFile(0xab6dc6a2008): loaded metadata in 22.879µs
+I1111 14:54:09.487293  3776239 save_restore.go:1392] MemoryFile(0xab6dc6a2008): loaded pages in 2.22111ms (4096 bytes, 1.844 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.00s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.489663  3776239 save_restore.go:546] MemoryFile(0xab6dc6a3008): save scanning took 2.011µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.489693  3776239 save_restore.go:581] MemoryFile(0xab6dc6a3008): saved metadata in 7.449µs
+I1111 14:54:09.489705  3776239 save_restore.go:611] MemoryFile(0xab6dc6a3008): saved pages in 65ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.489744  3776239 save_restore.go:1225] MemoryFile(0xab6dc6b6008): loaded metadata in 5.329µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.492582  3776239 save_restore.go:1225] MemoryFile(0xab6dc5df008): loaded metadata in 17.743µs
+I1111 14:54:09.492616  3776239 save_restore.go:1392] MemoryFile(0xab6dc5df008): loaded pages in 185ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.500424  3776239 save_restore.go:1225] MemoryFile(0xab6dc7b0008): loaded metadata in 12.006µs
+I1111 14:54:09.500456  3776239 save_restore.go:1392] MemoryFile(0xab6dc7b0008): loaded pages in 152ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.504975  3776239 save_restore.go:546] MemoryFile(0xab6dc806008): save scanning took 29.61µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.505021  3776239 save_restore.go:581] MemoryFile(0xab6dc806008): saved metadata in 9.23µs
+I1111 14:54:09.505049  3776239 save_restore.go:611] MemoryFile(0xab6dc806008): saved pages in 15.474µs (4096 bytes, 264.702 MB/s)
+I1111 14:54:09.505139  3776239 save_restore.go:1225] MemoryFile(0xab6dc807008): loaded metadata in 18.757µs
+I1111 14:54:09.507489  3776239 save_restore.go:1392] MemoryFile(0xab6dc807008): loaded pages in 2.32596ms (4096 bytes, 1.761 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.00s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.509698  3776239 save_restore.go:546] MemoryFile(0xab6dc82a008): save scanning took 2.62µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.509730  3776239 save_restore.go:581] MemoryFile(0xab6dc82a008): saved metadata in 7.355µs
+I1111 14:54:09.509742  3776239 save_restore.go:611] MemoryFile(0xab6dc82a008): saved pages in 91ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.509780  3776239 save_restore.go:1225] MemoryFile(0xab6dc82b008): loaded metadata in 5.604µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.512583  3776239 save_restore.go:1225] MemoryFile(0xab6dc70e008): loaded metadata in 33.953µs
+I1111 14:54:09.512628  3776239 save_restore.go:1392] MemoryFile(0xab6dc70e008): loaded pages in 142ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.520659  3776239 save_restore.go:1225] MemoryFile(0xab6dc70f008): loaded metadata in 9.588µs
+I1111 14:54:09.520683  3776239 save_restore.go:1392] MemoryFile(0xab6dc70f008): loaded pages in 140ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.525099  3776239 save_restore.go:546] MemoryFile(0xab6dc848008): save scanning took 25.323µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.525138  3776239 save_restore.go:581] MemoryFile(0xab6dc848008): saved metadata in 8.528µs
+I1111 14:54:09.525156  3776239 save_restore.go:611] MemoryFile(0xab6dc848008): saved pages in 5.205µs (4096 bytes, 786.936 MB/s)
+I1111 14:54:09.525231  3776239 save_restore.go:1225] MemoryFile(0xab6dc849008): loaded metadata in 16.658µs
+I1111 14:54:09.527331  3776239 save_restore.go:1392] MemoryFile(0xab6dc849008): loaded pages in 2.083565ms (4096 bytes, 1.966 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.01s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.530617  3776239 save_restore.go:546] MemoryFile(0xab6dc55e008): save scanning took 2.645µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.530655  3776239 save_restore.go:581] MemoryFile(0xab6dc55e008): saved metadata in 9.151µs
+I1111 14:54:09.530666  3776239 save_restore.go:611] MemoryFile(0xab6dc55e008): saved pages in 80ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.530708  3776239 save_restore.go:1225] MemoryFile(0xab6dc55f008): loaded metadata in 5.956µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.534740  3776239 save_restore.go:1225] MemoryFile(0xab6dc5a5008): loaded metadata in 9.817µs
+I1111 14:54:09.534768  3776239 save_restore.go:1392] MemoryFile(0xab6dc5a5008): loaded pages in 121ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.544223  3776239 save_restore.go:1225] MemoryFile(0xab6dc65c008): loaded metadata in 23.012µs
+I1111 14:54:09.544261  3776239 save_restore.go:1392] MemoryFile(0xab6dc65c008): loaded pages in 159ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.02s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.547201  3776239 save_restore.go:546] MemoryFile(0xab6dc65d008): save scanning took 26.247µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.547240  3776239 save_restore.go:581] MemoryFile(0xab6dc65d008): saved metadata in 7.371µs
+I1111 14:54:09.547258  3776239 save_restore.go:611] MemoryFile(0xab6dc65d008): saved pages in 5.709µs (4096 bytes, 717.464 MB/s)
+I1111 14:54:09.547333  3776239 save_restore.go:1225] MemoryFile(0xab6dc6f4008): loaded metadata in 17.666µs
+I1111 14:54:09.549149  3776239 save_restore.go:1392] MemoryFile(0xab6dc6f4008): loaded pages in 1.8004ms (4096 bytes, 2.275 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.00s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.549855  3776239 save_restore.go:546] MemoryFile(0xab6dc6f5008): save scanning took 2.028µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.549881  3776239 save_restore.go:581] MemoryFile(0xab6dc6f5008): saved metadata in 5.714µs
+I1111 14:54:09.549891  3776239 save_restore.go:611] MemoryFile(0xab6dc6f5008): saved pages in 72ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.549928  3776239 save_restore.go:1225] MemoryFile(0xab6dc6fc008): loaded metadata in 4.878µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.552672  3776239 save_restore.go:1225] MemoryFile(0xab6dc5de008): loaded metadata in 10.817µs
+I1111 14:54:09.552700  3776239 save_restore.go:1392] MemoryFile(0xab6dc5de008): loaded pages in 150ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.561288  3776239 save_restore.go:1225] MemoryFile(0xab6dc563008): loaded metadata in 9.698µs
+I1111 14:54:09.561312  3776239 save_restore.go:1392] MemoryFile(0xab6dc563008): loaded pages in 167ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.564697  3776239 save_restore.go:546] MemoryFile(0xab6dc94f008): save scanning took 22.54µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.564745  3776239 save_restore.go:581] MemoryFile(0xab6dc94f008): saved metadata in 10.889µs
+I1111 14:54:09.564762  3776239 save_restore.go:611] MemoryFile(0xab6dc94f008): saved pages in 5.811µs (4096 bytes, 704.870 MB/s)
+I1111 14:54:09.564841  3776239 save_restore.go:1225] MemoryFile(0xab6dc96e008): loaded metadata in 18.425µs
+I1111 14:54:09.567299  3776239 save_restore.go:1392] MemoryFile(0xab6dc96e008): loaded pages in 2.437972ms (4096 bytes, 1.680 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.01s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.570675  3776239 save_restore.go:546] MemoryFile(0xab6dc96f008): save scanning took 2.197µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.570712  3776239 save_restore.go:581] MemoryFile(0xab6dc96f008): saved metadata in 7.703µs
+I1111 14:54:09.570723  3776239 save_restore.go:611] MemoryFile(0xab6dc96f008): saved pages in 65ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.570764  3776239 save_restore.go:1225] MemoryFile(0xab6dc780008): loaded metadata in 5.41µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.574962  3776239 save_restore.go:1225] MemoryFile(0xab6dc775008): loaded metadata in 8.185µs
+I1111 14:54:09.574986  3776239 save_restore.go:1392] MemoryFile(0xab6dc775008): loaded pages in 81ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.582287  3776239 save_restore.go:1225] MemoryFile(0xab6dc781008): loaded metadata in 9.884µs
+I1111 14:54:09.582309  3776239 save_restore.go:1392] MemoryFile(0xab6dc781008): loaded pages in 145ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.02s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.587494  3776239 save_restore.go:546] MemoryFile(0xab6dc777008): save scanning took 99.695µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.587536  3776239 save_restore.go:581] MemoryFile(0xab6dc777008): saved metadata in 8.042µs
+I1111 14:54:09.587552  3776239 save_restore.go:611] MemoryFile(0xab6dc777008): saved pages in 5.035µs (4096 bytes, 813.505 MB/s)
+I1111 14:54:09.587630  3776239 save_restore.go:1225] MemoryFile(0xab6dc77c008): loaded metadata in 15.961µs
+I1111 14:54:09.589491  3776239 save_restore.go:1392] MemoryFile(0xab6dc77c008): loaded pages in 1.840587ms (4096 bytes, 2.225 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.01s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.592640  3776239 save_restore.go:546] MemoryFile(0xab6dc77d008): save scanning took 1.998µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.592668  3776239 save_restore.go:581] MemoryFile(0xab6dc77d008): saved metadata in 6.562µs
+I1111 14:54:09.592678  3776239 save_restore.go:611] MemoryFile(0xab6dc77d008): saved pages in 56ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.592713  3776239 save_restore.go:1225] MemoryFile(0xab6dc802008): loaded metadata in 5.176µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.595446  3776239 save_restore.go:1225] MemoryFile(0xab6dc5df008): loaded metadata in 10.823µs
+I1111 14:54:09.595483  3776239 save_restore.go:1392] MemoryFile(0xab6dc5df008): loaded pages in 145ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.603321  3776239 save_restore.go:1225] MemoryFile(0xab6dc980008): loaded metadata in 10.628µs
+I1111 14:54:09.603343  3776239 save_restore.go:1392] MemoryFile(0xab6dc980008): loaded pages in 124ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.606896  3776239 save_restore.go:546] MemoryFile(0xab6dca84008): save scanning took 23.676µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.606936  3776239 save_restore.go:581] MemoryFile(0xab6dca84008): saved metadata in 7.159µs
+I1111 14:54:09.606953  3776239 save_restore.go:611] MemoryFile(0xab6dca84008): saved pages in 5.808µs (4096 bytes, 705.234 MB/s)
+I1111 14:54:09.607018  3776239 save_restore.go:1225] MemoryFile(0xab6dca85008): loaded metadata in 14.88µs
+I1111 14:54:09.609199  3776239 save_restore.go:1392] MemoryFile(0xab6dca85008): loaded pages in 2.166009ms (4096 bytes, 1.891 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.00s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.610861  3776239 save_restore.go:546] MemoryFile(0xab6dd032008): save scanning took 2.386µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.610898  3776239 save_restore.go:581] MemoryFile(0xab6dd032008): saved metadata in 12.04µs
+I1111 14:54:09.610910  3776239 save_restore.go:611] MemoryFile(0xab6dd032008): saved pages in 77ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.610946  3776239 save_restore.go:1225] MemoryFile(0xab6dd033008): loaded metadata in 6.247µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.613752  3776239 save_restore.go:1225] MemoryFile(0xab6dca9e008): loaded metadata in 18.466µs
+I1111 14:54:09.613792  3776239 save_restore.go:1392] MemoryFile(0xab6dca9e008): loaded pages in 140ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.623151  3776239 save_restore.go:1225] MemoryFile(0xab6dd048008): loaded metadata in 9.526µs
+I1111 14:54:09.623174  3776239 save_restore.go:1392] MemoryFile(0xab6dd048008): loaded pages in 122ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.02s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.627264  3776239 save_restore.go:546] MemoryFile(0xab6dc5d0008): save scanning took 24.628µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.627298  3776239 save_restore.go:581] MemoryFile(0xab6dc5d0008): saved metadata in 8.141µs
+I1111 14:54:09.627317  3776239 save_restore.go:611] MemoryFile(0xab6dc5d0008): saved pages in 7.792µs (4096 bytes, 525.667 MB/s)
+I1111 14:54:09.627396  3776239 save_restore.go:1225] MemoryFile(0xab6dc5d1008): loaded metadata in 17.391µs
+I1111 14:54:09.629567  3776239 save_restore.go:1392] MemoryFile(0xab6dc5d1008): loaded pages in 2.153813ms (4096 bytes, 1.902 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.00s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.630286  3776239 save_restore.go:546] MemoryFile(0xab6dc5f4008): save scanning took 2.041µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.630313  3776239 save_restore.go:581] MemoryFile(0xab6dc5f4008): saved metadata in 6.237µs
+I1111 14:54:09.630324  3776239 save_restore.go:611] MemoryFile(0xab6dc5f4008): saved pages in 67ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.630370  3776239 save_restore.go:1225] MemoryFile(0xab6dc5f5008): loaded metadata in 5.599µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.634642  3776239 save_restore.go:1225] MemoryFile(0xab6dc6b2008): loaded metadata in 12.774µs
+I1111 14:54:09.634665  3776239 save_restore.go:1392] MemoryFile(0xab6dc6b2008): loaded pages in 127ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.643800  3776239 save_restore.go:1225] MemoryFile(0xab6dc679008): loaded metadata in 10.444µs
+I1111 14:54:09.643824  3776239 save_restore.go:1392] MemoryFile(0xab6dc679008): loaded pages in 103ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.02s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.648990  3776239 save_restore.go:546] MemoryFile(0xab6dd04e008): save scanning took 94.609µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.649024  3776239 save_restore.go:581] MemoryFile(0xab6dd04e008): saved metadata in 8.169µs
+I1111 14:54:09.649051  3776239 save_restore.go:611] MemoryFile(0xab6dd04e008): saved pages in 6.806µs (4096 bytes, 601.822 MB/s)
+I1111 14:54:09.649138  3776239 save_restore.go:1225] MemoryFile(0xab6dd04f008): loaded metadata in 18.239µs
+I1111 14:54:09.652284  3776239 save_restore.go:1392] MemoryFile(0xab6dd04f008): loaded pages in 3.126365ms (4096 bytes, 1.310 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.01s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.655647  3776239 save_restore.go:546] MemoryFile(0xab6dd06c008): save scanning took 2.278µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.655675  3776239 save_restore.go:581] MemoryFile(0xab6dd06c008): saved metadata in 7.6µs
+I1111 14:54:09.655686  3776239 save_restore.go:611] MemoryFile(0xab6dd06c008): saved pages in 80ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.655722  3776239 save_restore.go:1225] MemoryFile(0xab6dd06d008): loaded metadata in 5.871µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+I1111 14:54:09.658507  3776239 save_restore.go:1225] MemoryFile(0xab6dc6b3008): loaded metadata in 9.69µs
+I1111 14:54:09.658529  3776239 save_restore.go:1392] MemoryFile(0xab6dc6b3008): loaded pages in 102ns (0 bytes, 0.000 MB/s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+I1111 14:54:09.666991  3776239 save_restore.go:1225] MemoryFile(0xab6dcac2008): loaded metadata in 9.366µs
+I1111 14:54:09.667016  3776239 save_restore.go:1392] MemoryFile(0xab6dcac2008): loaded pages in 121ns (0 bytes, 0.000 MB/s)
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.02s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/small (0.01s)
+    --- PASS: TestFilestoreSnapshotSurvivesRelease/huge (0.01s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1111 14:54:09.671765  3776239 save_restore.go:546] MemoryFile(0xab6dc7a2008): save scanning took 28.169µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.671807  3776239 save_restore.go:581] MemoryFile(0xab6dc7a2008): saved metadata in 11.138µs
+I1111 14:54:09.671824  3776239 save_restore.go:611] MemoryFile(0xab6dc7a2008): saved pages in 4.217µs (4096 bytes, 971.307 MB/s)
+I1111 14:54:09.671910  3776239 save_restore.go:1225] MemoryFile(0xab6dc7a3008): loaded metadata in 17.437µs
+I1111 14:54:09.675461  3776239 save_restore.go:1392] MemoryFile(0xab6dc7a3008): loaded pages in 3.534432ms (4096 bytes, 1.159 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.01s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1111 14:54:09.677679  3776239 save_restore.go:546] MemoryFile(0xab6dc7c6008): save scanning took 2.24µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1111 14:54:09.677709  3776239 save_restore.go:581] MemoryFile(0xab6dc7c6008): saved metadata in 7.814µs
+I1111 14:54:09.677720  3776239 save_restore.go:611] MemoryFile(0xab6dc7c6008): saved pages in 69ns (0 bytes, 0.000 MB/s)
+I1111 14:54:09.677759  3776239 save_restore.go:1225] MemoryFile(0xab6dc7c7008): loaded metadata in 5.9µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+PASS

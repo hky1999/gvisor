@@ -1,0 +1,11 @@
+{
+  "baseline": "/root/filestore-publish-20261111/upstream-release/runsc",
+  "candidate": "/root/filestore-publish-20261111/final-measured-release/runsc",
+  "work_dir": "/mnt/m0-xfs/filestore-publish-dense-4g-64m",
+  "output": "/root/filestore-publish-20261111/final-performance/dense-4g-64m",
+  "mib": 4096,
+  "rewrite_mib": 64,
+  "sparse_mib": null,
+  "preflush_mode": "off",
+  "pairs": 12
+}

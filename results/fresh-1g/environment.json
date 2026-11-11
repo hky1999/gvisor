@@ -1,0 +1,11 @@
+{
+  "baseline": "/root/filestore-publish-20261111/upstream-release/runsc",
+  "candidate": "/root/filestore-publish-20261111/final-measured-release/runsc",
+  "work_dir": "/mnt/m0-xfs/filestore-publish-fresh-1g",
+  "output": "/root/filestore-publish-20261111/final-performance/fresh-1g",
+  "mib": 1024,
+  "rewrite_mib": null,
+  "sparse_mib": null,
+  "preflush_mode": "off",
+  "pairs": 12
+}

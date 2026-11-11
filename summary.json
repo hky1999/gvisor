@@ -1,0 +1,152 @@
+{
+  "fresh-1g": {
+    "baseline": {
+      "n": 12,
+      "all_contents_verified": true,
+      "median": {
+        "checkpoint_ms": 405.4948345,
+        "durable_checkpoint_ms": 1292.893052,
+        "restore_ms": 69.89050399999999,
+        "application_pause_ms": 399.6522015
+      },
+      "sample_sd": {
+        "checkpoint_ms": 14.409485746329464,
+        "durable_checkpoint_ms": 52.097879877905555,
+        "restore_ms": 2.066073635149531,
+        "application_pause_ms": 14.272514234018605
+      },
+      "dirty_mib_range": [
+        1024.0,
+        1024.0
+      ],
+      "resumed_writes_before_cli": 0
+    },
+    "candidate": {
+      "n": 12,
+      "all_contents_verified": true,
+      "median": {
+        "checkpoint_ms": 918.239847,
+        "durable_checkpoint_ms": 920.1786374999999,
+        "restore_ms": 82.03929500000001,
+        "application_pause_ms": 909.5384865000001
+      },
+      "sample_sd": {
+        "checkpoint_ms": 46.10231610483701,
+        "durable_checkpoint_ms": 46.110688440897746,
+        "restore_ms": 2.0289592155096803,
+        "application_pause_ms": 45.76906524690041
+      },
+      "dirty_mib_range": [
+        1024.0,
+        1024.0
+      ],
+      "resumed_writes_before_cli": 12,
+      "phases_ms": {
+        "ficlone_ms": 904.343046,
+        "state_pages_fsync_ms": 2.1243575,
+        "snapshot_fsync_ms": 0.0298945,
+        "post_resume_persistence_ms": 3.533482
+      }
+    }
+  },
+  "sparse-4g-64m": {
+    "baseline": {
+      "n": 12,
+      "all_contents_verified": true,
+      "median": {
+        "checkpoint_ms": 36.343923000000004,
+        "durable_checkpoint_ms": 95.9468915,
+        "restore_ms": 69.761442,
+        "application_pause_ms": 31.112006
+      },
+      "sample_sd": {
+        "checkpoint_ms": 1.59369016172791,
+        "durable_checkpoint_ms": 4.381734401279379,
+        "restore_ms": 2.8464952532739582,
+        "application_pause_ms": 1.9337569547774476
+      },
+      "dirty_mib_range": [
+        0.0,
+        0.0
+      ],
+      "resumed_writes_before_cli": 0
+    },
+    "candidate": {
+      "n": 12,
+      "all_contents_verified": true,
+      "median": {
+        "checkpoint_ms": 18.7566925,
+        "durable_checkpoint_ms": 20.807294499999998,
+        "restore_ms": 81.5382385,
+        "application_pause_ms": 8.805257000000001
+      },
+      "sample_sd": {
+        "checkpoint_ms": 0.6388709218098791,
+        "durable_checkpoint_ms": 0.8015053192560356,
+        "restore_ms": 2.357844464310357,
+        "application_pause_ms": 0.5582268607710176
+      },
+      "dirty_mib_range": [
+        0.0,
+        0.0
+      ],
+      "resumed_writes_before_cli": 12,
+      "phases_ms": {
+        "ficlone_ms": 0.065257,
+        "state_pages_fsync_ms": 2.2233015,
+        "snapshot_fsync_ms": 0.0302785,
+        "post_resume_persistence_ms": 3.5218895
+      }
+    }
+  },
+  "dense-4g-64m": {
+    "baseline": {
+      "n": 12,
+      "all_contents_verified": true,
+      "median": {
+        "checkpoint_ms": 1588.7085160000001,
+        "durable_checkpoint_ms": 6046.6557505,
+        "restore_ms": 70.1223005,
+        "application_pause_ms": 1583.3977115
+      },
+      "sample_sd": {
+        "checkpoint_ms": 66.0360296254876,
+        "durable_checkpoint_ms": 284.1670497535353,
+        "restore_ms": 1.7840653901013594,
+        "application_pause_ms": 66.01600540214716
+      },
+      "dirty_mib_range": [
+        64.0,
+        64.0
+      ],
+      "resumed_writes_before_cli": 0
+    },
+    "candidate": {
+      "n": 12,
+      "all_contents_verified": true,
+      "median": {
+        "checkpoint_ms": 79.31096500000001,
+        "durable_checkpoint_ms": 81.2382145,
+        "restore_ms": 81.19333549999999,
+        "application_pause_ms": 70.2360075
+      },
+      "sample_sd": {
+        "checkpoint_ms": 3.82920411090434,
+        "durable_checkpoint_ms": 3.9243058179493193,
+        "restore_ms": 2.5097564423297,
+        "application_pause_ms": 3.620016799148048
+      },
+      "dirty_mib_range": [
+        64.0,
+        64.0
+      ],
+      "resumed_writes_before_cli": 12,
+      "phases_ms": {
+        "ficlone_ms": 64.539407,
+        "state_pages_fsync_ms": 2.3372315,
+        "snapshot_fsync_ms": 0.0293395,
+        "post_resume_persistence_ms": 3.491511
+      }
+    }
+  }
+}

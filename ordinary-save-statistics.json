@@ -1,0 +1,66 @@
+{
+  "upstream": {
+    "BenchmarkSaveToCommittedZeroPages/resume-104": {
+      "n": 24,
+      "median_ns_per_op": 75948953.5,
+      "sample_sd_ns_per_op": 3063494.8766510948
+    },
+    "BenchmarkSaveToCommittedZeroPages/exit-after-saving-104": {
+      "n": 24,
+      "median_ns_per_op": 30743128.0,
+      "sample_sd_ns_per_op": 1432400.9971644573
+    },
+    "BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104": {
+      "n": 24,
+      "median_ns_per_op": 1282962.0,
+      "sample_sd_ns_per_op": 35458.323815160766
+    },
+    "BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104": {
+      "n": 24,
+      "median_ns_per_op": 9117634.0,
+      "sample_sd_ns_per_op": 309104.5454220827
+    },
+    "BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104": {
+      "n": 24,
+      "median_ns_per_op": 1324157.0,
+      "sample_sd_ns_per_op": 73397.44049025094
+    },
+    "BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104": {
+      "n": 24,
+      "median_ns_per_op": 3855065.5,
+      "sample_sd_ns_per_op": 441888.8766415559
+    }
+  },
+  "candidate": {
+    "BenchmarkSaveToCommittedZeroPages/resume-104": {
+      "n": 24,
+      "median_ns_per_op": 75929133.0,
+      "sample_sd_ns_per_op": 1757550.7832470331
+    },
+    "BenchmarkSaveToCommittedZeroPages/exit-after-saving-104": {
+      "n": 24,
+      "median_ns_per_op": 30866167.5,
+      "sample_sd_ns_per_op": 962993.8881788948
+    },
+    "BenchmarkSaveToDiskBacked/file=memfd/written=1pct-104": {
+      "n": 24,
+      "median_ns_per_op": 1312837.0,
+      "sample_sd_ns_per_op": 54155.89678111393
+    },
+    "BenchmarkSaveToDiskBacked/file=memfd/written=100pct-104": {
+      "n": 24,
+      "median_ns_per_op": 8962489.0,
+      "sample_sd_ns_per_op": 235117.26439926183
+    },
+    "BenchmarkSaveToDiskBacked/file=tempdir/written=1pct-104": {
+      "n": 24,
+      "median_ns_per_op": 1337219.0,
+      "sample_sd_ns_per_op": 69307.64832565718
+    },
+    "BenchmarkSaveToDiskBacked/file=tempdir/written=100pct-104": {
+      "n": 24,
+      "median_ns_per_op": 4088362.0,
+      "sample_sd_ns_per_op": 515579.3298075993
+    }
+  }
+}
