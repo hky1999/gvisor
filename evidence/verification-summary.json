@@ -1,0 +1,10 @@
+{
+  "source_files": 4652,
+  "reproducer_failures": 18,
+  "external_cases_passed": 54,
+  "reordered_cases_passed": 24,
+  "race_external_cases_passed": 9,
+  "performance_samples_verified": 48,
+  "boot_pairs": 24,
+  "skips": 0
+}

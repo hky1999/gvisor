@@ -1,0 +1,129 @@
+INFO: Invocation ID: 38d50248-51a7-489b-9009-924cf55dc963
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --@@rules_go+//go/config:pure, --@@rules_go+//go/config:race, --host_linkopt, and 1 more have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: target //runsc/container:container_test (0 packages loaded, 0 targets configured)
+Analyzing: target //runsc/container:container_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //runsc/container:container_test (0 packages loaded, 36404 targets configured, 189 aspect applications).
+[1 / 1] no actions running
+INFO: From Executing genrule //pkg/sentry/platform/systrap/sysmsg:sighandler_object:
+/usr/bin/x86_64-linux-gnu-ld.bfd: warning: bazel-out/k8-opt-ST-67df15d6b46b/bin/pkg/sentry/platform/systrap/sysmsg/sighandler.built-in.bin.o has a LOAD segment with RWX permissions
+INFO: From Executing genrule //pkg/sentry/platform/systrap/sysmsg:sighandler_go:
++ set -e
++ set -u
++ FILE=sighandler
++ NAME=Sighandler
++ PREFIX=Sighandler_blob_offset__
++ BLOB=Sighandler_blob
++ OBJNAME=bazel-out/k8-opt-ST-67df15d6b46b/bin/pkg/sentry/platform/systrap/sysmsg/sighandler.built-in.bin.o
++ NM=/usr/bin/x86_64-linux-gnu-nm
++ AWK_CMD='$2 ~ /^[tBCTA]$/ { print "var Sighandler_blob_offset__" $3 " = 0x" $1 }'
++ cat
++ /usr/bin/x86_64-linux-gnu-nm bazel-out/k8-opt-ST-67df15d6b46b/bin/pkg/sentry/platform/systrap/sysmsg/sighandler.built-in.bin.o
++ grep __export_
++ tr . _
++ awk '$2 ~ /^[tBCTA]$/ { print "var Sighandler_blob_offset__" $3 " = 0x" $1 }'
+[1,439 / 4,931] GoCompilePkg external/gazelle++go_deps+com_github_googleapis_gax_go_v2/internallog/internallog.a; 0s disk-cache, local ... (13 actions, 5 running)
+[1,822 / 4,931] GoCompilePkg external/gazelle++go_deps+in_gopkg_yaml_v2/yaml_v2.a; 0s disk-cache, local ... (15 actions, 14 running)
+INFO: From go_marshal: @@//pkg/sentry/loader:loader_abi_autogen:
+stdout (/root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/_tmp/actions/stdout-342) 1906336 exceeds maximum size of --experimental_ui_max_stdouterr_bytes=1048576 bytes; skipping
+[2,480 / 4,931] Generating state library @@//pkg/gvisordetect:gvisordetect_state_autogen_with_imports; 0s disk-cache, local ... (15 actions, 14 running)
+[2,691 / 4,931] GoCompilePkg pkg/state/state.a; 0s disk-cache, local ... (16 actions, 15 running)
+[2,848 / 4,931] go_marshal: @@//pkg/sentry/platform/systrap/usertrap:usertrap_abi_autogen; 0s disk-cache, local ... (16 actions, 14 running)
+[2,959 / 4,931] GoCompilePkg external/gazelle++go_deps+com_github_vishvananda_netlink/netlink.a; 1s disk-cache, local ... (16 actions, 14 running)
+[3,054 / 4,931] GoCompilePkg external/gazelle++go_deps+com_github_vishvananda_netlink/netlink.a; 2s disk-cache, local ... (16 actions, 15 running)
+[3,222 / 4,931] GoCompilePkg external/gazelle++go_deps+com_google_cloud_go_monitoring/apiv3/v2/monitoringpb/monitoringpb.a; 0s disk-cache, local ... (15 actions, 14 running)
+[3,306 / 4,931] GoCompilePkg external/gazelle++go_deps+org_golang_google_protobuf/internal/impl/impl.a; 1s disk-cache, local ... (16 actions, 14 running)
+[3,352 / 4,931] GoCompilePkg pkg/abi/nvgpu/nvgpu.a; 1s disk-cache, local ... (16 actions, 15 running)
+[3,485 / 4,931] Generating state library @@//pkg/xdp:xdp_state_autogen_with_imports; 1s disk-cache, local ... (16 actions, 15 running)
+[3,555 / 4,931] Generating state library @@//pkg/sentry/seccheck/sinks/remote/test:test_state_autogen_with_imports; 0s disk-cache, local ... (16 actions, 15 running)
+[3,598 / 4,931] Building Go template instance @@//pkg/sentry/devices/tpuproxy/accel:devaddr_set; 1s disk-cache, local ... (16 actions, 15 running)
+[3,638 / 4,931] Generating state library @@//runsc/autoplatform:autoplatform_state_autogen_with_imports; 0s disk-cache, local ... (16 actions, 14 running)
+[3,689 / 4,931] Generating state library @@//pkg/shim/v1:v1_state_autogen_with_imports; 0s disk-cache, local ... (16 actions, 15 running)
+[3,746 / 4,931] GoImports test/metricclient/metricclient_state_autogen_with_imports.go; 0s disk-cache, local ... (15 actions, 14 running)
+[3,782 / 4,931] Building Go template instance @@//pkg/sentry/fsimpl/fuse:request_list; 1s disk-cache, local ... (16 actions, 15 running)
+[3,834 / 4,931] Building Go template instance @@//pkg/sentry/fsimpl/fuse:inode_refs; 1s disk-cache, local ... (16 actions, 15 running)
+[3,886 / 4,931] Building Go template instance @@//pkg/sentry/fsimpl/fuse:connection_refs; 0s disk-cache, local ... (16 actions, 15 running)
+[3,910 / 4,931] GoCompilePkg pkg/abi/linux/linux.a; 1s disk-cache, local ... (16 actions, 15 running)
+[3,936 / 4,931] GoCompilePkg pkg/abi/linux/linux.a; 2s disk-cache, local ... (16 actions, 15 running)
+[3,992 / 4,931] GoCompilePkg external/gazelle++go_deps+com_github_vishvananda_netlink/netlink.a; 1s disk-cache, local ... (16 actions, 15 running)
+[4,019 / 4,931] Generating state library @@//pkg/sentry/fsimpl/gofer:gofer_state_autogen_with_imports; 1s disk-cache, local ... (16 actions, 15 running)
+[4,070 / 4,931] Building Go template instance @@//pkg/sentry/fsimpl/proc:subtasks_inode_refs; 0s disk-cache, local ... (16 actions, 15 running)
+[4,133 / 4,931] Generating state library @@//pkg/sentry/fsimpl/proc:proc_state_autogen_with_imports; 0s disk-cache, local ... (16 actions, 15 running)
+[4,190 / 4,931] GoImports runsc/gofer/net/filter/config/config_arm64_state_autogen_with_imports.go; 0s disk-cache, local ... (16 actions, 15 running)
+[4,235 / 4,931] Generating state library @@//runsc/gofer/net/filter/config:config_state_autogen_with_imports; 0s disk-cache, local ... (16 actions, 15 running)
+INFO: From GoLink test/cmd/test_app/test_app_/test_app:
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-754324368/000004.o: in function `_cgo_77133bf98b3a_C2func_getaddrinfo':
+cgo_unix_cgo.cgo2.c:(.text._cgo_77133bf98b3a_C2func_getaddrinfo+0x38): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+[4,287 / 4,931] GoImports runsc/gofer/fs/filter/filter_state_autogen_with_imports.go; 1s disk-cache, local ... (16 actions, 15 running)
+[4,386 / 4,931] GoCompilePkg external/gazelle++go_deps+com_github_gogo_protobuf/proto/proto.a; 1s disk-cache, local ... (15 actions, 14 running)
+[4,446 / 4,931] Generating state library @@//pkg/tcpip/link/stopfd:stopfd_state_autogen_with_imports; 0s disk-cache, local ... (16 actions, 15 running)
+[4,488 / 4,931] GoCompilePkg runsc/container/container_test.internal.a; 1s disk-cache, local ... (15 actions, 14 running)
+[4,547 / 4,931] GoCompilePkg runsc/container/container_test.internal.a; 2s disk-cache, local ... (16 actions, 15 running)
+[4,580 / 4,931] GoLink shim/containerd-shim-runsc-v1_/containerd-shim-runsc-v1; 1s disk-cache, local ... (16 actions, 15 running)
+[4,617 / 4,931] GoCompilePkg pkg/sentry/pgalloc/pgalloc.a; 1s disk-cache, local ... (16 actions, 15 running)
+[4,665 / 4,931] GoLink runsc/container/container_test_/container_test; 2s disk-cache, local ... (16 actions running)
+[4,711 / 4,931] Generating state library @@//pkg/sentry/platform/systrap:systrap_norace_state_autogen_with_imports; 0s disk-cache, local ... (16 actions, 14 running)
+[4,739 / 4,931] GoCompilePkg pkg/sentry/kernel/kernel.a; 1s disk-cache, local ... (16 actions, 15 running)
+[4,765 / 4,931] GoImports pkg/sentry/platform/systrap/stubfilter/stubfilter_arm64_state_autogen_with_imports.go; 1s disk-cache, local ... (16 actions, 15 running)
+[4,796 / 4,931] GoImports pkg/sentry/devices/rdmaproxy/rdmaproxy_state_autogen_with_imports.go; 0s disk-cache, local ... (16 actions, 15 running)
+[4,828 / 4,931] GoImports pkg/sentry/devices/ttydev/ttydev_state_autogen_with_imports.go; 0s disk-cache, local ... (14 actions, 13 running)
+[4,848 / 4,931] GoLink runsc/runsc-race_/runsc-race; 1s disk-cache, local ... (8 actions, 7 running)
+INFO: From GoLink runsc/runsc-race_/runsc-race:
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-10777485/000022.o: in function `_cgo_bdbee25190be_Cfunc_mygetgrgid_r':
+cgo_lookup_cgo.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetgrgid_r+0x45): warning: Using 'getgrgid_r' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-10777485/000022.o: in function `_cgo_bdbee25190be_Cfunc_mygetgrnam_r':
+cgo_lookup_cgo.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetgrnam_r+0x46): warning: Using 'getgrnam_r' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-10777485/000023.o: in function `_cgo_bdbee25190be_Cfunc_mygetgrouplist':
+getgrouplist_unix.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetgrouplist+0x2b): warning: Using 'getgrouplist' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-10777485/000004.o: in function `_cgo_77133bf98b3a_C2func_getaddrinfo':
+cgo_unix_cgo.cgo2.c:(.text._cgo_77133bf98b3a_C2func_getaddrinfo+0x38): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-10777485/000022.o: in function `_cgo_bdbee25190be_Cfunc_mygetpwnam_r':
+cgo_lookup_cgo.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetpwnam_r+0x4a): warning: Using 'getpwnam_r' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-10777485/000022.o: in function `_cgo_bdbee25190be_Cfunc_mygetpwuid_r':
+cgo_lookup_cgo.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetpwuid_r+0x49): warning: Using 'getpwuid_r' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+[4,862 / 4,931] GoCompilePkg pkg/sentry/inet/inet.a; 0s disk-cache, local ... (3 actions, 2 running)
+[4,870 / 4,931] GoCompilePkg pkg/sentry/kernel/kernel.a; 1s disk-cache, local ... (2 actions running)
+[4,872 / 4,931] GoCompilePkg pkg/sentry/kernel/kernel.a; 2s disk-cache, local ... (2 actions running)
+[4,873 / 4,931] PrecompileSeccomp runsc/boot/filter/filter_precompiled.go; 2s disk-cache, local ... (11 actions, 1 running)
+[4,888 / 4,931] GoCompilePkg pkg/sentry/fsimpl/cgroup2fs/cgroup2fs.a; 1s disk-cache, local ... (14 actions, 13 running)
+[4,902 / 4,931] GoCompilePkg pkg/sentry/devices/nvproxy/nvproxy.a; 2s disk-cache, local ... (3 actions running)
+[4,907 / 4,931] Generating state library @@//runsc/boot/filter:filter_state_autogen_with_imports; 2s disk-cache, local ... (4 actions running)
+[4,916 / 4,931] Generating state library @@//runsc/boot/filter:filter_state_autogen_with_imports; 4s disk-cache, local ... (3 actions running)
+[4,919 / 4,931] GoCompilePkg runsc/specutils/seccomp/seccomp.a; 0s disk-cache, local ... (3 actions, 2 running)
+[4,922 / 4,931] GoCompilePkg pkg/sentry/control/control.a; 0s disk-cache, local ... (2 actions, 1 running)
+[4,923 / 4,931] GoCompilePkg runsc/boot/filter/filter.a; 1s disk-cache, local
+[4,924 / 4,931] [Prepa] GoCompilePkg runsc/boot/boot.a
+[4,924 / 4,931] GoCompilePkg runsc/boot/boot.a; 1s disk-cache, local
+[4,925 / 4,931] [Prepa] GoCompilePkg runsc/cmd/sentry/sentrycmd/sentrycmd.a
+[4,926 / 4,931] [Prepa] GoCompilePkg runsc/cli/sentrycli/sentrycli.a
+[4,928 / 4,931] GoLink runsc/cmd/sentry/gvisor_sentry-race_/gvisor_sentry-race; 1s disk-cache, local
+INFO: From GoLink runsc/cmd/sentry/gvisor_sentry-race_/gvisor_sentry-race:
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-1855586241/000022.o: in function `_cgo_bdbee25190be_Cfunc_mygetgrgid_r':
+cgo_lookup_cgo.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetgrgid_r+0x45): warning: Using 'getgrgid_r' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-1855586241/000022.o: in function `_cgo_bdbee25190be_Cfunc_mygetgrnam_r':
+cgo_lookup_cgo.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetgrnam_r+0x46): warning: Using 'getgrnam_r' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-1855586241/000023.o: in function `_cgo_bdbee25190be_Cfunc_mygetgrouplist':
+getgrouplist_unix.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetgrouplist+0x2b): warning: Using 'getgrouplist' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-1855586241/000004.o: in function `_cgo_77133bf98b3a_C2func_getaddrinfo':
+cgo_unix_cgo.cgo2.c:(.text._cgo_77133bf98b3a_C2func_getaddrinfo+0x38): warning: Using 'getaddrinfo' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-1855586241/000022.o: in function `_cgo_bdbee25190be_Cfunc_mygetpwnam_r':
+cgo_lookup_cgo.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetpwnam_r+0x4a): warning: Using 'getpwnam_r' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+/usr/bin/x86_64-linux-gnu-ld.bfd: /tmp/go-link-1855586241/000022.o: in function `_cgo_bdbee25190be_Cfunc_mygetpwuid_r':
+cgo_lookup_cgo.cgo2.c:(.text._cgo_bdbee25190be_Cfunc_mygetpwuid_r+0x49): warning: Using 'getpwuid_r' in statically linked applications requires at runtime the shared libraries from the glibc version used for linking
+[4,929 / 4,931] [Prepa] Copying file runsc/cmd/sentry/gvisor_sentry-race_/gvisor_sentry-race
+[4,931 / 4,932] Testing //runsc/container:container_test; 1s disk-cache, local
+[4,931 / 4,932] Testing //runsc/container:container_test; 10s disk-cache, local
+[4,931 / 4,932] Testing //runsc/container:container_test; 30s disk-cache, local
+INFO: Found 1 test target...
+Target //runsc/container:container_test up-to-date:
+  bazel-bin/runsc/container/container_test_/container_test
+INFO: Elapsed time: 102.512s, Critical Path: 67.38s
+INFO: 2911 processes: 2021 action cache hit, 1117 disk cache hit, 53 internal, 1741 local.
+INFO: Build completed successfully, 2911 total actions
+//runsc/container:container_test                                         PASSED in 30.3s
+
+Executed 1 out of 1 test: 1 test passes.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

@@ -1,0 +1,6 @@
+==> clang-tidy
+clang-tidy: 367 sources analyzed.
+==> Lint summary
+  PASS  clang-tidy
+
+lint: all checks passed.

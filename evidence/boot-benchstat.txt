@@ -1,0 +1,50 @@
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+                                     │ /root/filestore-mount-identity-20261111/boot-baseline.txt │ /root/filestore-mount-identity-20261111/boot-fixed.txt │
+                                     │                          sec/op                           │             sec/op               vs base               │
+SandboxBoot/kvm/Boot-104                                                             67.56m ± 3%                       68.17m ± 3%       ~ (p=0.927 n=24)
+SandboxBoot/kvm/New-104                                                              41.90m ± 5%                       42.21m ± 4%       ~ (p=0.894 n=24)
+SandboxBoot/kvm/Run-104                                                              2.973m ± 2%                       2.943m ± 2%       ~ (p=0.480 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                     66.50m ± 3%                       67.08m ± 3%       ~ (p=0.214 n=24)
+SandboxBoot/kvm_overlay/New-104                                                      41.47m ± 4%                       41.08m ± 5%       ~ (p=0.480 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                      3.137m ± 2%                       3.138m ± 2%       ~ (p=0.992 n=24)
+SandboxBoot/systrap/Boot-104                                                         26.47m ± 1%                       26.73m ± 3%       ~ (p=0.602 n=24)
+SandboxBoot/systrap/New-104                                                          2.465m ± 3%                       2.463m ± 4%       ~ (p=1.000 n=24)
+SandboxBoot/systrap/Run-104                                                          2.583m ± 3%                       2.573m ± 3%       ~ (p=0.911 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                 26.73m ± 1%                       26.72m ± 3%       ~ (p=0.992 n=24)
+SandboxBoot/systrap_overlay/New-104                                                  2.436m ± 2%                       2.488m ± 2%       ~ (p=0.301 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                  2.748m ± 3%                       2.722m ± 3%       ~ (p=0.751 n=24)
+geomean                                                                              10.68m                            10.70m       +0.18%
+
+                                     │ /root/filestore-mount-identity-20261111/boot-baseline.txt │ /root/filestore-mount-identity-20261111/boot-fixed.txt │
+                                     │                          p50.ns                           │             p50.ns               vs base               │
+SandboxBoot/kvm/Boot-104                                                             67.41M ± 3%                       67.69M ± 4%       ~ (p=0.894 n=24)
+SandboxBoot/kvm/New-104                                                              41.94M ± 3%                       42.63M ± 5%       ~ (p=0.519 n=24)
+SandboxBoot/kvm/Run-104                                                              2.960M ± 3%                       2.909M ± 4%       ~ (p=0.407 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                     66.14M ± 3%                       67.03M ± 3%       ~ (p=0.341 n=24)
+SandboxBoot/kvm_overlay/New-104                                                      40.66M ± 6%                       40.56M ± 6%       ~ (p=0.783 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                      3.131M ± 1%                       3.097M ± 3%       ~ (p=0.617 n=24)
+SandboxBoot/systrap/Boot-104                                                         26.19M ± 2%                       26.20M ± 4%       ~ (p=1.000 n=24)
+SandboxBoot/systrap/New-104                                                          2.409M ± 3%                       2.378M ± 5%       ~ (p=0.878 n=24)
+SandboxBoot/systrap/Run-104                                                          2.553M ± 5%                       2.543M ± 6%       ~ (p=0.588 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                 26.58M ± 2%                       26.55M ± 2%       ~ (p=0.992 n=24)
+SandboxBoot/systrap_overlay/New-104                                                  2.394M ± 3%                       2.452M ± 3%       ~ (p=0.282 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                  2.752M ± 3%                       2.755M ± 4%       ~ (p=0.798 n=24)
+geomean                                                                              10.59M                            10.60M       +0.09%
+
+                                     │ /root/filestore-mount-identity-20261111/boot-baseline.txt │ /root/filestore-mount-identity-20261111/boot-fixed.txt │
+                                     │                          p90.ns                           │             p90.ns               vs base               │
+SandboxBoot/kvm/Boot-104                                                             69.64M ± 2%                       70.29M ± 4%       ~ (p=0.736 n=24)
+SandboxBoot/kvm/New-104                                                              43.72M ± 3%                       44.77M ± 6%       ~ (p=0.384 n=24)
+SandboxBoot/kvm/Run-104                                                              3.009M ± 3%                       2.995M ± 3%       ~ (p=0.992 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                     68.75M ± 4%                       69.62M ± 2%       ~ (p=0.207 n=24)
+SandboxBoot/kvm_overlay/New-104                                                      43.89M ± 5%                       43.29M ± 4%       ~ (p=0.798 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                      3.218M ± 2%                       3.237M ± 2%       ~ (p=0.546 n=24)
+SandboxBoot/systrap/Boot-104                                                         27.28M ± 2%                       27.56M ± 4%       ~ (p=0.533 n=24)
+SandboxBoot/systrap/New-104                                                          2.480M ± 7%                       2.466M ± 8%       ~ (p=0.976 n=24)
+SandboxBoot/systrap/Run-104                                                          2.677M ± 4%                       2.707M ± 2%       ~ (p=0.878 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                 27.29M ± 3%                       27.56M ± 4%       ~ (p=0.767 n=24)
+SandboxBoot/systrap_overlay/New-104                                                  2.523M ± 5%                       2.611M ± 6%       ~ (p=0.255 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                  2.864M ± 2%                       2.866M ± 3%       ~ (p=0.767 n=24)
+geomean                                                                              11.01M                            11.10M       +0.78%

@@ -1,0 +1,32 @@
+boot pair 1
+boot pair 2
+boot pair 3
+boot pair 4
+boot pair 5
+boot pair 6
+boot pair 7
+boot pair 8
+boot pair 9
+boot pair 10
+boot pair 11
+boot pair 12
+boot pair 13
+boot pair 14
+boot pair 15
+boot pair 16
+boot pair 17
+boot pair 18
+boot pair 19
+boot pair 20
+boot pair 21
+boot pair 22
+boot pair 23
+boot pair 24
+Traceback (most recent call last):
+  File "/root/filestore-mount-identity-20261111/performance.py", line 19, in <module>
+    subprocess.run(cmd,env=env,stdout=out,stderr=subprocess.STDOUT,check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['python3', '/root/filestore-mount-identity-20261111/harness/resume_benchmark.py', '--baseline', '/root/filestore-publish-20261111/final-measured-release/runsc', '--candidate', '/root/filestore-mount-identity-20261111/fixed-release/runsc', '--work-dir', '/mnt/m0-xfs/filestore-mount-identity-perf', '--output', '/root/filestore-mount-identity-20261111/external-performance', '--mib', '64', '--preflush-mode', 'off', '--pairs', '24']' returned non-zero exit status 1.

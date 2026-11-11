@@ -1,0 +1,20 @@
+INFO: Invocation ID: ce465d52-8088-415a-b3b2-f60b96205560
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --@@rules_go+//go/config:pure, --@@rules_go+//go/config:race, --host_linkopt, and 1 more have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 2 targets (0 packages loaded, 31479 targets configured, 132 aspect applications).
+INFO: From go_marshal: @@//pkg/sentry/loader:loader_abi_autogen:
+stdout (/root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/_tmp/actions/stdout-226) 1906336 exceeds maximum size of --experimental_ui_max_stdouterr_bytes=1048576 bytes; skipping
+[3,070 / 4,222] [Prepa] GoImports pkg/abi/abi_linux_state_autogen_with_imports.go ... (6 actions, 0 running)
+[4,128 / 4,222] [Sched] GoCompilePkg runsc/container/boot_benchmark_test.internal.a; Downloading external/rules_go+/stdlib_/pkg/linux_amd64/internal/poll.a ... (7 actions, 0 running)
+[4,221 / 4,222] [Prepa] runfiles for //runsc/container:boot_benchmark_test
+INFO: Found 2 targets...
+INFO: Elapsed time: 4.137s, Critical Path: 2.14s
+INFO: 1747 processes: 2475 action cache hit, 1724 disk cache hit, 18 internal, 5 linux-sandbox.
+INFO: Build completed successfully, 1747 total actions
+INFO: 
+INFO: 

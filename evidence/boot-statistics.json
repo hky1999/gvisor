@@ -1,0 +1,366 @@
+{
+  "baseline": {
+    "BenchmarkSandboxBoot/kvm/Boot-104/ns/op": {
+      "median": 67560772.5,
+      "sd": 2543324.3742435747,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Boot-104/p50.ns": {
+      "median": 67410978.0,
+      "sd": 3057523.088913262,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Boot-104/p90.ns": {
+      "median": 69644579.5,
+      "sd": 3532811.819389212,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/New-104/ns/op": {
+      "median": 41904005.5,
+      "sd": 2197317.1327072037,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/New-104/p50.ns": {
+      "median": 41939255.5,
+      "sd": 2764644.971074974,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/New-104/p90.ns": {
+      "median": 43724087.0,
+      "sd": 3090072.41424655,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Run-104/ns/op": {
+      "median": 2973120.5,
+      "sd": 97751.1758634102,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Run-104/p50.ns": {
+      "median": 2960379.5,
+      "sd": 111010.61469242252,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Run-104/p90.ns": {
+      "median": 3008505.5,
+      "sd": 117499.45225403474,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Boot-104/ns/op": {
+      "median": 66501805.5,
+      "sd": 2726803.9330741097,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p50.ns": {
+      "median": 66143420.0,
+      "sd": 3301417.113166879,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p90.ns": {
+      "median": 68750448.5,
+      "sd": 3033528.43185856,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/New-104/ns/op": {
+      "median": 41471441.5,
+      "sd": 2332198.356077018,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/New-104/p50.ns": {
+      "median": 40660013.5,
+      "sd": 2895492.09594041,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/New-104/p90.ns": {
+      "median": 43886530.0,
+      "sd": 2784209.2118808483,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Run-104/ns/op": {
+      "median": 3136863.0,
+      "sd": 87433.08192016321,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Run-104/p50.ns": {
+      "median": 3130645.0,
+      "sd": 98083.482544199,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Run-104/p90.ns": {
+      "median": 3217968.0,
+      "sd": 123683.35433034551,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Boot-104/ns/op": {
+      "median": 26474541.5,
+      "sd": 840859.1766056863,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Boot-104/p50.ns": {
+      "median": 26192796.5,
+      "sd": 860684.1682832614,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Boot-104/p90.ns": {
+      "median": 27276389.0,
+      "sd": 845960.6776952415,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/New-104/ns/op": {
+      "median": 2465164.5,
+      "sd": 115363.74472095497,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/New-104/p50.ns": {
+      "median": 2408562.0,
+      "sd": 144666.3090387556,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/New-104/p90.ns": {
+      "median": 2480119.5,
+      "sd": 178223.91676202771,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Run-104/ns/op": {
+      "median": 2583179.0,
+      "sd": 146538.76961521336,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Run-104/p50.ns": {
+      "median": 2552838.5,
+      "sd": 141177.2251921296,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Run-104/p90.ns": {
+      "median": 2677455.5,
+      "sd": 158986.06260435152,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Boot-104/ns/op": {
+      "median": 26733399.0,
+      "sd": 958946.4326332452,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p50.ns": {
+      "median": 26580305.0,
+      "sd": 1138813.899512055,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p90.ns": {
+      "median": 27294419.0,
+      "sd": 1084435.1837167698,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/New-104/ns/op": {
+      "median": 2435862.5,
+      "sd": 102805.99867309349,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/New-104/p50.ns": {
+      "median": 2394405.5,
+      "sd": 124504.26735411143,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/New-104/p90.ns": {
+      "median": 2522891.0,
+      "sd": 155665.13897261108,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Run-104/ns/op": {
+      "median": 2747893.5,
+      "sd": 155934.41794382106,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Run-104/p50.ns": {
+      "median": 2752170.5,
+      "sd": 156893.9657826208,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Run-104/p90.ns": {
+      "median": 2864266.0,
+      "sd": 155003.33345895982,
+      "n": 24
+    }
+  },
+  "fixed": {
+    "BenchmarkSandboxBoot/kvm/Boot-104/ns/op": {
+      "median": 68168850.0,
+      "sd": 3539072.3437826415,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Boot-104/p50.ns": {
+      "median": 67694347.5,
+      "sd": 4283166.365610475,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Boot-104/p90.ns": {
+      "median": 70293935.0,
+      "sd": 4065540.5439946675,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/New-104/ns/op": {
+      "median": 42212588.5,
+      "sd": 2811350.196459603,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/New-104/p50.ns": {
+      "median": 42627118.0,
+      "sd": 3612377.941355973,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/New-104/p90.ns": {
+      "median": 44774535.5,
+      "sd": 3393350.8128122957,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Run-104/ns/op": {
+      "median": 2942739.5,
+      "sd": 106122.99100734964,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Run-104/p50.ns": {
+      "median": 2909244.0,
+      "sd": 147377.37514962314,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm/Run-104/p90.ns": {
+      "median": 2995356.0,
+      "sd": 133280.9637471721,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Boot-104/ns/op": {
+      "median": 67084296.0,
+      "sd": 2536771.24090506,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p50.ns": {
+      "median": 67025815.0,
+      "sd": 2608797.4816783657,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p90.ns": {
+      "median": 69617836.0,
+      "sd": 4060812.7700809073,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/New-104/ns/op": {
+      "median": 41079300.0,
+      "sd": 2097252.074356699,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/New-104/p50.ns": {
+      "median": 40555061.5,
+      "sd": 2197168.337689204,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/New-104/p90.ns": {
+      "median": 43293802.5,
+      "sd": 3673511.3797255284,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Run-104/ns/op": {
+      "median": 3138437.0,
+      "sd": 94872.63441872431,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Run-104/p50.ns": {
+      "median": 3096662.0,
+      "sd": 116394.38905103375,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/kvm_overlay/Run-104/p90.ns": {
+      "median": 3237049.5,
+      "sd": 126607.19491494898,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Boot-104/ns/op": {
+      "median": 26731483.5,
+      "sd": 962672.7462004565,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Boot-104/p50.ns": {
+      "median": 26204179.0,
+      "sd": 1050847.178948459,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Boot-104/p90.ns": {
+      "median": 27557706.5,
+      "sd": 1225915.1620851387,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/New-104/ns/op": {
+      "median": 2463235.0,
+      "sd": 101829.29922221284,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/New-104/p50.ns": {
+      "median": 2377844.5,
+      "sd": 129943.64653042176,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/New-104/p90.ns": {
+      "median": 2466447.0,
+      "sd": 159709.39384284933,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Run-104/ns/op": {
+      "median": 2572726.0,
+      "sd": 124156.95925710734,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Run-104/p50.ns": {
+      "median": 2543277.5,
+      "sd": 166298.9595323321,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap/Run-104/p90.ns": {
+      "median": 2707212.0,
+      "sd": 142917.18667113746,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Boot-104/ns/op": {
+      "median": 26724404.0,
+      "sd": 945774.7680345832,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p50.ns": {
+      "median": 26553432.5,
+      "sd": 951442.5433960296,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p90.ns": {
+      "median": 27562498.0,
+      "sd": 1125311.1448409068,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/New-104/ns/op": {
+      "median": 2487751.0,
+      "sd": 81438.38617064872,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/New-104/p50.ns": {
+      "median": 2452293.5,
+      "sd": 104454.3056248205,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/New-104/p90.ns": {
+      "median": 2610726.5,
+      "sd": 140069.3512801486,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Run-104/ns/op": {
+      "median": 2722147.5,
+      "sd": 103553.30789931968,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Run-104/p50.ns": {
+      "median": 2755148.0,
+      "sd": 138283.2877484475,
+      "n": 24
+    },
+    "BenchmarkSandboxBoot/systrap_overlay/Run-104/p90.ns": {
+      "median": 2865815.0,
+      "sd": 128926.24477026935,
+      "n": 24
+    }
+  }
+}

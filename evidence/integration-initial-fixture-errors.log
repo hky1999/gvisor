@@ -1,0 +1,27 @@
+INFO: Invocation ID: 0bcaf626-a0fb-43d6-bace-ba3d1b3bcecc
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //runsc/container:container_test (1 packages loaded, 0 targets configured)
+Analyzing: target //runsc/container:container_test (1 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //runsc/container:container_test (1 packages loaded, 74 targets configured).
+[4,147 / 4,160] GoCompilePkg runsc/container/container_test.internal.a; 0s disk-cache, local ... (3 actions, 2 running)
+[4,157 / 4,160] GoLink runsc/container/container_test_/container_test; 0s disk-cache, local ... (2 actions, 1 running)
+[4,160 / 4,161] Testing //runsc/container:container_test; 1s disk-cache, local
+[4,160 / 4,161] Testing //runsc/container:container_test; 11s disk-cache, local
+[4,160 / 4,161] Testing //runsc/container:container_test; 41s disk-cache, local
+FAIL: //runsc/container:container_test (Exit 1) (see /root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/k8-opt/testlogs/runsc/container/container_test/test.log)
+[4,160 / 4,161] 1 / 1 tests, 1 failed; Testing //runsc/container:container_test; 79s disk-cache, local
+INFO: From Testing //runsc/container:container_test:
+stdout (/root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/_tmp/actions/stdout-23) 6425716 exceeds maximum size of --experimental_ui_max_stdouterr_bytes=1048576 bytes; skipping
+INFO: Found 1 test target...
+Target //runsc/container:container_test up-to-date:
+  bazel-bin/runsc/container/container_test_/container_test
+INFO: Elapsed time: 82.652s, Critical Path: 81.73s
+INFO: 23 processes: 45 action cache hit, 2 internal, 21 local.
+INFO: Build completed, 1 test FAILED, 23 total actions
+//runsc/container:container_test                                         FAILED in 79.0s
+  /root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/k8-opt/testlogs/runsc/container/container_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.

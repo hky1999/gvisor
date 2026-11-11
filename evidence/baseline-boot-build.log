@@ -1,0 +1,17 @@
+INFO: Invocation ID: 68a5cd53-ca7f-4676-8a92-8113eddec743
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //runsc/container:boot_benchmark_test (0 packages loaded, 0 targets configured)
+Analyzing: target //runsc/container:boot_benchmark_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //runsc/container:boot_benchmark_test (0 packages loaded, 11 targets configured).
+[4,129 / 4,131] [Prepa] GoLink runsc/container/boot_benchmark_test_/boot_benchmark_test
+INFO: Found 1 target...
+Target //runsc/container:boot_benchmark_test up-to-date:
+  bazel-bin/runsc/container/boot_benchmark_test_/boot_benchmark_test
+INFO: Elapsed time: 2.388s, Critical Path: 1.29s
+INFO: 10 processes: 3 action cache hit, 5 internal, 5 linux-sandbox.
+INFO: Build completed successfully, 10 total actions
+INFO: 
+INFO: 

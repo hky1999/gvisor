@@ -1,0 +1,460 @@
+diff --git a/g3doc/user_guide/checkpoint_restore.md b/g3doc/user_guide/checkpoint_restore.md
+index ac96c8369..c0e47ecc5 100644
+--- a/g3doc/user_guide/checkpoint_restore.md
++++ b/g3doc/user_guide/checkpoint_restore.md
+@@ -152,12 +152,17 @@ pause. The CLI waits for persistence before returning success. FICLONE itself
+ can wait for dirty source data writeback: a first, fully dirty layer may be
+ slower than an ordinary checkpoint. Latency is not constant or guaranteed O(1).
+ 
+-Keep the checkpoint and all `filestore-<n>` files together and transfer both when
+-migrating. Files follow the donated mount FD order, with the root first. Restore
+-creates private writable clones in the configured overlay directory; source
+-snapshots remain reusable by multiple instances. Treat artifacts as a trusted,
+-matched set: no content checksum or protection against swapping equal-size
+-artifacts is provided.
++Keep the checkpoint and all `filestore-*` files together and transfer both when
++migrating. The root artifact is named `filestore-root`; other artifact names
++encode the original OCI mount destination. Reordering mounts or relocating their
++host sources does not change this association. Restore creates private writable
++clones in the configured overlay directory, so snapshots remain reusable by
++multiple instances. Duplicate filestore destinations are unsupported.
++
++Keep artifact names unchanged. Positional artifacts from earlier experimental
++versions are not accepted. Treat artifacts as a trusted, matched set: the hash
++in a filename identifies a mount destination, not file contents. No content
++checksum or protection against swapping equal-size artifacts is provided.
+ 
+ If a save RPC or later persistence fails, runsc retains the artifacts because
+ the stopping source may already be gone. An error does not certify a complete
+diff --git a/runsc/container/BUILD b/runsc/container/BUILD
+index 7d3cd3a59..bed81c353 100644
+--- a/runsc/container/BUILD
++++ b/runsc/container/BUILD
+@@ -52,6 +52,7 @@ go_test(
+         "container_save_restore_test.go",
+         "container_test.go",
+         "filestore_integration_test.go",
++        "filestore_snapshot_test.go",
+         "metric_server_test.go",
+         "multi_container_save_restore_test.go",
+         "multi_container_test.go",
+diff --git a/runsc/container/container.go b/runsc/container/container.go
+index f5a70f967..d184fb058 100644
+--- a/runsc/container/container.go
++++ b/runsc/container/container.go
+@@ -1392,7 +1392,7 @@ func (c *Container) createGoferFilestores(conf *config.Config, ovlConf config.Ov
+ 	var adopter *filestoreAdopter
+ 	if conf.FilestoreAdoptDir != "" {
+ 		var err error
+-		adopter, err = newFilestoreAdopter(conf)
++		adopter, err = c.newFilestoreAdopter(conf)
+ 		if err != nil {
+ 			return nil, err
+ 		}
+diff --git a/runsc/container/filestore_integration_test.go b/runsc/container/filestore_integration_test.go
+index c1a40c025..a0bd2b033 100644
+--- a/runsc/container/filestore_integration_test.go
++++ b/runsc/container/filestore_integration_test.go
+@@ -72,15 +72,19 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 	requireFilestoreReflink(t, dir)
+ 	for platform, platformConf := range configs(t, true /* noOverlay */) {
+ 		for _, tc := range []struct {
+-			name                                     string
+-			resume, persistenceFailure, readOnlyRoot bool
+-			compression                              statefile.CompressionLevel
++			name                                                        string
++			resume, persistenceFailure, readOnlyRoot, reorder, relocate bool
++			compression                                                 statefile.CompressionLevel
+ 		}{
+ 			{name: "stop", compression: statefile.CompressionLevelNone},
+ 			{name: "resume", resume: true, compression: statefile.CompressionLevelNone},
+ 			{name: "persistence-failure", persistenceFailure: true, compression: statefile.CompressionLevelNone},
+ 			{name: "compressed", resume: true, compression: statefile.CompressionLevelFlateBestSpeed},
+ 			{name: "read-only-root", resume: true, readOnlyRoot: true, compression: statefile.CompressionLevelNone},
++			{name: "reordered-stop", reorder: true, compression: statefile.CompressionLevelNone},
++			{name: "reordered-resume", reorder: true, resume: true, compression: statefile.CompressionLevelNone},
++			{name: "reordered-read-only-root", reorder: true, resume: true, readOnlyRoot: true, compression: statefile.CompressionLevelNone},
++			{name: "reordered-relocated-sources", reorder: true, relocate: true, resume: true, compression: statefile.CompressionLevelNone},
+ 		} {
+ 			resume := tc.resume
+ 			t.Run(platform+"/"+tc.name, func(t *testing.T) {
+@@ -105,7 +109,8 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 				mount := "/var/run/gvisor-filestore-test"
+ 				spec.Mounts = append(spec.Mounts,
+ 					specs.Mount{Source: lower, Destination: mount, Type: "bind", Options: []string{"bind"}},
+-					specs.Mount{Destination: "/filestore-tmpfs", Type: "tmpfs"})
++					specs.Mount{Destination: "/filestore-tmpfs", Type: "tmpfs"},
++					specs.Mount{Source: lower, Destination: "/reorder-second", Type: "bind", Options: []string{"bind"}})
+ 				_, bundle, cleanup, err := testutil.SetupContainer(spec, conf)
+ 				if err != nil {
+ 					t.Fatal(err)
+@@ -120,24 +125,25 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 				if err := cont.Start(conf); err != nil {
+ 					t.Fatal(err)
+ 				}
+-				paths := []string{mount + "/data", "/filestore-tmpfs/data"}
++				paths := []string{mount + "/data", "/filestore-tmpfs/data", "/reorder-second/data"}
+ 				if !tc.readOnlyRoot {
+ 					paths = append(paths, "/filestore-root-data")
+ 				}
+ 				write := func(c *Container, cfg *config.Config, value string) {
+ 					t.Helper()
+-					for _, name := range paths {
+-						if ws, err := execute(cfg, c, "/bin/sh", "-c", fmt.Sprintf("printf '%s' > %s", value, name)); err != nil || ws.ExitStatus() != 0 {
++					for i, name := range paths {
++						if ws, err := execute(cfg, c, "/bin/sh", "-c", fmt.Sprintf("printf '%s-%d' > %s", value, i, name)); err != nil || ws.ExitStatus() != 0 {
+ 							t.Fatalf("write %s: status=%v err=%v", name, ws, err)
+ 						}
+ 					}
+ 				}
+ 				check := func(c *Container, cfg *config.Config, value string) {
+ 					t.Helper()
+-					for _, name := range paths {
++					for i, name := range paths {
+ 						out, err := executeCombinedOutput(cfg, c, nil, "/bin/cat", name)
+-						if err != nil || string(out) != value {
+-							t.Fatalf("read %s: %q, %v; want %q", name, out, err, value)
++						want := fmt.Sprintf("%s-%d", value, i)
++						if err != nil || string(out) != want {
++							t.Fatalf("read %s: %q, %v; want %q", name, out, err, want)
+ 						}
+ 					}
+ 				}
+@@ -177,6 +183,28 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 						t.Fatal(err)
+ 					}
+ 				}
++				if tc.reorder {
++					// Restore permits a different OCI mount order. Each mount
++					// must retain its own contents even when backing files have
++					// the same chunk-sized length.
++					restoreSpec := *spec
++					restoreSpec.Mounts = append([]specs.Mount(nil), spec.Mounts...)
++					first, second := len(restoreSpec.Mounts)-3, len(restoreSpec.Mounts)-1
++					restoreSpec.Mounts[first], restoreSpec.Mounts[second] = restoreSpec.Mounts[second], restoreSpec.Mounts[first]
++					if tc.relocate {
++						newLower, err := os.MkdirTemp(dir, "relocated-lower-")
++						if err != nil {
++							t.Fatal(err)
++						}
++						restoreSpec.Mounts[first].Source, restoreSpec.Mounts[second].Source = newLower, newLower
++					}
++					restoreBundle, restoreCleanup, err := testutil.SetupBundleDir(&restoreSpec)
++					if err != nil {
++						t.Fatal(err)
++					}
++					defer restoreCleanup()
++					args.Spec, args.BundleDir = &restoreSpec, restoreBundle
++				}
+ 				restoredConf := *conf
+ 				restoredConf.FilestoreAdoptDir = snapshots
+ 				for i := 0; i < 2; i++ {
+@@ -192,6 +220,29 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 					}
+ 					check(restored, &restoredConf, "checkpoint")
+ 					write(restored, &restoredConf, fmt.Sprintf("clone-%d", i))
++					if tc.reorder && i == 0 {
++						// Save from the reordered layout and restore with the
++						// original order, exercising a second checkpoint cycle.
++						secondImage, err := os.MkdirTemp(dir, "second-image-")
++						if err != nil {
++							t.Fatal(err)
++						}
++						secondSnapshots := secondImage + "-filestores"
++						if err := restored.Checkpoint(&restoredConf, secondImage, sandbox.CheckpointOpts{Resume: true, FilestoreSnapshotDir: secondSnapshots}); err != nil {
++							t.Fatal(err)
++						}
++						secondConf := *conf
++						secondConf.FilestoreAdoptDir = secondSnapshots
++						second, err := New(&secondConf, Args{ID: testutil.RandomContainerID(), Spec: spec, BundleDir: bundle, CheckpointDirPath: secondImage})
++						if err != nil {
++							t.Fatal(err)
++						}
++						defer second.Destroy()
++						if err := second.Restore(&secondConf, secondImage, sandbox.DirectIOOff, false, nil); err != nil {
++							t.Fatal(err)
++						}
++						check(second, &secondConf, "clone-0")
++					}
+ 				}
+ 				if resume {
+ 					check(cont, conf, "source-changed")
+@@ -221,7 +272,7 @@ func TestExternalFilestoreFailureCleanup(t *testing.T) {
+ 			}
+ 			defer os.RemoveAll(dir)
+ 			requireFilestoreReflink(t, dir)
+-			c := &Container{Status: Running, Sandbox: &sandbox.Sandbox{FilestoreReflink: true}, GoferMountConfs: []specutils.GoferMountConf{{Upper: specutils.AnonOverlay}}}
++			c := &Container{Spec: &specs.Spec{}, Status: Running, Sandbox: &sandbox.Sandbox{FilestoreReflink: true}, GoferMountConfs: []specutils.GoferMountConf{{Upper: specutils.AnonOverlay}}}
+ 			opts := sandbox.CheckpointOpts{FilestoreSnapshotDir: filepath.Join(dir, "snapshots")}
+ 			var files []*os.File
+ 			err = c.checkpoint(&config.Config{}, dir, opts, func(_ *config.Config, _, _ string, opts sandbox.CheckpointOpts) error {
+diff --git a/runsc/container/filestore_snapshot.go b/runsc/container/filestore_snapshot.go
+index 744cd84be..f829b9e0e 100644
+--- a/runsc/container/filestore_snapshot.go
++++ b/runsc/container/filestore_snapshot.go
+@@ -15,30 +15,40 @@
+ package container
+ 
+ import (
++	"crypto/sha256"
+ 	"fmt"
+ 	"os"
+ 	"path/filepath"
+ 
+ 	"golang.org/x/sys/unix"
+ 	"gvisor.dev/gvisor/runsc/config"
++	"gvisor.dev/gvisor/runsc/specutils"
+ )
+ 
+-// filestoreAdopter consumes artifacts in the same order as donated filestore FDs.
+-// Only private writable clones are donated to the sentry.
++// filestoreAdopter selects artifacts by mount identity and donates private
++// writable clones in the current filestore FD order.
+ type filestoreAdopter struct {
+-	dir  string
+-	next int
++	dir   string
++	names []string
++	next  int
+ }
+ 
+-func newFilestoreAdopter(conf *config.Config) (*filestoreAdopter, error) {
++func (c *Container) newFilestoreAdopter(conf *config.Config) (*filestoreAdopter, error) {
+ 	if !filepath.IsAbs(conf.FilestoreAdoptDir) {
+ 		return nil, fmt.Errorf("filestore snapshot directory must be absolute")
+ 	}
+-	return &filestoreAdopter{dir: conf.FilestoreAdoptDir}, nil
++	names, err := c.filestoreSnapshotNames()
++	if err != nil {
++		return nil, err
++	}
++	return &filestoreAdopter{dir: conf.FilestoreAdoptDir, names: names}, nil
+ }
+ 
+ func (a *filestoreAdopter) clone(goferRootfs, filestoreDir string) (*os.File, error) {
+-	name := filepath.Join(a.dir, fmt.Sprintf("filestore-%d", a.next))
++	if a.next >= len(a.names) {
++		return nil, fmt.Errorf("no snapshot for filestore FD %d", a.next)
++	}
++	name := filepath.Join(a.dir, a.names[a.next])
+ 	src, err := os.OpenFile(name, unix.O_RDONLY|unix.O_CLOEXEC|unix.O_NOFOLLOW|unix.O_NONBLOCK, 0)
+ 	if err != nil {
+ 		return nil, err
+@@ -72,18 +82,9 @@ func (c *Container) prepareFilestoreSnapshot(snapDir string) (files []*os.File,
+ 	if !filepath.IsAbs(snapDir) {
+ 		return nil, fmt.Errorf("filestore snapshot directory must be absolute")
+ 	}
+-	count := 0
+-	for _, conf := range c.GoferMountConfs {
+-		if !conf.IsFilestorePresent() {
+-			continue
+-		}
+-		if conf.IsSelfBacked() {
+-			return nil, fmt.Errorf("filestore snapshots require anonymous disk-backed mounts")
+-		}
+-		count++
+-	}
+-	if count == 0 {
+-		return nil, fmt.Errorf("no disk-backed filestores to snapshot")
++	names, err := c.filestoreSnapshotNames()
++	if err != nil {
++		return nil, err
+ 	}
+ 	if err := os.MkdirAll(snapDir, 0700); err != nil {
+ 		return nil, err
+@@ -104,8 +105,8 @@ func (c *Container) prepareFilestoreSnapshot(snapDir string) (files []*os.File,
+ 			files = nil
+ 		}
+ 	}()
+-	for i := 0; i < count; i++ {
+-		f, e := os.OpenFile(filepath.Join(snapDir, fmt.Sprintf("filestore-%d", i)), os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
++	for _, name := range names {
++		f, e := os.OpenFile(filepath.Join(snapDir, name), os.O_RDWR|os.O_CREATE|os.O_EXCL, 0600)
+ 		if e != nil {
+ 			return files, e
+ 		}
+@@ -123,3 +124,62 @@ func (c *Container) prepareFilestoreSnapshot(snapDir string) (files []*os.File,
+ 
+ 	return files, nil
+ }
++
++// filestoreSnapshotNames returns artifact names in donated FD order. Names use
++// the original OCI destination, not its position in the spec or the host source
++// path: restore accepts reordered mounts and relocated sources. The hash encodes
++// the destination as a bounded filename; it is not a content integrity check.
++// Both capture and restore derive these names in runsc, before the gofer resolves
++// symlinks and the sentry sorts mounts.
++func (c *Container) filestoreSnapshotNames() ([]string, error) {
++	if c.Spec == nil || len(c.GoferMountConfs) == 0 {
++		return nil, fmt.Errorf("missing filestore mount layout")
++	}
++	names := make([]string, 0, len(c.GoferMountConfs))
++	seen := make(map[string]bool, len(c.GoferMountConfs))
++	add := func(conf specutils.GoferMountConf, name string) error {
++		if !conf.IsFilestorePresent() {
++			return nil
++		}
++		if conf.IsSelfBacked() {
++			return fmt.Errorf("filestore snapshots require anonymous disk-backed mounts")
++		}
++		if seen[name] {
++			return fmt.Errorf("duplicate filestore snapshot identity %q", name)
++		}
++		seen[name] = true
++		names = append(names, name)
++		return nil
++	}
++	if err := add(c.GoferMountConfs[0], "filestore-root"); err != nil {
++		return nil, err
++	}
++	mountIdx := 1
++	for _, m := range c.Spec.Mounts {
++		if !specutils.HasMountConfig(m) {
++			continue
++		}
++		if mountIdx >= len(c.GoferMountConfs) {
++			return nil, fmt.Errorf("missing configuration for mount %q", m.Destination)
++		}
++		conf := c.GoferMountConfs[mountIdx]
++		mountIdx++
++		if !conf.IsFilestorePresent() {
++			continue
++		}
++		if !filepath.IsAbs(m.Destination) {
++			return nil, fmt.Errorf("filestore mount destination %q must be absolute", m.Destination)
++		}
++		name := fmt.Sprintf("filestore-mount-%x", sha256.Sum256([]byte(m.Destination)))
++		if err := add(conf, name); err != nil {
++			return nil, err
++		}
++	}
++	if mountIdx != len(c.GoferMountConfs) {
++		return nil, fmt.Errorf("unused filestore mount configurations")
++	}
++	if len(names) == 0 {
++		return nil, fmt.Errorf("no disk-backed filestores to snapshot")
++	}
++	return names, nil
++}
+diff --git a/runsc/container/filestore_snapshot_test.go b/runsc/container/filestore_snapshot_test.go
+new file mode 100644
+index 000000000..c1b926e8e
+--- /dev/null
++++ b/runsc/container/filestore_snapshot_test.go
+@@ -0,0 +1,116 @@
++// Copyright 2026 The gVisor Authors.
++//
++// Licensed under the Apache License, Version 2.0 (the "License");
++// you may not use this file except in compliance with the License.
++// You may obtain a copy of the License at
++//
++//     http://www.apache.org/licenses/LICENSE-2.0
++//
++// Unless required by applicable law or agreed to in writing, software
++// distributed under the License is distributed on an "AS IS" BASIS,
++// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++// See the License for the specific language governing permissions and
++// limitations under the License.
++
++package container
++
++import (
++	"os"
++	"path/filepath"
++	"testing"
++
++	specs "github.com/opencontainers/runtime-spec/specs-go"
++	"gvisor.dev/gvisor/runsc/config"
++	"gvisor.dev/gvisor/runsc/specutils"
++)
++
++func TestFilestoreSnapshotMountIdentity(t *testing.T) {
++	disk := specutils.GoferMountConf{Upper: specutils.AnonOverlay}
++	noDisk := specutils.GoferMountConf{}
++	c := &Container{
++		Spec: &specs.Spec{Mounts: []specs.Mount{
++			{Type: "bind", Source: "/source-a", Destination: "/var/run/a"},
++			{Type: "tmpfs", Destination: "/memory"},
++			{Type: "bind", Source: "/source", Destination: "/read-only"},
++			{Type: "bind", Source: "/source-b", Destination: "/b"},
++		}},
++		GoferMountConfs: []specutils.GoferMountConf{disk, disk, noDisk, disk},
++	}
++	saved, err := c.filestoreSnapshotNames()
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(saved) != 3 || saved[0] == saved[1] || saved[0] == saved[2] || saved[1] == saved[2] {
++		t.Fatalf("expected three distinct identities, got %v", saved)
++	}
++	c.Spec.Mounts[0], c.Spec.Mounts[3] = c.Spec.Mounts[3], c.Spec.Mounts[0]
++	c.Spec.Mounts[0].Source, c.Spec.Mounts[3].Source = "/relocated-b", "/relocated-a"
++	restored, err := c.filestoreSnapshotNames()
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(restored) != 3 || restored[0] != saved[0] || restored[1] != saved[2] || restored[2] != saved[1] {
++		t.Fatalf("mount identities changed: saved=%v restored=%v", saved, restored)
++	}
++	c.GoferMountConfs[0] = noDisk
++	withoutRoot, err := c.filestoreSnapshotNames()
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(withoutRoot) != 2 || withoutRoot[0] != saved[2] || withoutRoot[1] != saved[1] {
++		t.Fatalf("read-only root shifted mount identities: %v", withoutRoot)
++	}
++}
++
++func TestFilestoreSnapshotInvalidLayout(t *testing.T) {
++	disk := specutils.GoferMountConf{Upper: specutils.AnonOverlay}
++	for _, tc := range []struct {
++		name  string
++		spec  *specs.Spec
++		confs []specutils.GoferMountConf
++	}{
++		{name: "missing-spec", confs: []specutils.GoferMountConf{disk}},
++		{name: "missing-root", spec: &specs.Spec{}},
++		{name: "no-filestores", spec: &specs.Spec{}, confs: []specutils.GoferMountConf{{}}},
++		{name: "extra-config", spec: &specs.Spec{}, confs: []specutils.GoferMountConf{disk, disk}},
++		{name: "missing-config", spec: &specs.Spec{Mounts: []specs.Mount{{Type: "bind", Source: "/source", Destination: "/a"}}}, confs: []specutils.GoferMountConf{disk}},
++		{name: "relative-destination", spec: &specs.Spec{Mounts: []specs.Mount{{Type: "bind", Source: "/source", Destination: "a"}}}, confs: []specutils.GoferMountConf{disk, disk}},
++		{name: "duplicate-destination", spec: &specs.Spec{Mounts: []specs.Mount{{Type: "bind", Source: "/source", Destination: "/a"}, {Type: "bind", Source: "/source", Destination: "/a"}}}, confs: []specutils.GoferMountConf{disk, disk, disk}},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			c := &Container{Spec: tc.spec, GoferMountConfs: tc.confs}
++			dir := filepath.Join(t.TempDir(), "snapshots")
++			if files, err := c.prepareFilestoreSnapshot(dir); err == nil || len(files) != 0 {
++				t.Fatalf("prepare invalid layout: files=%v err=%v", files, err)
++			}
++			if _, err := os.Stat(dir); !os.IsNotExist(err) {
++				t.Fatalf("invalid layout created artifacts: %v", err)
++			}
++			if _, err := c.newFilestoreAdopter(&config.Config{FilestoreAdoptDir: dir}); err == nil {
++				t.Fatal("restore accepted invalid layout")
++			}
++		})
++	}
++}
++
++func TestFilestoreSnapshotRejectPositionalArtifact(t *testing.T) {
++	dir := t.TempDir()
++	legacy := filepath.Join(dir, "filestore-0")
++	if err := os.WriteFile(legacy, []byte("unidentified contents"), 0600); err != nil {
++		t.Fatal(err)
++	}
++	c := &Container{Spec: &specs.Spec{}, GoferMountConfs: []specutils.GoferMountConf{{Upper: specutils.AnonOverlay}}}
++	a, err := c.newFilestoreAdopter(&config.Config{FilestoreAdoptDir: dir})
++	if err != nil {
++		t.Fatal(err)
++	}
++	if f, err := a.clone("/", dir); !os.IsNotExist(err) || f != nil {
++		if f != nil {
++			f.Close()
++		}
++		t.Fatalf("expected missing identified artifact, got file=%v err=%v", f, err)
++	}
++	if data, err := os.ReadFile(legacy); err != nil || string(data) != "unidentified contents" {
++		t.Fatalf("input artifact changed: %q, %v", data, err)
++	}
++}

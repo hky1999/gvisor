@@ -1,0 +1,21 @@
+INFO: Invocation ID: 31dac665-49ae-4256-90b2-8585c4874737
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 5 targets (0 packages loaded, 0 targets configured)
+Analyzing: 5 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 5 targets (3 packages loaded, 50 targets configured).
+[3,292 / 3,293] 5 / 5 tests; Testing //runsc/specutils:specutils_test; 0s disk-cache, linux-sandbox
+INFO: Found 5 test targets...
+INFO: Elapsed time: 1.574s, Critical Path: 0.97s
+INFO: 25 processes: 41 action cache hit, 13 disk cache hit, 6 internal, 6 linux-sandbox.
+INFO: Build completed successfully, 25 total actions
+//pkg/sentry/control:control_test                               (cached) PASSED in 0.1s
+//pkg/sentry/pgalloc:pgalloc_test                               (cached) PASSED in 0.1s
+//runsc/boot:boot_test                                          (cached) PASSED in 1.7s
+//runsc/boot/filter/config:config_test                          (cached) PASSED in 19.5s
+//runsc/specutils:specutils_test                                         PASSED in 0.1s
+
+Executed 1 out of 5 tests: 5 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

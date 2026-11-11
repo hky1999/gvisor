@@ -1,0 +1,42 @@
+Local-only mount identity follow-up for google/gvisor#14228
+
+Published baseline: f87bd8102be7dc51a1979040a55c91d08d91baf6
+Upstream parent: a42ad63bdbc80581b567817b0f7fe9e878df6637
+
+1. In a separate checkout at the published baseline, apply reproducer.patch.
+2. Use a real reflink filesystem for TEST_TMPDIR and TMPDIR; the recorded runs
+   use /mnt/m0-xfs/filestore-publish-tests on BareMetal.
+3. Build/test //runsc/container:container_test with:
+   --test_strategy=standalone --spawn_strategy=local
+   --test_sharding_strategy=disabled --test_timeout=600
+   --test_env=TEST_TMPDIR=/mnt/m0-xfs/filestore-publish-tests
+   --test_env=TMPDIR=/mnt/m0-xfs/filestore-publish-tests
+   --test_filter='^TestExternalFilestoreCheckpointRestore$/.*$/reordered'
+   --test_arg=-test.v --test_arg=-test.count=3
+   --test_arg=--test_platforms=systrap,kvm
+   Expected: failure reading checkpoint-2 instead of checkpoint-0 in all 18 cases.
+4. In another clean checkout of the same published baseline, apply
+   local-fix.patch. This contains all code, tests and documentation for the fix.
+   Do not apply it on top of reproducer.patch; it already contains the expanded
+   regression test. Run the broader filter from validate-fixed.sh, which also
+   covers ordinary checkpoint/resume and split-FS. Note that helper scripts
+   contain the recorded machine's absolute paths and Bazel cache locations.
+5. source-manifest.json records the exact Git blob hashes of the final working
+   source. provenance.json records the local patch digest. This is an uncommitted
+   working-tree patch; it is not a new GitHub commit.
+
+Performance comparison:
+- Both external variants use --leave-running with a 64 MiB newly dirty layer.
+- Baseline is the complete opt release at f87bd8102; candidate is the complete
+  opt release built from source-manifest.json.
+- harness/resume_benchmark.py differs from the published harness by enabling
+  external filestore mode for BOTH variants. All other workload/checking logic
+  is retained. Each side verifies restored contents and the resumed source.
+- performance.py runs 24 alternating pairs, plus all BenchmarkSandboxBoot
+  subcases for systrap/KVM, including overlay variants, at five fixed iterations
+  per sample and 24 alternating pairs. It uses each variant's benchmark binary,
+  matching complete release, and matching GVISOR_SIDECAR_BINARIES_DIR.
+- Raw benchstat and samples are in evidence/. These focused measurements do not
+  replace the previous sparse/dense/fresh upstream comparison.
+
+No push, GitHub comment, issue edit or PR edit is part of this local follow-up.

@@ -1,0 +1,90 @@
+diff --git a/runsc/container/filestore_integration_test.go b/runsc/container/filestore_integration_test.go
+index c1a40c025..748acc398 100644
+--- a/runsc/container/filestore_integration_test.go
++++ b/runsc/container/filestore_integration_test.go
+@@ -72,15 +72,18 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 	requireFilestoreReflink(t, dir)
+ 	for platform, platformConf := range configs(t, true /* noOverlay */) {
+ 		for _, tc := range []struct {
+-			name                                     string
+-			resume, persistenceFailure, readOnlyRoot bool
+-			compression                              statefile.CompressionLevel
++			name                                              string
++			resume, persistenceFailure, readOnlyRoot, reorder bool
++			compression                                       statefile.CompressionLevel
+ 		}{
+ 			{name: "stop", compression: statefile.CompressionLevelNone},
+ 			{name: "resume", resume: true, compression: statefile.CompressionLevelNone},
+ 			{name: "persistence-failure", persistenceFailure: true, compression: statefile.CompressionLevelNone},
+ 			{name: "compressed", resume: true, compression: statefile.CompressionLevelFlateBestSpeed},
+ 			{name: "read-only-root", resume: true, readOnlyRoot: true, compression: statefile.CompressionLevelNone},
++			{name: "reordered-stop", reorder: true, compression: statefile.CompressionLevelNone},
++			{name: "reordered-resume", reorder: true, resume: true, compression: statefile.CompressionLevelNone},
++			{name: "reordered-read-only-root", reorder: true, resume: true, readOnlyRoot: true, compression: statefile.CompressionLevelNone},
+ 		} {
+ 			resume := tc.resume
+ 			t.Run(platform+"/"+tc.name, func(t *testing.T) {
+@@ -105,7 +108,8 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 				mount := "/var/run/gvisor-filestore-test"
+ 				spec.Mounts = append(spec.Mounts,
+ 					specs.Mount{Source: lower, Destination: mount, Type: "bind", Options: []string{"bind"}},
+-					specs.Mount{Destination: "/filestore-tmpfs", Type: "tmpfs"})
++					specs.Mount{Destination: "/filestore-tmpfs", Type: "tmpfs"},
++					specs.Mount{Source: lower, Destination: "/reorder-second", Type: "bind", Options: []string{"bind"}})
+ 				_, bundle, cleanup, err := testutil.SetupContainer(spec, conf)
+ 				if err != nil {
+ 					t.Fatal(err)
+@@ -120,24 +124,25 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 				if err := cont.Start(conf); err != nil {
+ 					t.Fatal(err)
+ 				}
+-				paths := []string{mount + "/data", "/filestore-tmpfs/data"}
++				paths := []string{mount + "/data", "/filestore-tmpfs/data", "/reorder-second/data"}
+ 				if !tc.readOnlyRoot {
+ 					paths = append(paths, "/filestore-root-data")
+ 				}
+ 				write := func(c *Container, cfg *config.Config, value string) {
+ 					t.Helper()
+-					for _, name := range paths {
+-						if ws, err := execute(cfg, c, "/bin/sh", "-c", fmt.Sprintf("printf '%s' > %s", value, name)); err != nil || ws.ExitStatus() != 0 {
++					for i, name := range paths {
++						if ws, err := execute(cfg, c, "/bin/sh", "-c", fmt.Sprintf("printf '%s-%d' > %s", value, i, name)); err != nil || ws.ExitStatus() != 0 {
+ 							t.Fatalf("write %s: status=%v err=%v", name, ws, err)
+ 						}
+ 					}
+ 				}
+ 				check := func(c *Container, cfg *config.Config, value string) {
+ 					t.Helper()
+-					for _, name := range paths {
++					for i, name := range paths {
+ 						out, err := executeCombinedOutput(cfg, c, nil, "/bin/cat", name)
+-						if err != nil || string(out) != value {
+-							t.Fatalf("read %s: %q, %v; want %q", name, out, err, value)
++						want := fmt.Sprintf("%s-%d", value, i)
++						if err != nil || string(out) != want {
++							t.Fatalf("read %s: %q, %v; want %q", name, out, err, want)
+ 						}
+ 					}
+ 				}
+@@ -177,6 +182,21 @@ func TestExternalFilestoreCheckpointRestore(t *testing.T) {
+ 						t.Fatal(err)
+ 					}
+ 				}
++				if tc.reorder {
++					// Restore permits a different OCI mount order. Each mount
++					// must retain its own contents even when backing files have
++					// the same chunk-sized length.
++					restoreSpec := *spec
++					restoreSpec.Mounts = append([]specs.Mount(nil), spec.Mounts...)
++					first, second := len(restoreSpec.Mounts)-3, len(restoreSpec.Mounts)-1
++					restoreSpec.Mounts[first], restoreSpec.Mounts[second] = restoreSpec.Mounts[second], restoreSpec.Mounts[first]
++					restoreBundle, restoreCleanup, err := testutil.SetupBundleDir(&restoreSpec)
++					if err != nil {
++						t.Fatal(err)
++					}
++					defer restoreCleanup()
++					args.Spec, args.BundleDir = &restoreSpec, restoreBundle
++				}
+ 				restoredConf := *conf
+ 				restoredConf.FilestoreAdoptDir = snapshots
+ 				for i := 0; i < 2; i++ {

@@ -1,0 +1,8 @@
+{
+  "baseline": "f87bd8102be7dc51a1979040a55c91d08d91baf6",
+  "candidate": "cd7d4251b17357d8f1004dbb3d82bd4a086cc89c",
+  "upstream_base": "a42ad63bdbc80581b567817b0f7fe9e878df6637",
+  "source_manifest_matches_commit": true,
+  "tracked_files": 4652,
+  "patch_sha256": "6119f74e8a45c8fc1afc1ee9a16fc739c2945b510c08c3450581c3d76ee8883d"
+}

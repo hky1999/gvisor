@@ -1,0 +1,77 @@
+<testsuites>
+	<testsuite errors="0" failures="0" skipped="0" tests="7" time="9.860" name="gvisor.dev/gvisor/runsc/container.TestCheckpointRestore" timestamp="2026-11-11T15:44:22.678Z">
+		<testcase classname="container" name="TestCheckpointRestore" time="9.860"></testcase>
+		<testcase classname="container" name="TestCheckpointRestore/kvm" time="5.130"></testcase>
+		<testcase classname="container" name="TestCheckpointRestore/kvm/flate-best-speed" time="2.600"></testcase>
+		<testcase classname="container" name="TestCheckpointRestore/kvm/none" time="2.540"></testcase>
+		<testcase classname="container" name="TestCheckpointRestore/systrap" time="4.730"></testcase>
+		<testcase classname="container" name="TestCheckpointRestore/systrap/flate-best-speed" time="2.380"></testcase>
+		<testcase classname="container" name="TestCheckpointRestore/systrap/none" time="2.350"></testcase>
+	</testsuite>
+	<testsuite errors="0" failures="0" skipped="0" tests="3" time="0.412" name="gvisor.dev/gvisor/runsc/container.TestCheckpointResume" timestamp="2026-11-11T15:44:32.538Z">
+		<testcase classname="container" name="TestCheckpointResume" time="0.410"></testcase>
+		<testcase classname="container" name="TestCheckpointResume/kvm" time="0.230"></testcase>
+		<testcase classname="container" name="TestCheckpointResume/systrap" time="0.180"></testcase>
+	</testsuite>
+	<testsuite errors="0" failures="0" skipped="0" tests="19" time="13.834" name="gvisor.dev/gvisor/runsc/container.TestExternalFilestoreCheckpointRestore" timestamp="2026-11-11T15:44:35.033Z">
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore" time="13.830"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/compressed" time="0.820"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/persistence-failure" time="0.720"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/read-only-root" time="0.720"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/reordered-read-only-root" time="0.960"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/reordered-relocated-sources" time="1.070"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/reordered-resume" time="1.060"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/reordered-stop" time="0.960"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/resume" time="0.820"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/kvm/stop" time="0.720"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/compressed" time="0.680"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/persistence-failure" time="0.530"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/read-only-root" time="0.550"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/reordered-read-only-root" time="0.700"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/reordered-relocated-sources" time="0.810"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/reordered-resume" time="0.810"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/reordered-stop" time="0.700"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/resume" time="0.660"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreCheckpointRestore/systrap/stop" time="0.530"></testcase>
+	</testsuite>
+	<testsuite errors="0" failures="0" skipped="0" tests="5" time="0.002" name="gvisor.dev/gvisor/runsc/container.TestExternalFilestoreFailureCleanup" timestamp="2026-11-11T15:44:48.868Z">
+		<testcase classname="container" name="TestExternalFilestoreFailureCleanup" time="0.000"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreFailureCleanup/before-rpc" time="0.000"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreFailureCleanup/disk-full" time="0.000"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreFailureCleanup/lost-response" time="0.000"></testcase>
+		<testcase classname="container" name="TestExternalFilestoreFailureCleanup/sync-io-error" time="0.000"></testcase>
+	</testsuite>
+	<testsuite errors="0" failures="0" skipped="0" tests="8" time="0.000" name="gvisor.dev/gvisor/runsc/container.TestFilestoreSnapshotInvalidLayout" timestamp="2026-11-11T15:44:48.870Z">
+		<testcase classname="container" name="TestFilestoreSnapshotInvalidLayout" time="0.000"></testcase>
+		<testcase classname="container" name="TestFilestoreSnapshotInvalidLayout/duplicate-destination" time="0.000"></testcase>
+		<testcase classname="container" name="TestFilestoreSnapshotInvalidLayout/extra-config" time="0.000"></testcase>
+		<testcase classname="container" name="TestFilestoreSnapshotInvalidLayout/missing-config" time="0.000"></testcase>
+		<testcase classname="container" name="TestFilestoreSnapshotInvalidLayout/missing-root" time="0.000"></testcase>
+		<testcase classname="container" name="TestFilestoreSnapshotInvalidLayout/missing-spec" time="0.000"></testcase>
+		<testcase classname="container" name="TestFilestoreSnapshotInvalidLayout/no-filestores" time="0.000"></testcase>
+		<testcase classname="container" name="TestFilestoreSnapshotInvalidLayout/relative-destination" time="0.000"></testcase>
+	</testsuite>
+	<testsuite errors="0" failures="0" skipped="0" tests="1" time="0.000" name="gvisor.dev/gvisor/runsc/container.TestFilestoreSnapshotMountIdentity" timestamp="2026-11-11T15:44:48.870Z">
+		<testcase classname="container" name="TestFilestoreSnapshotMountIdentity" time="0.000"></testcase>
+	</testsuite>
+	<testsuite errors="0" failures="0" skipped="0" tests="1" time="0.000" name="gvisor.dev/gvisor/runsc/container.TestFilestoreSnapshotRejectPositionalArtifact" timestamp="2026-11-11T15:44:48.870Z">
+		<testcase classname="container" name="TestFilestoreSnapshotRejectPositionalArtifact" time="0.000"></testcase>
+	</testsuite>
+	<testsuite errors="0" failures="0" skipped="0" tests="9" time="1.220" name="gvisor.dev/gvisor/runsc/container.TestMultiBundleSplitFSCheckpointRestore" timestamp="2026-11-11T15:44:33.813Z">
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore" time="1.220"></testcase>
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore/noRootContainer=false" time="0.540"></testcase>
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore/noRootContainer=false/AutoDiscoverBothBundles" time="0.120"></testcase>
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore/noRootContainer=false/IsolatedPrefixPathsRestore" time="0.110"></testcase>
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore/noRootContainer=false/StartFreshCombiningBundlesFromDifferentCheckpoints" time="0.110"></testcase>
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore/noRootContainer=true" time="0.680"></testcase>
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore/noRootContainer=true/AutoDiscoverBothBundles" time="0.130"></testcase>
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore/noRootContainer=true/IsolatedPrefixPathsRestore" time="0.120"></testcase>
+		<testcase classname="container" name="TestMultiBundleSplitFSCheckpointRestore/noRootContainer=true/StartFreshCombiningBundlesFromDifferentCheckpoints" time="0.120"></testcase>
+	</testsuite>
+	<testsuite errors="0" failures="0" skipped="0" tests="4" time="0.864" name="gvisor.dev/gvisor/runsc/container.TestSplitFSCheckpointRestore" timestamp="2026-11-11T15:44:32.950Z">
+		<testcase classname="container" name="TestSplitFSCheckpointRestore" time="0.860"></testcase>
+		<testcase classname="container" name="TestSplitFSCheckpointRestore/DefaultFilePrefix" time="0.290"></testcase>
+		<testcase classname="container" name="TestSplitFSCheckpointRestore/DirectoryPrefix" time="0.290"></testcase>
+		<testcase classname="container" name="TestSplitFSCheckpointRestore/ExplicitFilePrefix" time="0.280"></testcase>
+	</testsuite>
+</testsuites>
