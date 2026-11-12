@@ -1,0 +1,43 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //runsc/boot/filter/config:config_test
+-----------------------------------------------------------------------------
+=== RUN   TestCgoThreadClone
+--- PASS: TestCgoThreadClone (0.02s)
+=== RUN   TestFilestoreReflinkPermission
+--- PASS: TestFilestoreReflinkPermission (0.01s)
+=== RUN   TestOptionsToPrecompileFilestoreReflink
+    config_test.go:63: all 1152 configurations include both FilestoreReflink settings
+--- PASS: TestOptionsToPrecompileFilestoreReflink (0.01s)
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/default_systrap
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/nvproxy_default
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/tpuproxy
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/host_network_with_raw_sockets
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/default_kvm
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/nvproxy_all
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/host_network
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/profiling
+=== RUN   TestIoctlFirstArgumentIsNonNegativeFD/host_filesystem
+--- PASS: TestIoctlFirstArgumentIsNonNegativeFD (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/default_systrap (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/nvproxy_default (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/tpuproxy (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/host_network_with_raw_sockets (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/default_kvm (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/nvproxy_all (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/host_network (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/profiling (0.00s)
+    --- PASS: TestIoctlFirstArgumentIsNonNegativeFD/host_filesystem (0.00s)
+=== RUN   TestOptionsConfigKey
+=== RUN   TestOptionsConfigKey/fields_are_exhaustive
+=== RUN   TestOptionsConfigKey/mutating_config_fields_causes_ConfigKey_to_change
+=== RUN   TestOptionsConfigKey/mutating_vars_fields_does_not_cause_ConfigKey_to_change
+--- PASS: TestOptionsConfigKey (0.00s)
+    --- PASS: TestOptionsConfigKey/fields_are_exhaustive (0.00s)
+    --- PASS: TestOptionsConfigKey/mutating_config_fields_causes_ConfigKey_to_change (0.00s)
+    --- PASS: TestOptionsConfigKey/mutating_vars_fields_does_not_cause_ConfigKey_to_change (0.00s)
+=== RUN   TestPrecompiledProgramsDeterministic
+--- PASS: TestPrecompiledProgramsDeterministic (38.24s)
+=== RUN   TestMknodat
+--- PASS: TestMknodat (0.01s)
+PASS

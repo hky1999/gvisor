@@ -1,0 +1,17 @@
+INFO: Invocation ID: 321b19cb-e4cf-41a6-8a99-fdf642329bbb
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 2 targets (0 packages loaded, 1723 targets configured).
+[4,123 / 4,131] GoCompilePkg runsc/boot/filter/filter.a; 1s disk-cache, linux-sandbox
+[4,123 / 4,131] GoCompilePkg runsc/boot/filter/filter.a; 11s disk-cache, linux-sandbox
+[4,124 / 4,131] [Prepa] GoCompilePkg runsc/boot/boot.a
+[4,128 / 4,131] GoLink runsc/cmd/sentry/gvisor_sentry_/gvisor_sentry; 0s disk-cache
+[4,128 / 4,131] GoLink runsc/cmd/sentry/gvisor_sentry_/gvisor_sentry; 1s disk-cache, linux-sandbox
+INFO: Found 2 targets...
+INFO: Elapsed time: 20.951s, Critical Path: 20.21s
+INFO: 6 processes: 1572 action cache hit, 2 internal, 4 linux-sandbox.
+INFO: Build completed successfully, 6 total actions

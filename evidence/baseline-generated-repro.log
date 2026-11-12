@@ -1,0 +1,37 @@
+INFO: Invocation ID: 2933e1d0-11ce-4a78-983a-a6ff3b4ab301
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //runsc/boot/filter:filter_test (1 packages loaded, 0 targets configured)
+Analyzing: target //runsc/boot/filter:filter_test (1 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //runsc/boot/filter:filter_test (1 packages loaded, 20 targets configured).
+[2,558 / 2,563] GoCompilePkg runsc/boot/filter/filter_test.internal.a; 1s disk-cache, linux-sandbox
+[2,559 / 2,563] [Prepa] GoCompilePkgExternal runsc/boot/filter/filter_test_test.external.a
+[2,561 / 2,563] GoLink runsc/boot/filter/filter_test_/filter_test; 1s disk-cache, linux-sandbox
+FAIL: //runsc/boot/filter:filter_test (Exit 1) (see /root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/k8-opt/testlogs/runsc/boot/filter/filter_test/test.log)
+INFO: From Testing //runsc/boot/filter:filter_test:
+==================== Test output for //runsc/boot/filter:filter_test:
+--- FAIL: TestPrecompiledFilestoreReflink (0.00s)
+    --- FAIL: TestPrecompiledFilestoreReflink/systrap/directfs=false/reflink=true (0.00s)
+        reflink_test.go:48: no precompiled program for GOARCH="amd64" Platform="systrap" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=false FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=""
+    --- FAIL: TestPrecompiledFilestoreReflink/systrap/directfs=true/reflink=true (0.00s)
+        reflink_test.go:48: no precompiled program for GOARCH="amd64" Platform="systrap" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=""
+    --- FAIL: TestPrecompiledFilestoreReflink/kvm/directfs=false/reflink=true (0.00s)
+        reflink_test.go:48: no precompiled program for GOARCH="amd64" Platform="kvm" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=false FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=""
+    --- FAIL: TestPrecompiledFilestoreReflink/kvm/directfs=true/reflink=true (0.00s)
+        reflink_test.go:48: no precompiled program for GOARCH="amd64" Platform="kvm" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=""
+FAIL
+================================================================================
+INFO: Found 1 test target...
+Target //runsc/boot/filter:filter_test up-to-date:
+  bazel-bin/runsc/boot/filter/filter_test_/filter_test
+INFO: Elapsed time: 9.571s, Critical Path: 8.99s
+INFO: 11 processes: 14 action cache hit, 5 internal, 6 linux-sandbox.
+INFO: Build completed, 1 test FAILED, 11 total actions
+INFO: 
+//runsc/boot/filter:filter_test                                          FAILED in 0.1s
+  /root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/k8-opt/testlogs/runsc/boot/filter/filter_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.
+INFO: 

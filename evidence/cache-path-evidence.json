@@ -1,0 +1,300 @@
+{
+  "baseline": {
+    "fallback": [
+      {
+        "path": "external-performance/64-19-baseline-dirty/runsc.log.20261112-003939.643987.boot.txt",
+        "line": "W1112 00:39:39.697847       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-19-baseline-dirty/runsc.log.20261112-003939.108966.boot.txt",
+        "line": "W1112 00:39:39.161636       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-4-baseline-dirty/runsc.log.20261112-003917.777157.boot.txt",
+        "line": "W1112 00:39:17.829418       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-4-baseline-dirty/runsc.log.20261112-003917.261138.boot.txt",
+        "line": "W1112 00:39:17.315362       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-5-baseline-dirty/runsc.log.20261112-003919.882237.boot.txt",
+        "line": "W1112 00:39:19.937683       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-5-baseline-dirty/runsc.log.20261112-003919.346217.boot.txt",
+        "line": "W1112 00:39:19.399994       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-3-baseline-dirty/runsc.log.20261112-003916.560111.boot.txt",
+        "line": "W1112 00:39:16.618222       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-3-baseline-dirty/runsc.log.20261112-003917.080131.boot.txt",
+        "line": "W1112 00:39:17.135464       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-10-baseline-dirty/runsc.log.20261112-003925.669457.boot.txt",
+        "line": "W1112 00:39:25.722300       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-10-baseline-dirty/runsc.log.20261112-003926.204477.boot.txt",
+        "line": "W1112 00:39:26.256823       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-20-baseline-dirty/runsc.log.20261112-003940.338013.boot.txt",
+        "line": "W1112 00:39:40.390925       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-20-baseline-dirty/runsc.log.20261112-003939.823993.boot.txt",
+        "line": "W1112 00:39:39.879523       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-7-baseline-dirty/runsc.log.20261112-003922.680343.boot.txt",
+        "line": "W1112 00:39:22.735513       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-7-baseline-dirty/runsc.log.20261112-003922.158323.boot.txt",
+        "line": "W1112 00:39:22.211446       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-6-baseline-dirty/runsc.log.20261112-003920.595264.boot.txt",
+        "line": "W1112 00:39:20.655830       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-6-baseline-dirty/runsc.log.20261112-003920.067244.boot.txt",
+        "line": "W1112 00:39:20.121498       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-12-baseline-dirty/runsc.log.20261112-003928.517565.boot.txt",
+        "line": "W1112 00:39:28.571148       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-12-baseline-dirty/runsc.log.20261112-003929.032584.boot.txt",
+        "line": "W1112 00:39:29.083189       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-22-baseline-dirty/runsc.log.20261112-003943.190121.boot.txt",
+        "line": "W1112 00:39:43.249022       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-22-baseline-dirty/runsc.log.20261112-003942.655101.boot.txt",
+        "line": "W1112 00:39:42.709887       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-1-baseline-dirty/runsc.log.20261112-003913.694002.boot.txt",
+        "line": "W1112 00:39:13.749563       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-1-baseline-dirty/runsc.log.20261112-003914.226023.boot.txt",
+        "line": "W1112 00:39:14.281369       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-23-baseline-dirty/runsc.log.20261112-003945.331202.boot.txt",
+        "line": "W1112 00:39:45.386185       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-23-baseline-dirty/runsc.log.20261112-003944.790182.boot.txt",
+        "line": "W1112 00:39:44.847952       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-15-baseline-dirty/runsc.log.20261112-003933.401750.boot.txt",
+        "line": "W1112 00:39:33.456610       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-15-baseline-dirty/runsc.log.20261112-003933.932770.boot.txt",
+        "line": "W1112 00:39:33.986046       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-21-baseline-dirty/runsc.log.20261112-003942.463093.boot.txt",
+        "line": "W1112 00:39:42.516778       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-21-baseline-dirty/runsc.log.20261112-003941.928073.boot.txt",
+        "line": "W1112 00:39:41.985515       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-8-baseline-dirty/runsc.log.20261112-003922.866350.boot.txt",
+        "line": "W1112 00:39:22.920600       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-8-baseline-dirty/runsc.log.20261112-003923.407371.boot.txt",
+        "line": "W1112 00:39:23.461129       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-9-baseline-dirty/runsc.log.20261112-003924.953429.boot.txt",
+        "line": "W1112 00:39:25.007892       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-9-baseline-dirty/runsc.log.20261112-003925.485450.boot.txt",
+        "line": "W1112 00:39:25.537390       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-11-baseline-dirty/runsc.log.20261112-003928.332558.boot.txt",
+        "line": "W1112 00:39:28.385530       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-11-baseline-dirty/runsc.log.20261112-003927.806538.boot.txt",
+        "line": "W1112 00:39:27.863322       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-2-baseline-dirty/runsc.log.20261112-003914.950050.boot.txt",
+        "line": "W1112 00:39:15.008104       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-2-baseline-dirty/runsc.log.20261112-003914.432030.boot.txt",
+        "line": "W1112 00:39:14.488190       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-16-baseline-dirty/runsc.log.20261112-003934.666798.boot.txt",
+        "line": "W1112 00:39:34.721652       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-16-baseline-dirty/runsc.log.20261112-003934.119777.boot.txt",
+        "line": "W1112 00:39:34.176370       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-18-baseline-dirty/runsc.log.20261112-003937.513906.boot.txt",
+        "line": "W1112 00:39:37.566298       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-18-baseline-dirty/runsc.log.20261112-003936.974885.boot.txt",
+        "line": "W1112 00:39:37.028307       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-17-baseline-dirty/runsc.log.20261112-003936.266858.boot.txt",
+        "line": "W1112 00:39:36.324716       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-17-baseline-dirty/runsc.log.20261112-003936.789878.boot.txt",
+        "line": "W1112 00:39:36.843421       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-0-baseline-dirty/runsc.log.20261112-003912.093942.boot.txt",
+        "line": "W1112 00:39:12.149961       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-0-baseline-dirty/runsc.log.20261112-003911.559921.boot.txt",
+        "line": "W1112 00:39:11.621050       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-13-baseline-dirty/runsc.log.20261112-003930.594643.boot.txt",
+        "line": "W1112 00:39:30.646893       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-13-baseline-dirty/runsc.log.20261112-003931.121663.boot.txt",
+        "line": "W1112 00:39:31.176902       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-14-baseline-dirty/runsc.log.20261112-003931.812690.boot.txt",
+        "line": "W1112 00:39:31.865110       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      },
+      {
+        "path": "external-performance/64-14-baseline-dirty/runsc.log.20261112-003931.303670.boot.txt",
+        "line": "W1112 00:39:31.355556       1 filter.go:73] No precompiled program found for config options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", building seccomp program from scratch. This slows down sandbox startup."
+      }
+    ],
+    "loaded": []
+  },
+  "candidate": {
+    "fallback": [],
+    "loaded": [
+      {
+        "path": "external-performance/64-10-candidate-dirty/runsc.log.20261112-003926.399484.boot.txt",
+        "line": "D1112 00:39:26.452179       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-17-candidate-dirty/runsc.log.20261112-003935.558832.boot.txt",
+        "line": "D1112 00:39:35.612537       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-12-candidate-dirty/runsc.log.20261112-003929.204591.boot.txt",
+        "line": "D1112 00:39:29.262562       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-16-candidate-dirty/runsc.log.20261112-003934.861805.boot.txt",
+        "line": "D1112 00:39:34.914647       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-8-candidate-dirty/runsc.log.20261112-003923.598378.boot.txt",
+        "line": "D1112 00:39:23.652329       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-11-candidate-dirty/runsc.log.20261112-003927.110511.boot.txt",
+        "line": "D1112 00:39:27.167913       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-15-candidate-dirty/runsc.log.20261112-003932.704723.boot.txt",
+        "line": "D1112 00:39:32.757980       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-14-candidate-dirty/runsc.log.20261112-003932.008697.boot.txt",
+        "line": "D1112 00:39:32.063357       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-21-candidate-dirty/runsc.log.20261112-003941.228047.boot.txt",
+        "line": "D1112 00:39:41.282599       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-23-candidate-dirty/runsc.log.20261112-003944.081155.boot.txt",
+        "line": "D1112 00:39:44.138960       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-20-candidate-dirty/runsc.log.20261112-003940.534020.boot.txt",
+        "line": "D1112 00:39:40.585778       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-6-candidate-dirty/runsc.log.20261112-003920.787271.boot.txt",
+        "line": "D1112 00:39:20.845076       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-7-candidate-dirty/runsc.log.20261112-003921.450297.boot.txt",
+        "line": "D1112 00:39:21.508206       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-3-candidate-dirty/runsc.log.20261112-003915.855084.boot.txt",
+        "line": "D1112 00:39:15.915356       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-0-candidate-dirty/runsc.log.20261112-003912.301950.boot.txt",
+        "line": "D1112 00:39:12.362400       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-4-candidate-dirty/runsc.log.20261112-003917.961164.boot.txt",
+        "line": "D1112 00:39:18.013906       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-5-candidate-dirty/runsc.log.20261112-003918.640190.boot.txt",
+        "line": "D1112 00:39:18.699467       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-13-candidate-dirty/runsc.log.20261112-003929.915618.boot.txt",
+        "line": "D1112 00:39:29.973949       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-1-candidate-dirty/runsc.log.20261112-003912.983975.boot.txt",
+        "line": "D1112 00:39:13.041694       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-2-candidate-dirty/runsc.log.20261112-003915.141057.boot.txt",
+        "line": "D1112 00:39:15.195782       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-19-candidate-dirty/runsc.log.20261112-003938.405940.boot.txt",
+        "line": "D1112 00:39:38.460759       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-22-candidate-dirty/runsc.log.20261112-003943.377128.boot.txt",
+        "line": "D1112 00:39:43.432845       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-18-candidate-dirty/runsc.log.20261112-003937.706913.boot.txt",
+        "line": "D1112 00:39:37.764578       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      },
+      {
+        "path": "external-performance/64-9-candidate-dirty/runsc.log.20261112-003924.294404.boot.txt",
+        "line": "D1112 00:39:24.347008       1 filter.go:57] Loaded precompiled seccomp instructions for options GOARCH=\"amd64\" Platform=\"systrap\" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=false RDMAProxy=false CgoEnabled=false PluginNetwork=false VendorSyscalls=\"\", using variables: map[controller_fd:9 proc_self_fd:7 self_pid_high32bits:0 self_pid_low32bits:1 systrap_self_pid_high32bits:0 systrap_self_pid_low32bits:1 systrap_sysmsg_thread_priority_high32bits:0 systrap_sysmsg_thread_priority_low32bits:1]"
+      }
+    ]
+  }
+}

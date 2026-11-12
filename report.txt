@@ -1,0 +1,239 @@
+PR #14228: local seccomp precompile follow-up (2026-11-12)
+
+Status: measurement report recorded before publication. See README.md for the published commits and post-rebase validation.
+Baseline: cd7d4251b17357d8f1004dbb3d82bd4a086cc89c (published PR head).
+Candidate: baseline + fix.patch; no unrelated main-branch rebase.
+Review: https://github.com/google/gvisor/pull/14228#discussion_r4540405313
+
+Finding and scope
+Ayush's report is correct. FilestoreReflink participates in ConfigKey but was
+missing from optionsToPrecompile. All 576 previously generated configurations
+had reflink disabled. Enabling the feature therefore selected the synchronous
+runtime BPF build/optimization fallback during sandbox creation and restore.
+This is a startup-performance defect, not evidence of a snapshot-integrity or
+permission-isolation defect. It belongs in #14228 because the flag is introduced
+by that PR.
+
+The production fix adds nine lines using the existing option-expansion pattern.
+Every previously supported configuration now has both reflink settings. No
+runtime permission rule changes, prewrite, asynchronous park or new modes are
+introduced. ConfigKey still separates enabled and disabled filters. Options
+already unsupported by precompilation retain their existing fallback behavior.
+
+Deterministic reproduction and regression tests
+- tests-only.patch fails on the published PR: 576/576 missing counterparts;
+  all four enabled lookup cases fail (systrap/KVM x DirectFS off/on).
+- After the fix, all 1,152 unique configurations have their opposite flag setting.
+  Full config_test passes, including serial/parallel deterministic generation.
+- The generated-release filter test passes eight configurations. It performs
+  GetPrecompiled + RenderInstructions and interprets the actual generated BPF:
+  valid FICLONE is permitted only when enabled; negative destination/source FDs
+  remain denied. There were no opt-test skips. Fastbuild explicitly skips this
+  generated-filter test because precompilation is intentionally disabled there;
+  the configuration-enumeration test still applies.
+- Formal container regression: systrap and KVM, three repetitions; 54 external
+  checkpoint/restore cases, including 24 reordered-mount cases, all pass.
+  Ordinary checkpoint/resume, split-FS and snapshot failure-cleanup cases in
+  the recorded test filter also pass; no skipped cases.
+- 48/48 performance trials verify all 64 MiB of the restored snapshot and the
+  resumed source, including rejection of the opposite content version. In all
+  trials the original starts writing again before checkpoint CLI return.
+- Source startup logs independently show fallback before the fix and successful
+  precompiled loading afterward; no fallback remains in the candidate trials.
+- Complete opt release build, make DOCKER_BUILD=false lint, lint-cc and nine
+  harness tests pass. Initial lint-cc used stale compilation-database paths;
+  regenerating the database fixed the environment and all 367 sources passed.
+
+Measurement methodology
+Intel Xeon Platinum 8269CY, amd64, same host and XFS; 24 alternating pairs on
+both sides. Existing BenchmarkSandboxBoot runs all systrap/KVM and overlay
+subcases, both reflink flag settings, five boots per sample. Boot means active
+sentry boot (process start to kernel start excluding the wait for the OCI start
+signal), not whole CLI time. The same small benchmark-only configuration hook
+is applied to both sides and kept out of fix.patch.
+
+External checkpoint/restore uses a 64 MiB newly dirty layer, --leave-running,
+and no prewrite on BOTH sides. Source debug logging is enabled for pause/phase
+measurement. Timed restore uses --debug=false on both sides to exclude the old
+fallback's debug dump of 576 keys. Checkpoint CLI already waits for durability;
+DurableCheckpoint includes the same extra harness fsync verification on both
+sides. Both sides use matching complete release filesets. Baseline files are
+byte-identical to the previously tested release for published cd7d4251b.
+
+Performance summary (median, milliseconds; before -> after)
+- Reflink enabled kvm active boot: 75.25 -> 67.28; sample SD 2.31 -> 1.71, n=24 each.
+- Reflink enabled kvm_overlay active boot: 75.88 -> 69.06; sample SD 2.24 -> 2.17, n=24 each.
+- Reflink enabled systrap active boot: 36.49 -> 27.08; sample SD 0.97 -> 0.93, n=24 each.
+- Reflink enabled systrap_overlay active boot: 37.38 -> 27.69; sample SD 0.83 -> 1.05, n=24 each.
+All four enabled Boot differences have p<0.001. The corresponding Loader.Run
+phase improves; loader creation does not show a significant difference.
+All 12 primary Boot/New/Run metrics with reflink disabled show no statistically
+significant difference. This does not establish zero overhead or cold-cache
+behavior. Full raw tables and all secondary percentile metrics follow below.
+
+- External pause_ms: 64.00 -> 63.21; sample SD 2.14 -> 2.46, n=24 each.
+- External cli_ms: 72.57 -> 71.77; sample SD 2.45 -> 2.53, n=24 each.
+- External durable_ms: 74.46 -> 73.94; sample SD 2.47 -> 2.50, n=24 each.
+- External restore_cli_ms: 75.31 -> 67.54; sample SD 2.67 -> 2.87, n=24 each.
+Restore improves by 10.32% (p<0.001). Application pause (p=0.185), checkpoint CLI
+(p=0.159), complete persistence verification (p=0.351), and FICLONE (p=0.519)
+do not show significant differences. The log-derived pause window alone has a
+small p=0.036 difference; the application heartbeat measurement and unchanged
+clone path do not support claiming a checkpoint-pause optimization. Sample SD
+is recorded in boot-statistics.json and performance-summary.json; benchstat's
+printed +/- intervals are confidence intervals, not sample SD.
+
+Binary-size cost (file bytes, not RSS)
+- program_count: 576 -> 1,152; delta 576 (100.00%).
+- generated_go_bytes: 20,597,828 -> 41,286,271; delta 20,688,443 (100.44%).
+- release_file_bytes: 188,418,932 -> 192,736,692; delta 4,317,760 (2.29%).
+- gvisor_sentry: 55,379,043 -> 59,696,803 bytes; +4.12 MiB (7.80%).
+All other release files are byte-identical, including runsc. The generated Go
+source is a build artifact, not checked-in source. The whole release grows by
+2.29%, while sentry alone grows by 7.80%. Repeated startup tests do not measure
+the cold-page-cache or resident-memory effect of this size increase. The review's
+6.29-6.43 ms / 3.81 MB figures refer to its isolated runtime compilation benchmark;
+this follow-up measures end-to-end startup phases and restore CLI, not that
+allocation microbenchmark.
+
+Assessment
+Use the explicit option expansion in #14228. It preserves the existing precompile
+architecture and opt-in security boundary, has a small production diff, and
+removes a measured startup/restore penalty at a quantified +4.12 MiB complete
+release cost. Avoid adding a new runtime-parameterized permission mechanism
+solely to reduce variant count in this PR. This fix does not address the first
+fully dirty layer's FICLONE writeback delay; that tradeoff remains unchanged.
+
+Artifacts
+fix.patch: complete proposed production + tests patch.
+tests-only.patch / production-only.patch: deterministic before/after reproduction.
+REPRODUCE.txt, baseline.sh, fixed.sh: build/test commands and environment details.
+benchmark-instrumentation.patch / performance.py / harness/: measurement setup.
+evidence/: raw logs, benchstat, samples, hashes, statistics and cache-path traces.
+provenance.json: baseline and local patch/source hashes.
+
+Raw benchstat output (all measured variants)
+
+boot-enabled-benchstat.txt
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+                                     │ /root/filestore-reflink-precompile-20261112/boot-enabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-enabled-fixed.txt │
+                                     │                                sec/op                                 │                   sec/op                    vs base                │
+SandboxBoot/kvm/Boot-104                                                                         75.25m ± 3%                                  67.28m ± 2%  -10.58% (p=0.000 n=24)
+SandboxBoot/kvm/New-104                                                                          41.52m ± 5%                                  41.28m ± 2%        ~ (p=0.631 n=24)
+SandboxBoot/kvm/Run-104                                                                         10.931m ± 1%                                  2.957m ± 2%  -72.95% (p=0.000 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                 75.88m ± 2%                                  69.06m ± 2%   -8.98% (p=0.000 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                  41.24m ± 4%                                  42.00m ± 2%        ~ (p=0.264 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                 11.048m ± 2%                                  3.133m ± 1%  -71.64% (p=0.000 n=24)
+SandboxBoot/systrap/Boot-104                                                                     36.49m ± 1%                                  27.08m ± 3%  -25.78% (p=0.000 n=24)
+SandboxBoot/systrap/New-104                                                                      2.481m ± 3%                                  2.473m ± 1%        ~ (p=0.631 n=24)
+SandboxBoot/systrap/Run-104                                                                     12.054m ± 1%                                  2.608m ± 3%  -78.36% (p=0.000 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                             37.38m ± 2%                                  27.69m ± 2%  -25.90% (p=0.000 n=24)
+SandboxBoot/systrap_overlay/New-104                                                              2.474m ± 1%                                  2.493m ± 2%        ~ (p=0.384 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                             12.244m ± 1%                                  2.751m ± 4%  -77.53% (p=0.000 n=24)
+geomean                                                                                          18.35m                                       10.79m       -41.23%
+
+                                     │ /root/filestore-reflink-precompile-20261112/boot-enabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-enabled-fixed.txt │
+                                     │                                p50.ns                                 │                   p50.ns                    vs base                │
+SandboxBoot/kvm/Boot-104                                                                         75.35M ± 2%                                  67.19M ± 4%  -10.84% (p=0.000 n=24)
+SandboxBoot/kvm/New-104                                                                          40.38M ± 7%                                  42.29M ± 5%        ~ (p=0.396 n=24)
+SandboxBoot/kvm/Run-104                                                                         11.037M ± 3%                                  2.950M ± 3%  -73.27% (p=0.000 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                 76.80M ± 2%                                  67.93M ± 3%  -11.55% (p=0.000 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                  42.11M ± 4%                                  41.45M ± 3%        ~ (p=0.830 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                 10.984M ± 3%                                  3.115M ± 3%  -71.64% (p=0.000 n=24)
+SandboxBoot/systrap/Boot-104                                                                     36.35M ± 2%                                  27.22M ± 3%  -25.13% (p=0.000 n=24)
+SandboxBoot/systrap/New-104                                                                      2.400M ± 3%                                  2.428M ± 2%        ~ (p=0.846 n=24)
+SandboxBoot/systrap/Run-104                                                                     12.091M ± 1%                                  2.627M ± 4%  -78.28% (p=0.000 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                             36.75M ± 2%                                  27.41M ± 3%  -25.40% (p=0.000 n=24)
+SandboxBoot/systrap_overlay/New-104                                                              2.423M ± 4%                                  2.392M ± 4%        ~ (p=0.767 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                             12.238M ± 1%                                  2.771M ± 6%  -77.36% (p=0.000 n=24)
+geomean                                                                                          18.26M                                       10.73M       -41.25%
+
+                                     │ /root/filestore-reflink-precompile-20261112/boot-enabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-enabled-fixed.txt │
+                                     │                                p90.ns                                 │                   p90.ns                    vs base                │
+SandboxBoot/kvm/Boot-104                                                                         77.43M ± 2%                                  70.21M ± 2%   -9.32% (p=0.000 n=24)
+SandboxBoot/kvm/New-104                                                                          43.10M ± 3%                                  43.60M ± 3%        ~ (p=0.443 n=24)
+SandboxBoot/kvm/Run-104                                                                         11.236M ± 1%                                  3.041M ± 3%  -72.93% (p=0.000 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                 78.36M ± 2%                                  71.66M ± 2%   -8.55% (p=0.000 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                  43.55M ± 3%                                  43.61M ± 5%        ~ (p=0.468 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                 11.478M ± 2%                                  3.232M ± 2%  -71.84% (p=0.000 n=24)
+SandboxBoot/systrap/Boot-104                                                                     37.38M ± 2%                                  27.79M ± 3%  -25.66% (p=0.000 n=24)
+SandboxBoot/systrap/New-104                                                                      2.596M ± 5%                                  2.576M ± 5%        ~ (p=0.602 n=24)
+SandboxBoot/systrap/Run-104                                                                     12.195M ± 1%                                  2.746M ± 2%  -77.48% (p=0.000 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                             37.84M ± 2%                                  28.67M ± 3%  -24.21% (p=0.000 n=24)
+SandboxBoot/systrap_overlay/New-104                                                              2.537M ± 4%                                  2.637M ± 4%        ~ (p=0.310 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                             12.471M ± 1%                                  2.855M ± 2%  -77.11% (p=0.000 n=24)
+geomean                                                                                          18.90M                                       11.22M       -40.63%
+
+boot-disabled-benchstat.txt
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+                                     │ /root/filestore-reflink-precompile-20261112/boot-disabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-disabled-fixed.txt │
+                                     │                                 sec/op                                 │                    sec/op                     vs base               │
+SandboxBoot/kvm/Boot-104                                                                          68.46m ± 2%                                    68.72m ± 3%       ~ (p=0.862 n=24)
+SandboxBoot/kvm/New-104                                                                           42.12m ± 3%                                    42.42m ± 3%       ~ (p=0.943 n=24)
+SandboxBoot/kvm/Run-104                                                                           2.997m ± 3%                                    2.972m ± 3%       ~ (p=1.000 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                  69.02m ± 2%                                    69.08m ± 1%       ~ (p=0.959 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                   42.19m ± 3%                                    42.35m ± 3%       ~ (p=0.588 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                   3.125m ± 3%                                    3.145m ± 2%       ~ (p=0.631 n=24)
+SandboxBoot/systrap/Boot-104                                                                      27.16m ± 2%                                    27.48m ± 2%       ~ (p=0.291 n=24)
+SandboxBoot/systrap/New-104                                                                       2.474m ± 2%                                    2.450m ± 2%       ~ (p=0.631 n=24)
+SandboxBoot/systrap/Run-104                                                                       2.631m ± 3%                                    2.570m ± 3%       ~ (p=0.384 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                              27.50m ± 3%                                    27.59m ± 2%       ~ (p=0.943 n=24)
+SandboxBoot/systrap_overlay/New-104                                                               2.550m ± 2%                                    2.503m ± 3%       ~ (p=0.125 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                               2.788m ± 1%                                    2.735m ± 3%       ~ (p=0.331 n=24)
+geomean                                                                                           10.87m                                         10.83m       -0.35%
+
+                                     │ /root/filestore-reflink-precompile-20261112/boot-disabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-disabled-fixed.txt │
+                                     │                                 p50.ns                                 │                    p50.ns                     vs base               │
+SandboxBoot/kvm/Boot-104                                                                          69.44M ± 4%                                    68.35M ± 3%       ~ (p=0.506 n=24)
+SandboxBoot/kvm/New-104                                                                           42.17M ± 4%                                    41.32M ± 4%       ~ (p=0.798 n=24)
+SandboxBoot/kvm/Run-104                                                                           3.009M ± 3%                                    2.979M ± 2%       ~ (p=0.846 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                  68.28M ± 2%                                    68.50M ± 3%       ~ (p=0.751 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                   41.39M ± 2%                                    41.76M ± 5%       ~ (p=0.690 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                   3.073M ± 4%                                    3.115M ± 4%       ~ (p=0.506 n=24)
+SandboxBoot/systrap/Boot-104                                                                      26.92M ± 2%                                    27.35M ± 2%       ~ (p=0.362 n=24)
+SandboxBoot/systrap/New-104                                                                       2.417M ± 4%                                    2.420M ± 2%       ~ (p=0.705 n=24)
+SandboxBoot/systrap/Run-104                                                                       2.610M ± 4%                                    2.571M ± 5%       ~ (p=0.455 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                              27.21M ± 4%                                    27.25M ± 2%       ~ (p=0.830 n=24)
+SandboxBoot/systrap_overlay/New-104                                                               2.540M ± 5%                                    2.448M ± 4%       ~ (p=0.185 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                               2.816M ± 1%                                    2.740M ± 4%       ~ (p=0.078 n=24)
+geomean                                                                                           10.80M                                         10.73M       -0.67%
+
+                                     │ /root/filestore-reflink-precompile-20261112/boot-disabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-disabled-fixed.txt │
+                                     │                                 p90.ns                                 │                    p90.ns                     vs base               │
+SandboxBoot/kvm/Boot-104                                                                          71.17M ± 2%                                    70.06M ± 3%       ~ (p=0.207 n=24)
+SandboxBoot/kvm/New-104                                                                           44.22M ± 5%                                    44.50M ± 6%       ~ (p=0.230 n=24)
+SandboxBoot/kvm/Run-104                                                                           3.108M ± 3%                                    3.047M ± 3%       ~ (p=0.192 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                  70.03M ± 2%                                    70.61M ± 2%       ~ (p=0.690 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                   43.65M ± 4%                                    43.98M ± 3%       ~ (p=0.862 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                   3.252M ± 2%                                    3.263M ± 4%       ~ (p=0.927 n=24)
+SandboxBoot/systrap/Boot-104                                                                      27.53M ± 4%                                    28.14M ± 2%       ~ (p=0.331 n=24)
+SandboxBoot/systrap/New-104                                                                       2.547M ± 6%                                    2.490M ± 6%       ~ (p=0.736 n=24)
+SandboxBoot/systrap/Run-104                                                                       2.706M ± 3%                                    2.707M ± 2%       ~ (p=0.798 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                              28.20M ± 3%                                    28.39M ± 2%       ~ (p=0.878 n=24)
+SandboxBoot/systrap_overlay/New-104                                                               2.636M ± 3%                                    2.554M ± 3%       ~ (p=0.093 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                               2.880M ± 1%                                    2.848M ± 2%       ~ (p=0.255 n=24)
+geomean                                                                                           11.21M                                         11.17M       -0.38%
+
+external-benchstat.txt
+                                        │ /root/filestore-reflink-precompile-20261112/external-performance/baseline-dirty.txt │ /root/filestore-reflink-precompile-20261112/external-performance/candidate-dirty.txt │
+                                        │                                       sec/op                                        │                            sec/op                             vs base                │
+Resume/64MiB/ApplicationPause                                                                                     64.00m ± 1%                                                    63.21m ± 2%        ~ (p=0.185 n=24)
+Resume/64MiB/PauseLogWindow                                                                                       62.87m ± 1%                                                    61.96m ± 1%   -1.45% (p=0.036 n=24)
+Resume/64MiB/Checkpoint                                                                                           72.57m ± 1%                                                    71.77m ± 2%        ~ (p=0.159 n=24)
+Resume/64MiB/DurableCheckpoint                                                                                    74.46m ± 2%                                                    73.94m ± 2%        ~ (p=0.351 n=24)
+Resume/64MiB/EndToEnd                                                                                             74.91m ± 2%                                                    74.45m ± 2%        ~ (p=0.341 n=24)
+Resume/64MiB/Restore                                                                                              75.31m ± 3%                                                    67.54m ± 3%  -10.32% (p=0.000 n=24)
+Resume/64MiB/ficlone_ns                                                                                           57.26m ± 1%                                                    57.66m ± 1%        ~ (p=0.519 n=24)
+Resume/64MiB/state_pages_fsync_ns                                                                                 2.154m ± 5%                                                    2.147m ± 7%        ~ (p=0.468 n=24)
+Resume/64MiB/snapshot_fsync_ns                                                                                    28.96µ ± 4%                                                    29.31µ ± 3%        ~ (p=0.373 n=24)
+Resume/64MiB/post_resume_persistence_ns                                                                           3.418m ± 3%                                                    3.381m ± 5%        ~ (p=0.533 n=24)
+geomean                                                                                                           16.50m                                                         16.25m        -1.54%
+
+                      │ /root/filestore-reflink-precompile-20261112/external-performance/baseline-dirty.txt │ /root/filestore-reflink-precompile-20261112/external-performance/candidate-dirty.txt │
+                      │                                        ns/op                                        │                              ns/op                                vs base            │
+Resume/64MiB/Preflush                                                                            0.000 ± 0%                                                         0.000 ± 0%  ~ (p=1.000 n=24) ¹
+¹ all samples are equal

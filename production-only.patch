@@ -1,0 +1,20 @@
+diff --git a/runsc/boot/filter/config/config_precompiled.go b/runsc/boot/filter/config/config_precompiled.go
+index b4b23a973..fd06e8d9b 100644
+--- a/runsc/boot/filter/config/config_precompiled.go
++++ b/runsc/boot/filter/config/config_precompiled.go
+@@ -98,6 +98,15 @@ func optionsToPrecompile() ([]Options, error) {
+ 			return []Options{directfs, noDirectfs}, nil
+ 		},
+ 
++		// Precompile options with filestore reflink enabled and disabled.
++		func(opt Options) ([]Options, error) {
++			reflink := opt
++			reflink.FilestoreReflink = true
++			noReflink := opt
++			noReflink.FilestoreReflink = false
++			return []Options{reflink, noReflink}, nil
++		},
++
+ 		// Expand NVProxy and its possible configurations.
+ 		func(opt Options) ([]Options, error) {
+ 			// Add the "NVProxy disabled" configuration.

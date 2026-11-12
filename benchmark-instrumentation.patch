@@ -1,0 +1,17 @@
+--- a/runsc/container/boot_bench_test.go
++++ b/runsc/container/boot_bench_test.go
+@@ -59,7 +59,13 @@
+ 	if err := testutil.ConfigureExePath(); err != nil {
+ 		tb.Fatalf("ConfigureExePath: %v", err)
+ 	}
+-	return testutil.PlatformConfigs(tb, *testPlatforms, newConf)
++	configs := testutil.PlatformConfigs(tb, *testPlatforms, newConf)
++ if os.Getenv("BENCH_FILESTORE_REFLINK") == "enabled" {
++  for _, bc := range configs {
++   bc.Conf.FilestoreReflink = config.FilestoreReflinkEnabled
++  }
++ }
++ return configs
+ }
+ 
+ // setupMinimalRootfs returns a minimal root filesystem: the statically linked

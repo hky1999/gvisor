@@ -1,0 +1,24 @@
+INFO: Invocation ID: 276b7a7e-c853-41d0-ab70-910711e64b39
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //runsc/container:container_test (0 packages loaded, 0 targets configured)
+Analyzing: target //runsc/container:container_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //runsc/container:container_test (20 packages loaded, 143 targets configured).
+[4,161 / 4,165] [Prepa] GoCompilePkgExternal runsc/container/container_test_test.external.a
+[4,163 / 4,165] GoLink runsc/container/container_test_/container_test; 0s local, disk-cache
+[4,165 / 4,166] Testing //runsc/container:container_test; 0s local, disk-cache
+[4,165 / 4,166] Testing //runsc/container:container_test; 10s local, disk-cache
+[4,165 / 4,166] Testing //runsc/container:container_test; 40s local, disk-cache
+[4,165 / 4,166] 1 / 1 tests; Testing //runsc/container:container_test; 78s local, disk-cache
+INFO: Found 1 test target...
+Target //runsc/container:container_test up-to-date:
+  bazel-bin/runsc/container/container_test_/container_test
+INFO: Elapsed time: 82.655s, Critical Path: 81.82s
+INFO: 16 processes: 41 action cache hit, 3 internal, 13 local.
+INFO: Build completed successfully, 16 total actions
+//runsc/container:container_test                                         PASSED in 77.7s
+
+Executed 1 out of 1 test: 1 test passes.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

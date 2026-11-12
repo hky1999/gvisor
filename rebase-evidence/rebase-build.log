@@ -1,0 +1,33 @@
+INFO: Invocation ID: 214834ab-12a8-4d7e-9fd8-5393dd6937c4
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //:release (0 packages loaded, 0 targets configured)
+Analyzing: target //:release (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //:release (606 packages loaded, 6367 targets configured).
+[3,960 / 4,201] GoCompilePkg pkg/shim/v1/taskserver/taskserver.a; 0s disk-cache, linux-sandbox ... (15 actions, 14 running)
+[4,123 / 4,201] GoCompilePkg pkg/sentry/fsimpl/fuse/fuse.a; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[4,173 / 4,201] GoCompilePkg runsc/boot/filter/filter.a; 1s disk-cache, linux-sandbox ... (5 actions, 4 running)
+[4,186 / 4,201] GoCompilePkg runsc/boot/filter/filter.a; 2s disk-cache, linux-sandbox ... (6 actions, 5 running)
+[4,192 / 4,201] GoCompilePkg runsc/boot/filter/filter.a; 3s disk-cache, linux-sandbox ... (2 actions running)
+[4,194 / 4,201] GoCompilePkg runsc/boot/filter/filter.a; 4s disk-cache, linux-sandbox
+[4,194 / 4,201] GoCompilePkg runsc/boot/filter/filter.a; 14s disk-cache, linux-sandbox
+[4,195 / 4,201] [Prepa] GoCompilePkg runsc/boot/boot.a
+[4,196 / 4,201] GoCompilePkg runsc/cmd/sentry/sentrycmd/sentrycmd.a; 0s disk-cache, linux-sandbox
+[4,199 / 4,201] GoLink runsc/cmd/sentry/gvisor_sentry_/gvisor_sentry; 0s disk-cache, linux-sandbox
+[4,200 / 4,201] [Prepa] Copying file runsc/cmd/sentry/gvisor_sentry_/gvisor_sentry
+INFO: Found 1 target...
+Target //:release up-to-date:
+  bazel-bin/release/containerd-shim-runsc-v1
+  bazel-bin/release/runsc
+  bazel-bin/release/gvisor-bin/checkpointgofer
+  bazel-bin/release/gvisor-bin/runsc-metric-server
+  bazel-bin/release/gvisor-bin/runsc-netgofer
+  bazel-bin/release/gvisor-bin/runsc-fd-parking
+  bazel-bin/release/gvisor-bin/gvisor-sentry-prewarmer
+  bazel-bin/release/gvisor-bin/gvisor-proc-umounter
+  bazel-bin/release/gvisor-bin/gvisor_sentry
+INFO: Elapsed time: 24.390s, Critical Path: 21.61s
+INFO: 130 processes: 1116 action cache hit, 6 internal, 124 linux-sandbox.
+INFO: Build completed successfully, 130 total actions

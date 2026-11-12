@@ -1,0 +1,26 @@
+INFO: Invocation ID: abb9dfa6-ff82-4995-8125-9d9d34f63a20
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //runsc/boot/filter/config:config_test (0 packages loaded, 0 targets configured)
+Analyzing: target //runsc/boot/filter/config:config_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //runsc/boot/filter/config:config_test (0 packages loaded, 4 targets configured).
+[2,547 / 2,549] GoLink runsc/boot/filter/config/config_test_/config_test; 1s disk-cache, linux-sandbox
+FAIL: //runsc/boot/filter/config:config_test (Exit 1) (see /root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/k8-opt/testlogs/runsc/boot/filter/config/config_test/test.log)
+INFO: From Testing //runsc/boot/filter/config:config_test:
+==================== Test output for //runsc/boot/filter/config:config_test:
+--- FAIL: TestOptionsToPrecompileFilestoreReflink (0.01s)
+    config_test.go:61: 576 of 576 configurations lack the opposite FilestoreReflink setting; first missing: GOARCH="amd64" Platform="kvm" HostNetwork=false HostNetworkRawSockets=false HostFilesystem=true FilestoreReflink=true ProfileEnable=false Instrumentation=false NVProxy=false NVProxyCaps= TPUProxy=true RDMAProxy=true CgoEnabled=false PluginNetwork=false VendorSyscalls=""
+FAIL
+================================================================================
+INFO: Found 1 test target...
+Target //runsc/boot/filter/config:config_test up-to-date:
+  bazel-bin/runsc/boot/filter/config/config_test_/config_test
+INFO: Elapsed time: 2.397s, Critical Path: 1.80s
+INFO: 8 processes: 3 action cache hit, 2 internal, 6 linux-sandbox.
+INFO: Build completed, 1 test FAILED, 8 total actions
+//runsc/boot/filter/config:config_test                                   FAILED in 0.1s
+  /root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/execroot/_main/bazel-out/k8-opt/testlogs/runsc/boot/filter/config/config_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.

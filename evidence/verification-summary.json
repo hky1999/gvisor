@@ -1,0 +1,20 @@
+{
+  "external_cases_passed": 54,
+  "reordered_cases_passed": 24,
+  "all_integration_test_pass_lines": 171,
+  "generated_filter_cases": 8,
+  "generated_programs": 1152,
+  "performance_samples_verified": 48,
+  "boot_pairs_per_flag": 24,
+  "cache_path_counts": {
+    "baseline": {
+      "fallback": 48,
+      "loaded": 0
+    },
+    "candidate": {
+      "fallback": 0,
+      "loaded": 24
+    }
+  },
+  "skips": 0
+}

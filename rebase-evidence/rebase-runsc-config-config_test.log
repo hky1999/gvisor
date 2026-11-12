@@ -1,0 +1,294 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //runsc/config:config_test
+-----------------------------------------------------------------------------
+=== RUN   TestDefault
+--- PASS: TestDefault (0.00s)
+=== RUN   TestRegisterFlagsXDPIsolation
+--- PASS: TestRegisterFlagsXDPIsolation (0.00s)
+=== RUN   TestFromFlags
+--- PASS: TestFromFlags (0.00s)
+=== RUN   TestToFlagsFromFlags
+    config_test.go:173: Flags: [--debug=true --network=none --gofer-network-namespace=host --profile=false --num-network-channels=123 --root=some-path]
+--- PASS: TestToFlagsFromFlags (0.00s)
+=== RUN   TestToFlagsFromManual
+    config_test.go:236: Flags: [--num-network-channels=123 --root=some-path --debug=true --network=none --gofer-network-namespace=host]
+--- PASS: TestToFlagsFromManual (0.00s)
+=== RUN   TestInvalidFlags
+=== RUN   TestInvalidFlags/file-access
+=== RUN   TestInvalidFlags/network
+=== RUN   TestInvalidFlags/gofer-network-namespace
+=== RUN   TestInvalidFlags/qdisc
+=== RUN   TestInvalidFlags/ref-leak-mode
+=== RUN   TestInvalidFlags/host-uds
+=== RUN   TestInvalidFlags/host-fifo
+=== RUN   TestInvalidFlags/overlay2
+=== RUN   TestInvalidFlags/overlay2#01
+=== RUN   TestInvalidFlags/overlay2#02
+=== RUN   TestInvalidFlags/sidecar-release-enforcement-policy
+=== RUN   TestInvalidFlags/sidecar-usage-policy
+=== RUN   TestInvalidFlags/sidecar-usage-policy#01
+=== RUN   TestInvalidFlags/netgofer
+--- PASS: TestInvalidFlags (0.00s)
+    --- PASS: TestInvalidFlags/file-access (0.00s)
+    --- PASS: TestInvalidFlags/network (0.00s)
+    --- PASS: TestInvalidFlags/gofer-network-namespace (0.00s)
+    --- PASS: TestInvalidFlags/qdisc (0.00s)
+    --- PASS: TestInvalidFlags/ref-leak-mode (0.00s)
+    --- PASS: TestInvalidFlags/host-uds (0.00s)
+    --- PASS: TestInvalidFlags/host-fifo (0.00s)
+    --- PASS: TestInvalidFlags/overlay2 (0.00s)
+    --- PASS: TestInvalidFlags/overlay2#01 (0.00s)
+    --- PASS: TestInvalidFlags/overlay2#02 (0.00s)
+    --- PASS: TestInvalidFlags/sidecar-release-enforcement-policy (0.00s)
+    --- PASS: TestInvalidFlags/sidecar-usage-policy (0.00s)
+    --- PASS: TestInvalidFlags/sidecar-usage-policy#01 (0.00s)
+    --- PASS: TestInvalidFlags/netgofer (0.00s)
+=== RUN   TestValidationFail
+=== RUN   TestValidationFail/shared+overlay
+=== RUN   TestValidationFail/network-channels
+=== RUN   TestValidationFail/qdisc-tbf-burst-overflow
+=== RUN   TestValidationFail/qdisc-tbf-without-rate
+=== RUN   TestValidationFail/qdisc-tbf-without-burst
+=== RUN   TestValidationFail/fsgofer-host-uds+host-uds:open
+=== RUN   TestValidationFail/fsgofer-host-uds+host-uds:create
+=== RUN   TestValidationFail/fsgofer-host-uds+host-uds:all
+=== RUN   TestValidationFail/overlay+overlay2:root
+=== RUN   TestValidationFail/overlay+overlay2:all
+=== RUN   TestValidationFail/network-proxy-path+network:none
+=== RUN   TestValidationFail/network-proxy-path+network:host
+=== RUN   TestValidationFail/network-proxy-path:relative
+=== RUN   TestValidationFail/network-proxy-path:abstract
+=== RUN   TestValidationFail/network-proxy-path+xdp
+=== RUN   TestValidationFail/platform_device_path:malformed-pair
+=== RUN   TestValidationFail/platform_device_path:duplicate-platform
+=== RUN   TestValidationFail/platform_device_path:auto-single-path
+=== RUN   TestValidationFail/netgofer+network:none
+=== RUN   TestValidationFail/netgofer+network:host
+=== RUN   TestValidationFail/netgofer+xdp
+=== RUN   TestValidationFail/netgofer+network-proxy-path
+--- PASS: TestValidationFail (0.00s)
+    --- PASS: TestValidationFail/shared+overlay (0.00s)
+    --- PASS: TestValidationFail/network-channels (0.00s)
+    --- PASS: TestValidationFail/qdisc-tbf-burst-overflow (0.00s)
+    --- PASS: TestValidationFail/qdisc-tbf-without-rate (0.00s)
+    --- PASS: TestValidationFail/qdisc-tbf-without-burst (0.00s)
+    --- PASS: TestValidationFail/fsgofer-host-uds+host-uds:open (0.00s)
+    --- PASS: TestValidationFail/fsgofer-host-uds+host-uds:create (0.00s)
+    --- PASS: TestValidationFail/fsgofer-host-uds+host-uds:all (0.00s)
+    --- PASS: TestValidationFail/overlay+overlay2:root (0.00s)
+    --- PASS: TestValidationFail/overlay+overlay2:all (0.00s)
+    --- PASS: TestValidationFail/network-proxy-path+network:none (0.00s)
+    --- PASS: TestValidationFail/network-proxy-path+network:host (0.00s)
+    --- PASS: TestValidationFail/network-proxy-path:relative (0.00s)
+    --- PASS: TestValidationFail/network-proxy-path:abstract (0.00s)
+    --- PASS: TestValidationFail/network-proxy-path+xdp (0.00s)
+    --- PASS: TestValidationFail/platform_device_path:malformed-pair (0.00s)
+    --- PASS: TestValidationFail/platform_device_path:duplicate-platform (0.00s)
+    --- PASS: TestValidationFail/platform_device_path:auto-single-path (0.00s)
+    --- PASS: TestValidationFail/netgofer+network:none (0.00s)
+    --- PASS: TestValidationFail/netgofer+network:host (0.00s)
+    --- PASS: TestValidationFail/netgofer+xdp (0.00s)
+    --- PASS: TestValidationFail/netgofer+network-proxy-path (0.00s)
+=== RUN   TestPlatformDeviceFor
+=== RUN   TestPlatformDeviceFor/unset
+=== RUN   TestPlatformDeviceFor/single_path_applies_to_any_platform
+=== RUN   TestPlatformDeviceFor/single_path_applies_to_platform_without_device
+=== RUN   TestPlatformDeviceFor/pair_matches
+=== RUN   TestPlatformDeviceFor/pair_for_other_platform_is_ignored
+=== RUN   TestPlatformDeviceFor/unknown_platform_name_is_tolerated
+--- PASS: TestPlatformDeviceFor (0.00s)
+    --- PASS: TestPlatformDeviceFor/unset (0.00s)
+    --- PASS: TestPlatformDeviceFor/single_path_applies_to_any_platform (0.00s)
+    --- PASS: TestPlatformDeviceFor/single_path_applies_to_platform_without_device (0.00s)
+    --- PASS: TestPlatformDeviceFor/pair_matches (0.00s)
+    --- PASS: TestPlatformDeviceFor/pair_for_other_platform_is_ignored (0.00s)
+    --- PASS: TestPlatformDeviceFor/unknown_platform_name_is_tolerated (0.00s)
+=== RUN   TestPlatformAutoAcceptsDevicePairs
+--- PASS: TestPlatformAutoAcceptsDevicePairs (0.00s)
+=== RUN   TestOverride
+=== RUN   TestOverride/XDP
+=== RUN   TestOverride/string
+=== RUN   TestOverride/bool
+=== RUN   TestOverride/enum
+--- PASS: TestOverride (0.00s)
+    --- PASS: TestOverride/XDP (0.00s)
+    --- PASS: TestOverride/string (0.00s)
+    --- PASS: TestOverride/bool (0.00s)
+    --- PASS: TestOverride/enum (0.00s)
+=== RUN   TestOverrideDisabled
+--- PASS: TestOverrideDisabled (0.00s)
+=== RUN   TestOverrideError
+=== RUN   TestOverrideError/invalid
+=== RUN   TestOverrideError/debug
+=== RUN   TestOverrideError/file-access
+=== RUN   TestOverrideError/in-sandbox-cgroup
+--- PASS: TestOverrideError (0.00s)
+    --- PASS: TestOverrideError/invalid (0.00s)
+    --- PASS: TestOverrideError/debug (0.00s)
+    --- PASS: TestOverrideError/file-access (0.00s)
+    --- PASS: TestOverrideError/in-sandbox-cgroup (0.00s)
+=== RUN   TestOverrideAllowlist
+=== RUN   TestOverrideAllowlist/debug
+=== RUN   TestOverrideAllowlist/debug#01
+=== RUN   TestOverrideAllowlist/in-sandbox-cgroup
+=== RUN   TestOverrideAllowlist/in-sandbox-cgroup#01
+=== RUN   TestOverrideAllowlist/oci-seccomp
+=== RUN   TestOverrideAllowlist/oci-seccomp#01
+=== RUN   TestOverrideAllowlist/oci-seccomp#02
+=== RUN   TestOverrideAllowlist/profile
+=== RUN   TestOverrideAllowlist/profile#01
+=== RUN   TestOverrideAllowlist/profile#02
+=== RUN   TestOverrideAllowlist/network-proxy-path
+=== RUN   TestOverrideAllowlist/qdisc
+=== RUN   TestOverrideAllowlist/qdisc#01
+=== RUN   TestOverrideAllowlist/qdisc#02
+=== RUN   TestOverrideAllowlist/qdisc-tbf-rate
+=== RUN   TestOverrideAllowlist/qdisc-tbf-rate#01
+=== RUN   TestOverrideAllowlist/qdisc-tbf-rate#02
+=== RUN   TestOverrideAllowlist/qdisc-tbf-rate#03
+=== RUN   TestOverrideAllowlist/qdisc-tbf-rate#04
+=== RUN   TestOverrideAllowlist/qdisc-tbf-burst
+=== RUN   TestOverrideAllowlist/qdisc-tbf-burst#01
+=== RUN   TestOverrideAllowlist/qdisc-tbf-burst#02
+=== RUN   TestOverrideAllowlist/qdisc#03
+=== RUN   TestOverrideAllowlist/qdisc-tbf-rate#05
+=== RUN   TestOverrideAllowlist/qdisc-tbf-burst#03
+--- PASS: TestOverrideAllowlist (0.00s)
+    --- PASS: TestOverrideAllowlist/debug (0.00s)
+    --- PASS: TestOverrideAllowlist/debug#01 (0.00s)
+    --- PASS: TestOverrideAllowlist/in-sandbox-cgroup (0.00s)
+    --- PASS: TestOverrideAllowlist/in-sandbox-cgroup#01 (0.00s)
+    --- PASS: TestOverrideAllowlist/oci-seccomp (0.00s)
+    --- PASS: TestOverrideAllowlist/oci-seccomp#01 (0.00s)
+    --- PASS: TestOverrideAllowlist/oci-seccomp#02 (0.00s)
+    --- PASS: TestOverrideAllowlist/profile (0.00s)
+    --- PASS: TestOverrideAllowlist/profile#01 (0.00s)
+    --- PASS: TestOverrideAllowlist/profile#02 (0.00s)
+    --- PASS: TestOverrideAllowlist/network-proxy-path (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc#01 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc#02 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-rate (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-rate#01 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-rate#02 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-rate#03 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-rate#04 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-burst (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-burst#01 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-burst#02 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc#03 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-rate#05 (0.00s)
+    --- PASS: TestOverrideAllowlist/qdisc-tbf-burst#03 (0.00s)
+=== RUN   TestOverrideAllowlistQDiscTBF
+--- PASS: TestOverrideAllowlistQDiscTBF (0.00s)
+=== RUN   TestOverrideDeferredValidation
+--- PASS: TestOverrideDeferredValidation (0.00s)
+=== RUN   TestBundles
+=== RUN   TestBundles/empty_bundle
+=== RUN   TestBundles/no-op_bundle
+=== RUN   TestBundles/invalid_flag
+=== RUN   TestBundles/duplicate_no-op_bundles
+=== RUN   TestBundles/simple_bundle
+I1112 03:14:39.005227      22 flags.go:547] Overriding flag --debug="true" from applying bundle debug.
+=== RUN   TestBundles/incompatible_bundles
+=== RUN   TestBundles/compatible_bundles
+I1112 03:14:39.005422      22 flags.go:547] Overriding flag --debug="true" from applying bundle debug-and-profile.
+I1112 03:14:39.005435      22 flags.go:547] Overriding flag --profile="true" from applying bundle debug-and-profile.
+=== RUN   TestBundles/bundle_takes_precedence_over_command-line_value
+I1112 03:14:39.005540      22 flags.go:545] Flag --debug has explicitly-set value "true", but bundle no-debug takes precedence and is overriding its value to --debug="false".
+=== RUN   TestBundles/command_line_matching_bundle_value
+--- PASS: TestBundles (0.00s)
+    --- PASS: TestBundles/empty_bundle (0.00s)
+    --- PASS: TestBundles/no-op_bundle (0.00s)
+    --- PASS: TestBundles/invalid_flag (0.00s)
+    --- PASS: TestBundles/duplicate_no-op_bundles (0.00s)
+    --- PASS: TestBundles/simple_bundle (0.00s)
+    --- PASS: TestBundles/incompatible_bundles (0.00s)
+    --- PASS: TestBundles/compatible_bundles (0.00s)
+    --- PASS: TestBundles/bundle_takes_precedence_over_command-line_value (0.00s)
+    --- PASS: TestBundles/command_line_matching_bundle_value (0.00s)
+=== RUN   TestBundleValidate
+=== RUN   TestBundleValidate/empty_bundle
+=== RUN   TestBundleValidate/invalid_flag_bundle
+=== RUN   TestBundleValidate/invalid_value
+=== RUN   TestBundleValidate/valid_flag_bundle
+--- PASS: TestBundleValidate (0.00s)
+    --- PASS: TestBundleValidate/empty_bundle (0.00s)
+    --- PASS: TestBundleValidate/invalid_flag_bundle (0.00s)
+    --- PASS: TestBundleValidate/invalid_value (0.00s)
+    --- PASS: TestBundleValidate/valid_flag_bundle (0.00s)
+=== RUN   TestParseSerializeOverlay2
+=== RUN   TestParseSerializeOverlay2/Without_size
+=== RUN   TestParseSerializeOverlay2/With_size
+=== RUN   TestParseSerializeOverlay2/Repeated_Set
+=== RUN   TestParseSerializeOverlay2/Invalid_Set_preserves_value
+--- PASS: TestParseSerializeOverlay2 (0.00s)
+    --- PASS: TestParseSerializeOverlay2/Without_size (0.00s)
+    --- PASS: TestParseSerializeOverlay2/With_size (0.00s)
+    --- PASS: TestParseSerializeOverlay2/Repeated_Set (0.00s)
+    --- PASS: TestParseSerializeOverlay2/Invalid_Set_preserves_value (0.00s)
+=== RUN   TestSignalUnkillablePolicy
+=== RUN   TestSignalUnkillablePolicy/none
+=== RUN   TestSignalUnkillablePolicy/linux
+=== RUN   TestSignalUnkillablePolicy/invalid
+=== RUN   TestSignalUnkillablePolicy/InvalidStringPanics
+--- PASS: TestSignalUnkillablePolicy (0.00s)
+    --- PASS: TestSignalUnkillablePolicy/none (0.00s)
+    --- PASS: TestSignalUnkillablePolicy/linux (0.00s)
+    --- PASS: TestSignalUnkillablePolicy/invalid (0.00s)
+    --- PASS: TestSignalUnkillablePolicy/InvalidStringPanics (0.00s)
+=== RUN   TestSandboxCPUPolicy
+=== RUN   TestSandboxCPUPolicy/1x
+=== RUN   TestSandboxCPUPolicy/1.0x
+=== RUN   TestSandboxCPUPolicy/uncapped
+=== RUN   TestSandboxCPUPolicy/2500m
+=== RUN   TestSandboxCPUPolicy/3.5x
+=== RUN   TestSandboxCPUPolicy/1m
+=== RUN   TestSandboxCPUPolicy/0.5x
+=== RUN   TestSandboxCPUPolicy/9223372036854775807m
+=== RUN   TestSandboxCPUPolicy/max(4x,1000m)
+=== RUN   TestSandboxCPUPolicy/max(_1000m_,_4x_)
+=== RUN   TestSandboxCPUPolicy/max(0.5x,2000m,1x)
+=== RUN   TestSandboxCPUPolicy/max(1x)
+=== RUN   TestSandboxCPUPolicy/max(uncapped,4x)
+=== RUN   TestSandboxCPUPolicy/max()
+=== RUN   TestSandboxCPUPolicy/max(4x
+=== RUN   TestSandboxCPUPolicy/max(4x,bogus)
+=== RUN   TestSandboxCPUPolicy/0m
+=== RUN   TestSandboxCPUPolicy/-1x
+=== RUN   TestSandboxCPUPolicy/1.5m
+=== RUN   TestSandboxCPUPolicy/2
+--- PASS: TestSandboxCPUPolicy (0.00s)
+    --- PASS: TestSandboxCPUPolicy/1x (0.00s)
+    --- PASS: TestSandboxCPUPolicy/1.0x (0.00s)
+    --- PASS: TestSandboxCPUPolicy/uncapped (0.00s)
+    --- PASS: TestSandboxCPUPolicy/2500m (0.00s)
+    --- PASS: TestSandboxCPUPolicy/3.5x (0.00s)
+    --- PASS: TestSandboxCPUPolicy/1m (0.00s)
+    --- PASS: TestSandboxCPUPolicy/0.5x (0.00s)
+    --- PASS: TestSandboxCPUPolicy/9223372036854775807m (0.00s)
+    --- PASS: TestSandboxCPUPolicy/max(4x,1000m) (0.00s)
+    --- PASS: TestSandboxCPUPolicy/max(_1000m_,_4x_) (0.00s)
+    --- PASS: TestSandboxCPUPolicy/max(0.5x,2000m,1x) (0.00s)
+    --- PASS: TestSandboxCPUPolicy/max(1x) (0.00s)
+    --- PASS: TestSandboxCPUPolicy/max(uncapped,4x) (0.00s)
+    --- PASS: TestSandboxCPUPolicy/max() (0.00s)
+    --- PASS: TestSandboxCPUPolicy/max(4x (0.00s)
+    --- PASS: TestSandboxCPUPolicy/max(4x,bogus) (0.00s)
+    --- PASS: TestSandboxCPUPolicy/0m (0.00s)
+    --- PASS: TestSandboxCPUPolicy/-1x (0.00s)
+    --- PASS: TestSandboxCPUPolicy/1.5m (0.00s)
+    --- PASS: TestSandboxCPUPolicy/2 (0.00s)
+=== RUN   TestIsFlagExplicitlySet
+=== RUN   TestIsFlagExplicitlySet/omitted
+=== RUN   TestIsFlagExplicitlySet/explicit_default
+=== RUN   TestIsFlagExplicitlySet/explicit_non_default
+--- PASS: TestIsFlagExplicitlySet (0.00s)
+    --- PASS: TestIsFlagExplicitlySet/omitted (0.00s)
+    --- PASS: TestIsFlagExplicitlySet/explicit_default (0.00s)
+    --- PASS: TestIsFlagExplicitlySet/explicit_non_default (0.00s)
+=== RUN   TestNoNewBoolFlagsPlease
+--- PASS: TestNoNewBoolFlagsPlease (0.00s)
+=== RUN   TestDoNotAddNewFlagsToAllowlist
+--- PASS: TestDoNotAddNewFlagsToAllowlist (0.00s)
+PASS

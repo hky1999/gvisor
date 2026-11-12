@@ -1,0 +1,384 @@
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  69225812 ns/op	  70077273 p50.ns	  72036761 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  43262130 ns/op	  45594857 p50.ns	  46523453 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3004197 ns/op	   3046366 p50.ns	   3152134 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  66720902 ns/op	  67220309 p50.ns	  69367263 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  40079378 ns/op	  40466422 p50.ns	  41189679 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3015808 ns/op	   3034285 p50.ns	   3087439 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26398332 ns/op	  26029883 p50.ns	  26364521 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2491392 ns/op	   2505259 p50.ns	   2539313 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2703757 ns/op	   2735053 p50.ns	   2747777 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27652913 ns/op	  27144812 p50.ns	  28074229 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2559475 ns/op	   2517169 p50.ns	   2596439 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2763602 ns/op	   2741407 p50.ns	   2789544 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  67064315 ns/op	  70104676 p50.ns	  70281368 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  40810489 ns/op	  42461546 p50.ns	  43205663 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2857458 ns/op	   2920741 p50.ns	   2993092 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  71789565 ns/op	  69248664 p50.ns	  74665755 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  45439927 ns/op	  42295998 p50.ns	  49133458 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3093100 ns/op	   3046403 p50.ns	   3194956 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  28523442 ns/op	  28357707 p50.ns	  29399328 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2491043 ns/op	   2514682 p50.ns	   2652625 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2660996 ns/op	   2614278 p50.ns	   2708204 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  28822105 ns/op	  28624401 p50.ns	  29130160 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2613077 ns/op	   2557707 p50.ns	   2650716 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2807117 ns/op	   2828698 p50.ns	   2843293 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  65349464 ns/op	  64190076 p50.ns	  69752628 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  38333611 ns/op	  36298878 p50.ns	  41875949 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3057289 ns/op	   3025269 p50.ns	   3132536 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  69515836 ns/op	  66321177 p50.ns	  75198374 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  42955582 ns/op	  39381096 p50.ns	  48562447 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3228597 ns/op	   3296439 p50.ns	   3342740 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  28757514 ns/op	  28691312 p50.ns	  29216122 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2657080 ns/op	   2592215 p50.ns	   2827066 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2689807 ns/op	   2689768 p50.ns	   2700837 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  28132158 ns/op	  28194388 p50.ns	  28638136 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2510500 ns/op	   2513599 p50.ns	   2555699 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2813038 ns/op	   2802690 p50.ns	   2940044 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  67970594 ns/op	  66687713 p50.ns	  68432851 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  41906682 ns/op	  41127362 p50.ns	  42474308 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3028118 ns/op	   3024025 p50.ns	   3100425 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  69342587 ns/op	  66428599 p50.ns	  67575386 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  43589622 ns/op	  41715215 p50.ns	  42161935 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3024261 ns/op	   2989949 p50.ns	   3107887 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26501391 ns/op	  26051483 p50.ns	  26568874 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2527356 ns/op	   2382932 p50.ns	   2741264 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2686710 ns/op	   2717669 p50.ns	   2822632 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27525938 ns/op	  27056658 p50.ns	  28487987 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2400276 ns/op	   2373567 p50.ns	   2481468 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2755042 ns/op	   2866177 p50.ns	   2996004 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  70066797 ns/op	  71103335 p50.ns	  71199811 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  43908792 ns/op	  43447788 p50.ns	  43600556 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2843144 ns/op	   2788735 p50.ns	   2896217 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  66149948 ns/op	  66872695 p50.ns	  67007211 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  38195364 ns/op	  38458887 p50.ns	  38720472 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3079485 ns/op	   2992785 p50.ns	   3138482 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  28805195 ns/op	  28329845 p50.ns	  29063297 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2576691 ns/op	   2560761 p50.ns	   2692964 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2811274 ns/op	   2846406 p50.ns	   2914745 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  28490859 ns/op	  29057594 p50.ns	  29331543 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2461374 ns/op	   2462450 p50.ns	   2543856 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2787100 ns/op	   2819588 p50.ns	   2855363 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  66696566 ns/op	  65182520 p50.ns	  69756219 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  40207353 ns/op	  38987777 p50.ns	  42873747 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2963166 ns/op	   2928567 p50.ns	   3157626 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  70344938 ns/op	  68892710 p50.ns	  70150765 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  43989358 ns/op	  42759633 p50.ns	  44758758 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3191294 ns/op	   3120540 p50.ns	   3266104 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  28585443 ns/op	  28868652 p50.ns	  29247799 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2464804 ns/op	   2421907 p50.ns	   2550616 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2709130 ns/op	   2765779 p50.ns	   2783768 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  26909364 ns/op	  26453044 p50.ns	  27701222 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2647643 ns/op	   2675040 p50.ns	   2808706 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2782980 ns/op	   2853325 p50.ns	   2908598 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  70958825 ns/op	  71848376 p50.ns	  77653254 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  43907645 ns/op	  46007550 p50.ns	  49605888 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2872260 ns/op	   2841625 p50.ns	   3025559 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  67974422 ns/op	  67435837 p50.ns	  68899388 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  41892227 ns/op	  40920718 p50.ns	  42644526 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3057647 ns/op	   2985867 p50.ns	   3245573 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26672537 ns/op	  26371786 p50.ns	  27249961 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2346978 ns/op	   2361378 p50.ns	   2392131 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2532151 ns/op	   2536662 p50.ns	   2653504 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  26995513 ns/op	  27786048 p50.ns	  27892520 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2386573 ns/op	   2273028 p50.ns	   2380622 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2728716 ns/op	   2753455 p50.ns	   2839360 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  68345377 ns/op	  70250997 p50.ns	  70775187 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  40947026 ns/op	  40717243 p50.ns	  41679006 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2913669 ns/op	   2872457 p50.ns	   2967266 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  69102354 ns/op	  67416298 p50.ns	  72911360 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  43238585 ns/op	  40533323 p50.ns	  46356027 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3141450 ns/op	   3141003 p50.ns	   3268416 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27178086 ns/op	  27104746 p50.ns	  27833567 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2402145 ns/op	   2368651 p50.ns	   2482596 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2514239 ns/op	   2390591 p50.ns	   2648896 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27953038 ns/op	  27139680 p50.ns	  29602533 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2609343 ns/op	   2685550 p50.ns	   2699811 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2812277 ns/op	   2874103 p50.ns	   2931022 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  69637804 ns/op	  69641936 p50.ns	  72847537 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  42247726 ns/op	  42919965 p50.ns	  43093301 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2961875 ns/op	   2958291 p50.ns	   3110699 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  66730741 ns/op	  66443433 p50.ns	  68285711 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  40408033 ns/op	  40301577 p50.ns	  40535147 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3135104 ns/op	   3121551 p50.ns	   3132431 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27493924 ns/op	  26746052 p50.ns	  27204641 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2461045 ns/op	   2406658 p50.ns	   2412669 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2615533 ns/op	   2609490 p50.ns	   2666891 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  28989140 ns/op	  28381693 p50.ns	  29764171 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2506981 ns/op	   2539439 p50.ns	   2549411 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2782361 ns/op	   2788778 p50.ns	   2866307 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  67504386 ns/op	  63746732 p50.ns	  71330363 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  41059676 ns/op	  37464616 p50.ns	  44130969 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3099138 ns/op	   3169074 p50.ns	   3197451 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  70549981 ns/op	  69674943 p50.ns	  71545187 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  44739442 ns/op	  43201854 p50.ns	  45417690 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3216660 ns/op	   3193556 p50.ns	   3492577 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27435353 ns/op	  27269059 p50.ns	  27733695 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2515163 ns/op	   2434746 p50.ns	   2689266 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2583215 ns/op	   2541625 p50.ns	   2703170 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  28706801 ns/op	  28849566 p50.ns	  29193631 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2624765 ns/op	   2655542 p50.ns	   2711113 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2871002 ns/op	   2886387 p50.ns	   2917138 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  69668410 ns/op	  65779217 p50.ns	  74248514 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  43145744 ns/op	  40568266 p50.ns	  48315200 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2767714 ns/op	   2688152 p50.ns	   2857891 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  69162137 ns/op	  70980669 p50.ns	  71356863 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  41774358 ns/op	  42885968 p50.ns	  43130256 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3204984 ns/op	   3145548 p50.ns	   3290047 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26817967 ns/op	  26853634 p50.ns	  27416952 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2601651 ns/op	   2670059 p50.ns	   2695806 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2777904 ns/op	   2920591 p50.ns	   2937671 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27198614 ns/op	  26935392 p50.ns	  27942401 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2429356 ns/op	   2369946 p50.ns	   2408080 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2842057 ns/op	   2806679 p50.ns	   3032864 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  69436742 ns/op	  69234098 p50.ns	  74273268 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  43189631 ns/op	  41890416 p50.ns	  47895643 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3011920 ns/op	   2993199 p50.ns	   3085763 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  67084563 ns/op	  65971568 p50.ns	  70613678 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  39936887 ns/op	  39171117 p50.ns	  44177245 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3046657 ns/op	   3024876 p50.ns	   3047472 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26839113 ns/op	  25959763 p50.ns	  28191823 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2453267 ns/op	   2440191 p50.ns	   2441983 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2522463 ns/op	   2488392 p50.ns	   2617891 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27350391 ns/op	  27383435 p50.ns	  27742588 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2569303 ns/op	   2701391 p50.ns	   2766634 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2789383 ns/op	   2793544 p50.ns	   2841939 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  68908658 ns/op	  71044459 p50.ns	  71136831 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  41994741 ns/op	  42962632 p50.ns	  44277363 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3097656 ns/op	   3063838 p50.ns	   3159113 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  65148092 ns/op	  66418414 p50.ns	  66596801 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  38731090 ns/op	  39507202 p50.ns	  40184388 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3212859 ns/op	   3021251 p50.ns	   3226396 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  25908442 ns/op	  25433173 p50.ns	  26638135 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2351019 ns/op	   2300980 p50.ns	   2335049 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2539932 ns/op	   2451086 p50.ns	   2465864 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  28370357 ns/op	  27234115 p50.ns	  27789768 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2448425 ns/op	   2312357 p50.ns	   2685480 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2773916 ns/op	   2780039 p50.ns	   2798541 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  68354023 ns/op	  67611903 p50.ns	  72055734 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  42422088 ns/op	  42447145 p50.ns	  44989158 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3118808 ns/op	   3199586 p50.ns	   3204846 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  73161675 ns/op	  75242173 p50.ns	  78450281 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  45798086 ns/op	  48506527 p50.ns	  49084099 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3033947 ns/op	   2999708 p50.ns	   3119208 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27471392 ns/op	  26987537 p50.ns	  28240854 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2499278 ns/op	   2522984 p50.ns	   2624769 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2706042 ns/op	   2679386 p50.ns	   2738355 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  26688857 ns/op	  26389764 p50.ns	  26490940 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2376795 ns/op	   2321836 p50.ns	   2404242 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2637226 ns/op	   2540244 p50.ns	   2667861 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  66991282 ns/op	  66716876 p50.ns	  66811997 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  41940558 ns/op	  40882997 p50.ns	  42112489 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2881712 ns/op	   2815686 p50.ns	   2959873 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  67809427 ns/op	  65505644 p50.ns	  68497142 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  41914379 ns/op	  39838258 p50.ns	  42281087 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3165079 ns/op	   3201549 p50.ns	   3355042 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26025818 ns/op	  25198541 p50.ns	  27411074 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2410256 ns/op	   2286043 p50.ns	   2409694 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2473409 ns/op	   2464274 p50.ns	   2540453 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  26854057 ns/op	  25758550 p50.ns	  28611069 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2341742 ns/op	   2354169 p50.ns	   2382734 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2649676 ns/op	   2779322 p50.ns	   2790953 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  72079862 ns/op	  73296887 p50.ns	  74142523 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  44261627 ns/op	  45883683 p50.ns	  47164843 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2919963 ns/op	   2929352 p50.ns	   2957176 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  68275688 ns/op	  68727529 p50.ns	  68959660 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  42423193 ns/op	  41590861 p50.ns	  44489453 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3115442 ns/op	   3099290 p50.ns	   3257489 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26884737 ns/op	  27442300 p50.ns	  27466871 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2336323 ns/op	   2292875 p50.ns	   2331914 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2515266 ns/op	   2466386 p50.ns	   2508574 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  26931802 ns/op	  26337161 p50.ns	  28323144 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2629369 ns/op	   2677199 p50.ns	   2678142 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2843544 ns/op	   2825372 p50.ns	   2848377 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  66530051 ns/op	  64406729 p50.ns	  68782186 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  40656232 ns/op	  38760554 p50.ns	  42857377 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3032383 ns/op	   3044077 p50.ns	   3165781 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  69157148 ns/op	  68784344 p50.ns	  69732881 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  41959820 ns/op	  41808592 p50.ns	  44582062 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3078686 ns/op	   2965710 p50.ns	   3259549 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27348792 ns/op	  28249138 p50.ns	  28737360 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2470738 ns/op	   2437725 p50.ns	   2500263 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2667824 ns/op	   2610462 p50.ns	   2788213 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27497856 ns/op	  28090412 p50.ns	  28517433 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2503466 ns/op	   2419811 p50.ns	   2530827 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2788044 ns/op	   2811653 p50.ns	   2999357 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  69053197 ns/op	  69748516 p50.ns	  71948728 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  42391492 ns/op	  43481435 p50.ns	  44592298 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3136780 ns/op	   3109435 p50.ns	   3233883 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  68115438 ns/op	  68906403 p50.ns	  70797634 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  41168277 ns/op	  42102654 p50.ns	  42945096 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3004965 ns/op	   2921152 p50.ns	   3212026 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27944151 ns/op	  28734219 p50.ns	  29046935 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2573000 ns/op	   2507375 p50.ns	   2705251 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2621655 ns/op	   2588692 p50.ns	   2709189 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  26096383 ns/op	  25209692 p50.ns	  26440892 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2502088 ns/op	   2560839 p50.ns	   2589102 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2833081 ns/op	   2886431 p50.ns	   2974496 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  66565200 ns/op	  65048639 p50.ns	  66799284 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  41365277 ns/op	  40044190 p50.ns	  42717444 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2850480 ns/op	   2864499 p50.ns	   3036602 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  70248894 ns/op	  69835837 p50.ns	  69903780 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  44112655 ns/op	  41806218 p50.ns	  42709595 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3030733 ns/op	   2967687 p50.ns	   3165722 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26190248 ns/op	  26344340 p50.ns	  27128455 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2457242 ns/op	   2411136 p50.ns	   2542640 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2609068 ns/op	   2619894 p50.ns	   2686026 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27494695 ns/op	  27151364 p50.ns	  27905526 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2562772 ns/op	   2540328 p50.ns	   2664865 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2791053 ns/op	   2851489 p50.ns	   2880971 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  68566825 ns/op	  63884204 p50.ns	  75981344 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  41327538 ns/op	  38981767 p50.ns	  47598627 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3109644 ns/op	   3038136 p50.ns	   3146535 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  69173541 ns/op	  68138161 p50.ns	  71084096 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  43353664 ns/op	  41083529 p50.ns	  42202786 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3204311 ns/op	   3322491 p50.ns	   3416065 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26214864 ns/op	  25757143 p50.ns	  27521702 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2331189 ns/op	   2262769 p50.ns	   2356310 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2730193 ns/op	   2808179 p50.ns	   2863176 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27269526 ns/op	  27337402 p50.ns	  27769349 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2557443 ns/op	   2636239 p50.ns	   2654180 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2788961 ns/op	   2824239 p50.ns	   2884195 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  68246702 ns/op	  70466791 p50.ns	  70617918 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  43187797 ns/op	  46206861 p50.ns	  46299863 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3068126 ns/op	   3092607 p50.ns	   3155657 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  68928627 ns/op	  68426943 p50.ns	  72396442 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  43317136 ns/op	  44088724 p50.ns	  46764188 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3049890 ns/op	   3018224 p50.ns	   3213055 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27369695 ns/op	  27124861 p50.ns	  27528867 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2476333 ns/op	   2452710 p50.ns	   2589008 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2736092 ns/op	   2733850 p50.ns	   2829870 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  26387867 ns/op	  26609985 p50.ns	  27097911 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2559498 ns/op	   2581373 p50.ns	   2640019 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2657432 ns/op	   2631889 p50.ns	   2839733 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  67286825 ns/op	  67020384 p50.ns	  69958075 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  41361903 ns/op	  39999980 p50.ns	  44163611 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   3086303 ns/op	   3058577 p50.ns	   3200828 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  73462175 ns/op	  74573125 p50.ns	  76208544 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  45095333 ns/op	  44864523 p50.ns	  48220896 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3332562 ns/op	   3276603 p50.ns	   3497101 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27132730 ns/op	  27031694 p50.ns	  27087752 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2498613 ns/op	   2375086 p50.ns	   2720541 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2565039 ns/op	   2526237 p50.ns	   2684388 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  27498226 ns/op	  27189091 p50.ns	  27916888 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2543049 ns/op	   2407188 p50.ns	   2632085 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2756548 ns/op	   2900096 p50.ns	   2906079 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  69990739 ns/op	  69718676 p50.ns	  71016376 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  43650384 ns/op	  42712601 p50.ns	  46019700 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2989857 ns/op	   3087826 p50.ns	   3105632 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  68297559 ns/op	  66975582 p50.ns	  67431255 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  41874341 ns/op	  40338233 p50.ns	  41782047 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3297246 ns/op	   3246920 p50.ns	   3286575 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  27202380 ns/op	  26714460 p50.ns	  28931447 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2530882 ns/op	   2407851 p50.ns	   2746479 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2640049 ns/op	   2584148 p50.ns	   2832828 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  28231186 ns/op	  28495269 p50.ns	  29023998 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2630981 ns/op	   2583567 p50.ns	   2711959 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2819582 ns/op	   2861427 p50.ns	   2879700 p90.ns
+PASS
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+BenchmarkSandboxBoot/kvm/Boot-104         	       5	  70546129 ns/op	  72062152 p50.ns	  72775140 p90.ns
+BenchmarkSandboxBoot/kvm/New-104          	       5	  44492496 ns/op	  45654071 p50.ns	  47573532 p90.ns
+BenchmarkSandboxBoot/kvm/Run-104          	       5	   2868619 ns/op	   2877405 p50.ns	   2926796 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Boot-104 	       5	  67430779 ns/op	  68645206 p50.ns	  68924885 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/New-104  	       5	  41883149 ns/op	  41196839 p50.ns	  44175253 p90.ns
+BenchmarkSandboxBoot/kvm_overlay/Run-104  	       5	   3169402 ns/op	   3256168 p50.ns	   3315689 p90.ns
+BenchmarkSandboxBoot/systrap/Boot-104     	       5	  26624852 ns/op	  26811055 p50.ns	  26876963 p90.ns
+BenchmarkSandboxBoot/systrap/New-104      	       5	   2337180 ns/op	   2286744 p50.ns	   2331532 p90.ns
+BenchmarkSandboxBoot/systrap/Run-104      	       5	   2465000 ns/op	   2387651 p50.ns	   2505094 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Boot-104         	       5	  28836034 ns/op	  28499514 p50.ns	  29202592 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/New-104          	       5	   2644016 ns/op	   2766691 p50.ns	   2812448 p90.ns
+BenchmarkSandboxBoot/systrap_overlay/Run-104          	       5	   2775265 ns/op	   2656597 p50.ns	   2916858 p90.ns
+PASS

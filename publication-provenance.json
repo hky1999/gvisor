@@ -1,0 +1,9 @@
+{
+  "baseline": "cd7d4251b17357d8f1004dbb3d82bd4a086cc89c",
+  "measured_candidate": "dbbad2349bbd41b5d68a350fc5791817181f342c",
+  "candidate": "faa7206bc21cebae2ecd8c96691fe849e97fd0cb",
+  "upstream_base": "2f5253abfaa87b6d62d79a0da60942e773389934",
+  "source_files": 4651,
+  "rebase_conflict": "runsc/boot/BUILD: retain both netstack and state dependencies",
+  "status": "prepared"
+}

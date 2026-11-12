@@ -1,0 +1,878 @@
+{
+  "disabled": {
+    "baseline": {
+      "BenchmarkSandboxBoot/kvm/Boot-104/ns/op": {
+        "median": 68460424.0,
+        "mean": 68543524.375,
+        "sd": 1618018.6627090988,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Boot-104/p50.ns": {
+        "median": 69438017.0,
+        "mean": 68286381.875,
+        "sd": 2911316.6781243472,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Boot-104/p90.ns": {
+        "median": 71168321.0,
+        "mean": 71442245.70833333,
+        "sd": 2612229.9202627377,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/ns/op": {
+        "median": 42121233.5,
+        "mean": 42165776.583333336,
+        "sd": 1473578.7338593465,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/p50.ns": {
+        "median": 42168780.5,
+        "mean": 41896007.5,
+        "sd": 2775144.687378033,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/p90.ns": {
+        "median": 44220487.0,
+        "mean": 44818332.833333336,
+        "sd": 2319056.449386271,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/ns/op": {
+        "median": 2997027.0,
+        "mean": 2980844.9583333335,
+        "sd": 105984.62162009501,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/p50.ns": {
+        "median": 3008612.0,
+        "mean": 2976563.5416666665,
+        "sd": 126237.90594538729,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/p90.ns": {
+        "median": 3108165.5,
+        "mean": 3080390.875,
+        "sd": 108079.98928704631,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/ns/op": {
+        "median": 69015490.5,
+        "mean": 68903209.04166667,
+        "sd": 2029601.3459401005,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p50.ns": {
+        "median": 68282552.0,
+        "mean": 68461927.625,
+        "sd": 2419751.054832812,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p90.ns": {
+        "median": 70027272.5,
+        "mean": 70690014.25,
+        "sd": 3022530.03346559,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/ns/op": {
+        "median": 42191506.5,
+        "mean": 42411245.25,
+        "sd": 2009324.6013154304,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/p50.ns": {
+        "median": 41393850.0,
+        "mean": 41617665.333333336,
+        "sd": 2143837.98168686,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/p90.ns": {
+        "median": 43652754.5,
+        "mean": 44008691.25,
+        "sd": 2869917.1713044452,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/ns/op": {
+        "median": 3125273.0,
+        "mean": 3130423.7083333335,
+        "sd": 92131.42361180206,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/p50.ns": {
+        "median": 3072846.5,
+        "mean": 3099564.7916666665,
+        "sd": 119582.2154099263,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/p90.ns": {
+        "median": 3251531.0,
+        "mean": 3247418.375,
+        "sd": 117857.38276364676,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/ns/op": {
+        "median": 27155408.0,
+        "mean": 27180266.583333332,
+        "sd": 850613.2008340355,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/p50.ns": {
+        "median": 26920585.5,
+        "mean": 27019265.958333332,
+        "sd": 1063514.2252462283,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/p90.ns": {
+        "median": 27525284.5,
+        "mean": 27837791.458333332,
+        "sd": 938117.2327054624,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/ns/op": {
+        "median": 2473535.5,
+        "mean": 2469194.5,
+        "sd": 88158.45201878165,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/p50.ns": {
+        "median": 2416521.5,
+        "mean": 2425154.875,
+        "sd": 103937.41150758344,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/p90.ns": {
+        "median": 2546628.0,
+        "mean": 2554656.2083333335,
+        "sd": 153889.64330295665,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/ns/op": {
+        "median": 2630852.0,
+        "mean": 2628197.8333333335,
+        "sd": 97224.15954522499,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/p50.ns": {
+        "median": 2609976.0,
+        "mean": 2615689.5416666665,
+        "sd": 142441.16764901773,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/p90.ns": {
+        "median": 2705687.0,
+        "mean": 2710750.6666666665,
+        "sd": 125572.8106342281,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/ns/op": {
+        "median": 27498041.0,
+        "mean": 27620153.333333332,
+        "sd": 811279.2582302759,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p50.ns": {
+        "median": 27211603.0,
+        "mean": 27387876.25,
+        "sd": 994353.9553113936,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p90.ns": {
+        "median": 28198686.5,
+        "mean": 28274609.625,
+        "sd": 885690.1027210762,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/ns/op": {
+        "median": 2550246.0,
+        "mean": 2525762.9166666665,
+        "sd": 91873.61349201255,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/p50.ns": {
+        "median": 2539883.5,
+        "mean": 2520251.0416666665,
+        "sd": 140565.3999323042,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/p90.ns": {
+        "median": 2636052.0,
+        "mean": 2605776.5833333335,
+        "sd": 127413.46964454865,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/ns/op": {
+        "median": 2787572.0,
+        "mean": 2777041.7916666665,
+        "sd": 59034.3507886863,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/p50.ns": {
+        "median": 2815620.5,
+        "mean": 2798484.5416666665,
+        "sd": 85859.84798089579,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/p90.ns": {
+        "median": 2880335.5,
+        "mean": 2881191.5416666665,
+        "sd": 79684.83095839353,
+        "n": 24
+      }
+    },
+    "fixed": {
+      "BenchmarkSandboxBoot/kvm/Boot-104/ns/op": {
+        "median": 68720382.5,
+        "mean": 68264017.41666667,
+        "sd": 2629211.966418239,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Boot-104/p50.ns": {
+        "median": 68353286.0,
+        "mean": 67936962.54166667,
+        "sd": 2820439.982684169,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Boot-104/p90.ns": {
+        "median": 70064597.0,
+        "mean": 70200807.70833333,
+        "sd": 3184818.0141084096,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/ns/op": {
+        "median": 42423693.0,
+        "mean": 41951608.208333336,
+        "sd": 2349341.73713667,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/p50.ns": {
+        "median": 41318432.0,
+        "mean": 41479265.208333336,
+        "sd": 2642676.91161134,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/p90.ns": {
+        "median": 44497989.5,
+        "mean": 43589107.25,
+        "sd": 2962819.4820138477,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/ns/op": {
+        "median": 2972462.0,
+        "mean": 2990871.0,
+        "sd": 112281.76572046036,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/p50.ns": {
+        "median": 2978752.5,
+        "mean": 2976738.4166666665,
+        "sd": 101302.27732961717,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/p90.ns": {
+        "median": 3047451.5,
+        "mean": 3047520.25,
+        "sd": 118418.29747579222,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/ns/op": {
+        "median": 69079903.5,
+        "mean": 68777965.91666667,
+        "sd": 2552756.3924329686,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p50.ns": {
+        "median": 68503376.0,
+        "mean": 68238584.29166667,
+        "sd": 2447000.4070341783,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p90.ns": {
+        "median": 70613413.5,
+        "mean": 70789619.5,
+        "sd": 3012696.8767497856,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/ns/op": {
+        "median": 42349317.0,
+        "mean": 42199470.041666664,
+        "sd": 2243625.591873806,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/p50.ns": {
+        "median": 41760834.5,
+        "mean": 41795387.541666664,
+        "sd": 2266008.5776057956,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/p90.ns": {
+        "median": 43977362.5,
+        "mean": 44126204.666666664,
+        "sd": 2652613.5611719224,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/ns/op": {
+        "median": 3145481.0,
+        "mean": 3144602.75,
+        "sd": 92637.15632427318,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/p50.ns": {
+        "median": 3115039.5,
+        "mean": 3122485.5833333335,
+        "sd": 119597.13757477522,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/p90.ns": {
+        "median": 3262951.5,
+        "mean": 3237713.875,
+        "sd": 126962.86540091076,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/ns/op": {
+        "median": 27476139.5,
+        "mean": 27329471.125,
+        "sd": 740312.7071797203,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/p50.ns": {
+        "median": 27353859.5,
+        "mean": 27172724.25,
+        "sd": 930587.4296443665,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/p90.ns": {
+        "median": 28141381.5,
+        "mean": 28140836.583333332,
+        "sd": 926499.4808421041,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/ns/op": {
+        "median": 2449673.5,
+        "mean": 2468416.2083333335,
+        "sd": 98243.75620916142,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/p50.ns": {
+        "median": 2419595.0,
+        "mean": 2440436.5416666665,
+        "sd": 94719.88291477927,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/p90.ns": {
+        "median": 2490430.5,
+        "mean": 2544917.0833333335,
+        "sd": 148594.55480453506,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/ns/op": {
+        "median": 2570177.5,
+        "mean": 2601034.4166666665,
+        "sd": 89231.3585096126,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/p50.ns": {
+        "median": 2571170.5,
+        "mean": 2583765.0416666665,
+        "sd": 131623.39370421803,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/p90.ns": {
+        "median": 2707384.0,
+        "mean": 2701159.4583333335,
+        "sd": 101035.28630351364,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/ns/op": {
+        "median": 27588162.5,
+        "mean": 27581570.916666668,
+        "sd": 831605.3665561264,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p50.ns": {
+        "median": 27246393.5,
+        "mean": 27343943.625,
+        "sd": 1047134.0318023664,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p90.ns": {
+        "median": 28388022.0,
+        "mean": 28372595.583333332,
+        "sd": 952892.3642461873,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/ns/op": {
+        "median": 2502742.5,
+        "mean": 2489879.7916666665,
+        "sd": 80719.4504888108,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/p50.ns": {
+        "median": 2448061.5,
+        "mean": 2465163.125,
+        "sd": 105128.80764848611,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/p90.ns": {
+        "median": 2553731.0,
+        "mean": 2545783.0,
+        "sd": 126524.37649889756,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/ns/op": {
+        "median": 2734910.0,
+        "mean": 2748490.7083333335,
+        "sd": 112862.44672107615,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/p50.ns": {
+        "median": 2739859.0,
+        "mean": 2723778.7916666665,
+        "sd": 146804.0737090201,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/p90.ns": {
+        "median": 2848144.5,
+        "mean": 2851408.9166666665,
+        "sd": 99680.86872916712,
+        "n": 24
+      }
+    }
+  },
+  "enabled": {
+    "baseline": {
+      "BenchmarkSandboxBoot/kvm/Boot-104/ns/op": {
+        "median": 75246020.5,
+        "mean": 75224251.5,
+        "sd": 2309357.7322371616,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Boot-104/p50.ns": {
+        "median": 75352238.0,
+        "mean": 75403641.66666667,
+        "sd": 2760165.1715069935,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Boot-104/p90.ns": {
+        "median": 77425778.5,
+        "mean": 77578804.16666667,
+        "sd": 2459714.5504023284,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/ns/op": {
+        "median": 41521328.0,
+        "mean": 41041557.208333336,
+        "sd": 2219277.0044664857,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/p50.ns": {
+        "median": 40376123.5,
+        "mean": 41145641.208333336,
+        "sd": 2690548.491590758,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/p90.ns": {
+        "median": 43104614.5,
+        "mean": 43057280.5,
+        "sd": 2350168.263004088,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/ns/op": {
+        "median": 10931470.0,
+        "mean": 10882743.458333334,
+        "sd": 241349.57437221712,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/p50.ns": {
+        "median": 11036586.5,
+        "mean": 10911095.791666666,
+        "sd": 372939.49176881334,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/p90.ns": {
+        "median": 11235622.5,
+        "mean": 11199615.041666666,
+        "sd": 309159.7063963626,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/ns/op": {
+        "median": 75878818.5,
+        "mean": 75900893.70833333,
+        "sd": 2235645.272633705,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p50.ns": {
+        "median": 76804633.5,
+        "mean": 76334420.45833333,
+        "sd": 2485395.462247179,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p90.ns": {
+        "median": 78364211.5,
+        "mean": 78302999.08333333,
+        "sd": 2666787.797703201,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/ns/op": {
+        "median": 41241202.0,
+        "mean": 41343880.25,
+        "sd": 1904347.4287588077,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/p50.ns": {
+        "median": 42108328.0,
+        "mean": 41413171.041666664,
+        "sd": 2200565.311276321,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/p90.ns": {
+        "median": 43545102.0,
+        "mean": 43346508.625,
+        "sd": 2372817.9363898477,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/ns/op": {
+        "median": 11047611.0,
+        "mean": 11045791.875,
+        "sd": 312273.9447632914,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/p50.ns": {
+        "median": 10984492.0,
+        "mean": 10971306.5,
+        "sd": 419795.3962013234,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/p90.ns": {
+        "median": 11477921.0,
+        "mean": 11362451.916666666,
+        "sd": 280883.33044103015,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/ns/op": {
+        "median": 36490722.0,
+        "mean": 36449887.541666664,
+        "sd": 966112.2173930791,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/p50.ns": {
+        "median": 36351571.0,
+        "mean": 36208016.416666664,
+        "sd": 1259458.4674191943,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/p90.ns": {
+        "median": 37376241.0,
+        "mean": 37330123.541666664,
+        "sd": 1478812.0340705907,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/ns/op": {
+        "median": 2480808.5,
+        "mean": 2493570.9583333335,
+        "sd": 119370.61524930743,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/p50.ns": {
+        "median": 2400460.5,
+        "mean": 2450846.75,
+        "sd": 132302.47072301048,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/p90.ns": {
+        "median": 2595996.0,
+        "mean": 2579213.2083333335,
+        "sd": 183497.43092834443,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/ns/op": {
+        "median": 12053598.5,
+        "mean": 12067660.791666666,
+        "sd": 209657.72202723744,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/p50.ns": {
+        "median": 12091066.0,
+        "mean": 12023967.875,
+        "sd": 222084.79798849896,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/p90.ns": {
+        "median": 12194914.5,
+        "mean": 12212486.708333334,
+        "sd": 216813.16788774598,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/ns/op": {
+        "median": 37375724.0,
+        "mean": 37216229.0,
+        "sd": 833872.8414341591,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p50.ns": {
+        "median": 36745914.5,
+        "mean": 36861904.666666664,
+        "sd": 948206.5745529095,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p90.ns": {
+        "median": 37835094.5,
+        "mean": 38029387.0,
+        "sd": 1205388.4131338347,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/ns/op": {
+        "median": 2473502.0,
+        "mean": 2474443.9583333335,
+        "sd": 71270.26067538492,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/p50.ns": {
+        "median": 2423071.5,
+        "mean": 2439089.7916666665,
+        "sd": 94487.39372736182,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/p90.ns": {
+        "median": 2537414.5,
+        "mean": 2559778.4166666665,
+        "sd": 132562.27756004268,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/ns/op": {
+        "median": 12244328.0,
+        "mean": 12263322.958333334,
+        "sd": 203597.99633815465,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/p50.ns": {
+        "median": 12237900.5,
+        "mean": 12251970.583333334,
+        "sd": 209508.1724133757,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/p90.ns": {
+        "median": 12471427.5,
+        "mean": 12463214.458333334,
+        "sd": 199516.1157740482,
+        "n": 24
+      }
+    },
+    "fixed": {
+      "BenchmarkSandboxBoot/kvm/Boot-104/ns/op": {
+        "median": 67281485.0,
+        "mean": 67634527.20833333,
+        "sd": 1707195.8543762055,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Boot-104/p50.ns": {
+        "median": 67185050.0,
+        "mean": 67708580.125,
+        "sd": 2389529.3828281118,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Boot-104/p90.ns": {
+        "median": 70209770.0,
+        "mean": 69913932.875,
+        "sd": 2303542.653641849,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/ns/op": {
+        "median": 41280450.0,
+        "mean": 41549053.041666664,
+        "sd": 1641727.3565193852,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/p50.ns": {
+        "median": 42287034.5,
+        "mean": 41733386.5,
+        "sd": 2153516.886704286,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/New-104/p90.ns": {
+        "median": 43603925.5,
+        "mean": 43565317.875,
+        "sd": 2345475.922215312,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/ns/op": {
+        "median": 2957362.5,
+        "mean": 2938823.9583333335,
+        "sd": 97283.1031257782,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/p50.ns": {
+        "median": 2950047.5,
+        "mean": 2925838.0,
+        "sd": 121236.82032322919,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm/Run-104/p90.ns": {
+        "median": 3040922.5,
+        "mean": 3016518.7083333335,
+        "sd": 132399.02827289514,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/ns/op": {
+        "median": 69064155.0,
+        "mean": 68570834.20833333,
+        "sd": 2165833.597671063,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p50.ns": {
+        "median": 67930965.5,
+        "mean": 68341203.5,
+        "sd": 2464837.3358523734,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Boot-104/p90.ns": {
+        "median": 71660842.5,
+        "mean": 71161434.29166667,
+        "sd": 2764977.085922751,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/ns/op": {
+        "median": 42003047.5,
+        "mean": 42075727.333333336,
+        "sd": 1818642.0199768902,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/p50.ns": {
+        "median": 41446508.0,
+        "mean": 41727026.5,
+        "sd": 2036434.903437911,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/New-104/p90.ns": {
+        "median": 43613453.0,
+        "mean": 44146232.666666664,
+        "sd": 2587133.8041016953,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/ns/op": {
+        "median": 3133376.5,
+        "mean": 3131885.2083333335,
+        "sd": 104976.15020688775,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/p50.ns": {
+        "median": 3115275.5,
+        "mean": 3101694.25,
+        "sd": 129012.00609051857,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/kvm_overlay/Run-104/p90.ns": {
+        "median": 3231623.5,
+        "mean": 3209531.2083333335,
+        "sd": 126612.51215729352,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/ns/op": {
+        "median": 27081933.0,
+        "mean": 26976266.958333332,
+        "sd": 927557.4056553743,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/p50.ns": {
+        "median": 27217673.5,
+        "mean": 26970799.5,
+        "sd": 1196611.9717722961,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Boot-104/p90.ns": {
+        "median": 27786824.5,
+        "mean": 27902221.791666668,
+        "sd": 1065208.4155191733,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/ns/op": {
+        "median": 2473366.0,
+        "mean": 2469463.2083333335,
+        "sd": 80285.57246695083,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/p50.ns": {
+        "median": 2427671.5,
+        "mean": 2435089.625,
+        "sd": 87022.45109955821,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/New-104/p90.ns": {
+        "median": 2575758.0,
+        "mean": 2543482.9583333335,
+        "sd": 127304.86338962217,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/ns/op": {
+        "median": 2608306.0,
+        "mean": 2626096.3333333335,
+        "sd": 105344.30939446659,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/p50.ns": {
+        "median": 2626525.0,
+        "mean": 2633162.0833333335,
+        "sd": 118931.40958366705,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap/Run-104/p90.ns": {
+        "median": 2746264.5,
+        "mean": 2723615.75,
+        "sd": 99488.47774152586,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/ns/op": {
+        "median": 27694447.5,
+        "mean": 27528061.875,
+        "sd": 1050024.9125373506,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p50.ns": {
+        "median": 27413531.0,
+        "mean": 27320229.958333332,
+        "sd": 1241286.0243575394,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Boot-104/p90.ns": {
+        "median": 28674294.0,
+        "mean": 28361726.875,
+        "sd": 1306197.5626811592,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/ns/op": {
+        "median": 2493170.5,
+        "mean": 2487657.2083333335,
+        "sd": 67748.25567206055,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/p50.ns": {
+        "median": 2392158.0,
+        "mean": 2435564.75,
+        "sd": 96999.87409281384,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/New-104/p90.ns": {
+        "median": 2636887.5,
+        "mean": 2596516.625,
+        "sd": 149820.63687820977,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/ns/op": {
+        "median": 2750821.5,
+        "mean": 2726691.7083333335,
+        "sd": 105952.10950214588,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/p50.ns": {
+        "median": 2770945.0,
+        "mean": 2717927.8333333335,
+        "sd": 141346.81443624882,
+        "n": 24
+      },
+      "BenchmarkSandboxBoot/systrap_overlay/Run-104/p90.ns": {
+        "median": 2854825.0,
+        "mean": 2840271.5416666665,
+        "sd": 86114.72590273127,
+        "n": 24
+      }
+    }
+  }
+}

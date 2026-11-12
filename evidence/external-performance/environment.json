@@ -1,0 +1,11 @@
+{
+  "baseline": "/root/filestore-reflink-precompile-20261112/baseline-release/runsc",
+  "candidate": "/root/filestore-reflink-precompile-20261112/fixed-release/runsc",
+  "work_dir": "/mnt/m0-xfs/filestore-precompile-perf",
+  "output": "/root/filestore-reflink-precompile-20261112/external-performance",
+  "mib": 64,
+  "rewrite_mib": null,
+  "sparse_mib": null,
+  "preflush_mode": "off",
+  "pairs": 24
+}

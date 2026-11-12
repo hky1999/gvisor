@@ -1,0 +1,15 @@
+INFO: Invocation ID: 2086d682-7030-49b9-8002-98a26175c86c
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 2 targets (0 packages loaded, 1720 targets configured).
+[1,577 / 1,578] [Prepa] runfiles for //runsc/container:boot_benchmark_test
+INFO: Found 2 targets...
+INFO: Elapsed time: 1.867s, Critical Path: 1.32s
+INFO: 7 processes: 1571 action cache hit, 2 internal, 5 linux-sandbox.
+INFO: Build completed successfully, 7 total actions
+INFO: 
+INFO: 

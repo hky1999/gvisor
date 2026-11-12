@@ -1,0 +1,12 @@
+{
+  "baseline_commit": "cd7d4251b17357d8f1004dbb3d82bd4a086cc89c",
+  "review_comment": "https://github.com/google/gvisor/pull/14228#discussion_r4540405313",
+  "fix_patch_sha256": "63333adf08c1d2f5ab12e3bdd51f12eed0e2901d0c80cde6d8b1db38bfe3ec81",
+  "files": {
+    "runsc/boot/filter/BUILD": "405f89f1a989ca23d22aea604631ab6ce520fa5e0949be606658a89e8014b3e8",
+    "runsc/boot/filter/config/config_precompiled.go": "f310f11b9284b7a49c782068aeb91fa69f246f48a46ed2e91c55004d0b1674e1",
+    "runsc/boot/filter/config/config_test.go": "cbce6032ff0c6652ac6fc4665c6e863b0175b594ac5ae75f1fd53dda2dfb900d",
+    "runsc/boot/filter/reflink_test.go": "09fe807ecd946c1e26375044a8269b734094e6c5cb665c1b56d5e0c84500f160"
+  },
+  "scope": "Local only; no GitHub writes or push. Benchmark instrumentation is identical on both sides and is not part of the proposed fix."
+}

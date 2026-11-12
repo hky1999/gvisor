@@ -1,0 +1,51 @@
+Local seccomp precompile follow-up for google/gvisor#14228
+
+Baseline: cd7d4251b17357d8f1004dbb3d82bd4a086cc89c (the published PR head).
+The parent is a42ad63bdbc80581b567817b0f7fe9e878df6637; this comparison does
+not mix a main-branch update into the fix. No push or GitHub reply was made.
+
+1. Start with the baseline and apply tests-only.patch.
+2. Run the following with -c opt:
+   //runsc/boot/filter/config:config_test
+     --test_filter=TestOptionsToPrecompileFilestoreReflink
+   //runsc/boot/filter:filter_test
+   Expected: 576 missing counterpart configurations, and four missing generated
+   programs (reflink enabled, systrap/KVM, DirectFS off/on).
+3. Apply production-only.patch and run both targets without a test filter.
+   Expected: 1,152 unique paired configurations, deterministic precompilation,
+   eight generated-filter cases pass, valid FICLONE allowed only when enabled,
+   and negative source or destination FDs rejected.
+   Alternatively apply fix.patch directly to a clean baseline checkout; it
+   includes both production code and tests. Do not apply both combinations.
+4. Build the complete //:release fileset and run the container regression command
+   in fixed.sh. The recorded run uses reflink-enabled XFS as both TEST_TMPDIR and
+   TMPDIR, systrap and KVM, and three repetitions. Do not install only runsc.
+
+Performance reproduction:
+- Apply benchmark-instrumentation.patch identically to both variants. This
+  measurement-only patch adds BENCH_FILESTORE_REFLINK=enabled support to the
+  existing BenchmarkSandboxBoot; it is not part of the proposed PR fix.
+- baseline.sh and fixed.sh record the exact Bazel flags, complete release copies
+  and separate benchmark executables. They contain machine-specific paths;
+  adjust those paths for your machine. Use fresh output directories.
+- performance.py runs 24 alternating pairs for both reflink flag settings, all
+  systrap/KVM and overlay subcases, five boots per reported sample. Boot is active
+  sentry boot time (excludes waiting for the OCI start signal), not CLI latency.
+- The 64 MiB dirty-layer harness also runs 24 alternating pairs. BOTH variants
+  use external filestore mode and --leave-running, without preflush. It verifies
+  the complete original snapshot and the resumed source after overwriting the
+  source, including negative checks for the wrong version.
+- Source debug logs are enabled to measure pause and checkpoint phases. Timed
+  restore explicitly uses --debug=false on both sides, so the baseline's debug
+  dump of 576 precompiled keys does not distort the restore measurement. The
+  source-start logs provide separate evidence for fallback vs precompiled load.
+- CLI checkpoint already waits for durability; DurableCheckpoint includes an
+  extra harness fsync of all artifacts/directories on BOTH sides as a check.
+- collect.py validates counts and records sample SD separately from benchstat's
+  confidence intervals. All raw benchstat output and samples are retained.
+- sizes.json records exact per-file size/hash and verifies the baseline release
+  is byte-identical to the release previously tested for published cd7d4251b.
+  File sizes do not measure resident memory. Generated Go is a build artifact,
+  not a generated file added to the proposed source patch.
+- Measurements use repeated runs on one amd64 host; they do not establish
+  cold-cache startup costs or other architectures' release size.

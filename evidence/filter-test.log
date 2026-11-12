@@ -1,0 +1,22 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //runsc/boot/filter:filter_test
+-----------------------------------------------------------------------------
+=== RUN   TestPrecompiledFilestoreReflink
+=== RUN   TestPrecompiledFilestoreReflink/systrap/directfs=false/reflink=false
+=== RUN   TestPrecompiledFilestoreReflink/systrap/directfs=false/reflink=true
+=== RUN   TestPrecompiledFilestoreReflink/systrap/directfs=true/reflink=false
+=== RUN   TestPrecompiledFilestoreReflink/systrap/directfs=true/reflink=true
+=== RUN   TestPrecompiledFilestoreReflink/kvm/directfs=false/reflink=false
+=== RUN   TestPrecompiledFilestoreReflink/kvm/directfs=false/reflink=true
+=== RUN   TestPrecompiledFilestoreReflink/kvm/directfs=true/reflink=false
+=== RUN   TestPrecompiledFilestoreReflink/kvm/directfs=true/reflink=true
+--- PASS: TestPrecompiledFilestoreReflink (0.00s)
+    --- PASS: TestPrecompiledFilestoreReflink/systrap/directfs=false/reflink=false (0.00s)
+    --- PASS: TestPrecompiledFilestoreReflink/systrap/directfs=false/reflink=true (0.00s)
+    --- PASS: TestPrecompiledFilestoreReflink/systrap/directfs=true/reflink=false (0.00s)
+    --- PASS: TestPrecompiledFilestoreReflink/systrap/directfs=true/reflink=true (0.00s)
+    --- PASS: TestPrecompiledFilestoreReflink/kvm/directfs=false/reflink=false (0.00s)
+    --- PASS: TestPrecompiledFilestoreReflink/kvm/directfs=false/reflink=true (0.00s)
+    --- PASS: TestPrecompiledFilestoreReflink/kvm/directfs=true/reflink=false (0.00s)
+    --- PASS: TestPrecompiledFilestoreReflink/kvm/directfs=true/reflink=true (0.00s)
+PASS

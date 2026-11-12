@@ -1,0 +1,18 @@
+                                        │ /root/filestore-reflink-precompile-20261112/external-performance/baseline-dirty.txt │ /root/filestore-reflink-precompile-20261112/external-performance/candidate-dirty.txt │
+                                        │                                       sec/op                                        │                            sec/op                             vs base                │
+Resume/64MiB/ApplicationPause                                                                                     64.00m ± 1%                                                    63.21m ± 2%        ~ (p=0.185 n=24)
+Resume/64MiB/PauseLogWindow                                                                                       62.87m ± 1%                                                    61.96m ± 1%   -1.45% (p=0.036 n=24)
+Resume/64MiB/Checkpoint                                                                                           72.57m ± 1%                                                    71.77m ± 2%        ~ (p=0.159 n=24)
+Resume/64MiB/DurableCheckpoint                                                                                    74.46m ± 2%                                                    73.94m ± 2%        ~ (p=0.351 n=24)
+Resume/64MiB/EndToEnd                                                                                             74.91m ± 2%                                                    74.45m ± 2%        ~ (p=0.341 n=24)
+Resume/64MiB/Restore                                                                                              75.31m ± 3%                                                    67.54m ± 3%  -10.32% (p=0.000 n=24)
+Resume/64MiB/ficlone_ns                                                                                           57.26m ± 1%                                                    57.66m ± 1%        ~ (p=0.519 n=24)
+Resume/64MiB/state_pages_fsync_ns                                                                                 2.154m ± 5%                                                    2.147m ± 7%        ~ (p=0.468 n=24)
+Resume/64MiB/snapshot_fsync_ns                                                                                    28.96µ ± 4%                                                    29.31µ ± 3%        ~ (p=0.373 n=24)
+Resume/64MiB/post_resume_persistence_ns                                                                           3.418m ± 3%                                                    3.381m ± 5%        ~ (p=0.533 n=24)
+geomean                                                                                                           16.50m                                                         16.25m        -1.54%
+
+                      │ /root/filestore-reflink-precompile-20261112/external-performance/baseline-dirty.txt │ /root/filestore-reflink-precompile-20261112/external-performance/candidate-dirty.txt │
+                      │                                        ns/op                                        │                              ns/op                                vs base            │
+Resume/64MiB/Preflush                                                                            0.000 ± 0%                                                         0.000 ± 0%  ~ (p=1.000 n=24) ¹
+¹ all samples are equal

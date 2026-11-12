@@ -1,0 +1,58 @@
+==> goimports
+Starting local Bazel server (9.3.1) and connecting to it...
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Loading: 
+Loading: 4 packages loaded
+DEBUG: /home/keyang/.cache/bazel/_bazel_keyang/732f143e61fe5a9f9a6d0e97f1ebd298/external/gazelle+/internal/bzlmod/go_deps.bzl:705:36: The following Go modules were required by the root module at the given versions, but were implicitly updated to higher versions due to transitive dependencies:
+ 
+  go.opentelemetry.io/auto/sdk: v1.1.0 -> v1.2.1 
+  go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc: v0.61.0 -> v0.67.0 
+  go.opentelemetry.io/otel: v1.37.0 -> v1.43.0 
+  go.opentelemetry.io/otel/metric: v1.28.0 -> v1.43.0 
+  github.com/felixge/httpsnoop: v1.0.2 -> v1.0.4 
+  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp: v0.53.0 -> v0.67.0 
+  go.opentelemetry.io/otel/trace: v1.28.0 -> v1.43.0 
+  github.com/opencontainers/image-spec: v1.0.2 -> v1.1.1 
+  cloud.google.com/go: v0.105.0 -> v0.123.0 
+  cloud.google.com/go/iam: v0.8.0 -> v1.7.0 
+  github.com/googleapis/enterprise-certificate-proxy: v0.3.6 -> v0.3.14 
+  golang.org/x/oauth2: v0.30.0 -> v0.36.0 
+  google.golang.org/genproto: v0.0.0-20250707201910-8d1bb00bc6a7 -> v0.0.0-20260319201613-d00831a3d3e7 
+
+Update the root module's dependencies to match the resolved versions via:
+
+  bazel run @io_bazel_rules_go//go -- get go.opentelemetry.io/auto/sdk@v1.2.1 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc@v0.67.0 go.opentelemetry.io/otel@v1.43.0 go.opentelemetry.io/otel/metric@v1.43.0 github.com/felixge/httpsnoop@v1.0.4 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.67.0 go.opentelemetry.io/otel/trace@v1.43.0 github.com/opencontainers/image-spec@v1.1.1 cloud.google.com/go@v0.123.0 cloud.google.com/go/iam@v1.7.0 github.com/googleapis/enterprise-certificate-proxy@v0.3.14 golang.org/x/oauth2@v0.36.0 google.golang.org/genproto@v0.0.0-20260319201613-d00831a3d3e7 
+
+Loading: 4 packages loaded
+    currently loading: @@gazelle++go_deps+org_golang_x_tools//cmd/goimports
+Analyzing: target @@gazelle++go_deps+org_golang_x_tools//cmd/goimports:goimports (5 packages loaded)
+Analyzing: target @@gazelle++go_deps+org_golang_x_tools//cmd/goimports:goimports (9 packages loaded, 6 targets configured)
+Analyzing: target @@gazelle++go_deps+org_golang_x_tools//cmd/goimports:goimports (9 packages loaded, 6 targets configured)
+
+Analyzing: target @@gazelle++go_deps+org_golang_x_tools//cmd/goimports:goimports (97 packages loaded, 8 targets configured)
+
+Analyzing: target @@gazelle++go_deps+org_golang_x_tools//cmd/goimports:goimports (179 packages loaded, 4074 targets configured)
+
+INFO: Analyzed target @@gazelle++go_deps+org_golang_x_tools//cmd/goimports:goimports (182 packages loaded, 13868 targets configured).
+INFO: Found 1 target...
+Target @@gazelle++go_deps+org_golang_x_tools//cmd/goimports:goimports up-to-date:
+  bazel-bin/external/gazelle++go_deps+org_golang_x_tools/cmd/goimports/goimports_/goimports
+INFO: Elapsed time: 12.328s, Critical Path: 0.37s
+INFO: 2 processes: 32 action cache hit, 2 internal.
+INFO: Build completed successfully, 2 total actions
+INFO: Running command line: bazel-bin/external/gazelle++go_deps+org_golang_x_tools/cmd/goimports/goimports_/goimports <args omitted>
+==> clang-format
+==> cpplint
+==> buildifier
+==> codespell
+==> Lint summary
+  PASS  goimports
+  PASS  clang-format
+  PASS  cpplint
+  PASS  buildifier
+  PASS  spelling
+
+lint: all checks passed.

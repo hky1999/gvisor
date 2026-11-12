@@ -1,0 +1,202 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //pkg/sentry/control:control_test
+-----------------------------------------------------------------------------
+=== RUN   TestFilestoreSnapshotFDLifetime
+=== RUN   TestFilestoreSnapshotFDLifetime/inline
+=== RUN   TestFilestoreSnapshotFDLifetime/pages
+--- PASS: TestFilestoreSnapshotFDLifetime (0.00s)
+    --- PASS: TestFilestoreSnapshotFDLifetime/inline (0.00s)
+    --- PASS: TestFilestoreSnapshotFDLifetime/pages (0.00s)
+=== RUN   TestFilestoreSnapshotRejectsInvalidFDCount
+--- PASS: TestFilestoreSnapshotRejectsInvalidFDCount (0.00s)
+=== RUN   TestFdReader_Seekable
+I1112 03:14:54.580204      49 subprocess_linux.go:50] Latest seccomp behavior found (kernel >= 4.8 likely)
+--- PASS: TestFdReader_Seekable (0.00s)
+=== RUN   TestFdReader_NonSeekable
+--- PASS: TestFdReader_NonSeekable (0.00s)
+=== RUN   TestPercentCPU
+--- PASS: TestPercentCPU (0.00s)
+=== RUN   TestStateSaveGraphEngineOverride
+=== RUN   TestStateSaveGraphEngineOverride/override_wire_with_graph
+I1112 03:14:54.582350      49 state.go:135] Before save CPU usage: 16.832694ms
+W1112 03:14:54.582383      49 state.go:141] Cannot calculate wall time as start time is not available
+I1112 03:14:54.582388      49 state.go:147] Sandbox save started, pausing all tasks.
+W1112 03:14:54.582405      49 state_tsc.go:44] No TSC snapshot is available, unable to save TSC
+I1112 03:14:54.585650      49 kernel.go:939] CPUID save took [2.958378ms].
+I1112 03:14:54.586641      49 kernel.go:960] Kernel save stats: 136 objects, 8054 bytes, 951.413µs
+I1112 03:14:54.586655      49 kernel.go:961] Kernel save took [978.817µs].
+I1112 03:14:54.586671      49 save_restore.go:546] MemoryFile(0x3fd906e35008): save scanning took 7.261µs for 12288 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 12288 bytes of non-zero pages (0 bytes expected + 12288 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:54.586893      49 save_restore.go:581] MemoryFile(0x3fd906e35008): saved metadata in 201.429µs
+I1112 03:14:54.586928      49 save_restore.go:611] MemoryFile(0x3fd906e35008): saved pages in 21.037µs (12288 bytes, 584.114 MB/s)
+I1112 03:14:54.586948      49 kernel.go:1077] Memory files save took [286.326µs].
+I1112 03:14:54.587383      49 kernel.go:1000] Overall save took [4.70862ms].
+I1112 03:14:54.587402      49 calibrated_clock.go:82] CalibratedClock(Monotonic): ready
+I1112 03:14:54.587425      49 calibrated_clock.go:82] CalibratedClock(Realtime): ready
+I1112 03:14:54.587436      49 state.go:202] Save CPU usage: 5.560572ms
+I1112 03:14:54.587444      49 state.go:204] Save succeeded: exiting...
+I1112 03:14:54.587453      49 watchdog.go:220] Starting watchdog, period: 15s, timeout: 1m0s, action: logWarning
+I1112 03:14:54.587468      49 state.go:152] Tasks resumed after save.
+I1112 03:14:54.588755      49 watchdog.go:240] Stopping watchdog
+I1112 03:14:54.588791      49 watchdog.go:244] Watchdog stopped
+=== RUN   TestStateSaveGraphEngineOverride/override_graph_with_wire
+I1112 03:14:54.589964      49 state.go:135] Before save CPU usage: 35.041632ms
+W1112 03:14:54.589974      49 state.go:141] Cannot calculate wall time as start time is not available
+I1112 03:14:54.589979      49 state.go:147] Sandbox save started, pausing all tasks.
+W1112 03:14:54.589991      49 state_tsc.go:44] No TSC snapshot is available, unable to save TSC
+I1112 03:14:54.590367      49 kernel.go:939] CPUID save took [179.502µs].
+I1112 03:14:54.591706      49 kernel.go:960] Kernel save stats: 
+           total |    count |              per | type
+-----------------+----------+------------------+----------------
+       497.418µs |        1 |        497.418µs | state.default
+        49.478µs |        7 |          7.068µs | pkg/sentry/fsimpl/kernfs.slot
+        46.459µs |        7 |          6.637µs | pkg/sentry/vfs.Filesystem
+        43.947µs |       15 |          2.929µs | pkg/sentry/fsimpl/kernfs.InodeAttrs
+         43.49µs |        1 |          43.49µs | pkg/sentry/kernel.Kernel
+        37.894µs |        1 |         37.894µs | pkg/sentry/fsimpl/cgroup2fs.cgroup
+        37.204µs |        6 |            6.2µs | pkg/sentry/vfs.Mount
+        32.657µs |        6 |          5.442µs | pkg/sentry/fsimpl/nsfs.Inode
+        28.901µs |        2 |          14.45µs | pkg/sentry/fsimpl/kernfs.Dentry
+         21.93µs |        7 |          3.132µs | pkg/sentry/fsimpl/kernfs.DynamicBytesFile
+        19.469µs |        1 |         19.469µs | pkg/sentry/vfs.VirtualFilesystem
+        14.281µs |       98 |            145ns | pkg/atomicbitops.Int64
+        13.687µs |        1 |         13.687µs | pkg/sentry/kernel/futex.Manager
+        13.537µs |        1 |         13.537µs | pkg/sentry/kernel/auth.UserNamespace
+        13.474µs |        1 |         13.474µs | pkg/cpuid.FeatureSet
+        12.908µs |       98 |            131ns | pkg/atomicbitops.Uint32
+        12.789µs |        5 |          2.557µs | pkg/sentry/fsimpl/cgroup2fs.cgroupSourceWritable
+         9.514µs |        6 |          1.585µs | pkg/sentry/vfs.mountEntry
+         9.223µs |        4 |          2.305µs | pkg/sentry/kernel/auth.idMapSet
+         8.581µs |        1 |          8.581µs | pkg/sentry/kernel/mq.Registry
+         8.447µs |        1 |          8.447µs | pkg/sentry/fsimpl/tmpfs.inode
+         7.749µs |        1 |          7.749µs | pkg/sentry/loader.VDSO
+         6.767µs |        3 |          2.255µs | pkg/sentry/vfs.Dentry
+         6.616µs |        1 |          6.616µs | pkg/sentry/fsimpl/cgroup2fs.filesystem
+         6.473µs |        5 |          1.294µs | pkg/sentry/fsimpl/kernfs.Filesystem
+         6.269µs |        1 |          6.269µs | pkg/sentry/kernel.CgroupNamespace
+         6.104µs |        7 |            872ns | pkg/sentry/fsimpl/cgroup2fs.cgroupInterfaceFile
+         5.832µs |        1 |          5.832µs | pkg/bitmap.Bitmap
+         5.697µs |       15 |            379ns | pkg/sentry/fsimpl/kernfs.InodeWatches
+         5.547µs |       31 |            178ns | pkg/atomicbitops.Uint64
+         5.461µs |        1 |          5.461µs | pkg/sentry/fsimpl/tmpfs.filesystem
+         5.413µs |        1 |          5.413µs | pkg/sentry/fsimpl/cgroup2fs.cpu
+         5.231µs |        2 |          2.615µs | pkg/sentry/fsimpl/cgroup2fs.cgroupSourceReadOnly
+         5.087µs |        1 |          5.087µs | pkg/sentry/kernel.PIDNamespace
+         4.897µs |        1 |          4.897µs | pkg/sentry/fsimpl/mqfs.rootInode
+         4.632µs |        1 |          4.632µs | pkg/sentry/kernel.CgroupRegistry
+         4.628µs |       13 |            356ns | pkg/sentry/fsimpl/kernfs.InodeNotDirectory
+         4.566µs |        1 |          4.566µs | pkg/sentry/kernel.Timekeeper
+         4.507µs |        3 |          1.502µs | pkg/sentry/kernel.timekeeperClock
+         4.306µs |        1 |          4.306µs | pkg/sentry/vfs.registeredFilesystemType
+         4.018µs |        1 |          4.018µs | pkg/sentry/kernel.IPCNamespace
+         3.991µs |        1 |          3.991µs | pkg/sentry/inet.Namespace
+         3.804µs |        6 |            634ns | pkg/sentry/fsimpl/nsfs.inodeRefs
+         3.769µs |        7 |            538ns | pkg/sentry/fsimpl/kernfs.slotEntry
+         3.562µs |        1 |          3.562µs | pkg/sentry/kernel.VDSOParamPage
+         3.387µs |        2 |          1.693µs | pkg/sentry/mm.SpecialMappable
+         3.109µs |        8 |            388ns | pkg/sentry/fsimpl/kernfs.InodeNoopRefCount
+         2.704µs |        5 |            540ns | pkg/sentry/fsimpl/kernfs.dentryList
+         2.663µs |        3 |            887ns | pkg/sentry/kernel/ipc.Registry
+         2.648µs |       16 |            165ns | pkg/sentry/vfs.FileLocks
+         2.453µs |       16 |            153ns | pkg/sentry/vfs.Watches
+          2.41µs |        1 |           2.41µs | pkg/sentry/fsimpl/tmpfs.dentryEntry
+         2.351µs |        7 |            335ns | pkg/atomicbitops.Bool
+         2.336µs |        1 |          2.336µs | pkg/sentry/fsimpl/tmpfs.dentry
+         2.303µs |        3 |            767ns | pkg/sentry/loader.elfProgHeader
+         2.246µs |        1 |          2.246µs | pkg/sentry/kernel.TaskSet
+         2.202µs |        2 |          1.101µs | pkg/sentry/fsimpl/kernfs.OrderedChildren
+         2.145µs |        7 |            306ns | pkg/sentry/vfs.FilesystemRefs
+         2.011µs |        2 |          1.005µs | pkg/waiter.Queue
+         1.988µs |        2 |            994ns | pkg/sentry/vfs.DynamicBytesPoller
+         1.921µs |        1 |          1.921µs | pkg/sentry/fsimpl/tmpfs.directory
+         1.827µs |       15 |            121ns | pkg/sentry/fsimpl/kernfs.InodeFSOwned
+         1.699µs |       15 |            113ns | pkg/sentry/fsimpl/kernfs.InodeNotSymlink
+         1.638µs |        6 |            273ns | pkg/sentry/vfs.MountFlags
+         1.615µs |        7 |            230ns | pkg/atomicbitops.Int32
+         1.604µs |        6 |            267ns | pkg/sentry/vfs.followerEntry
+         1.594µs |       14 |            113ns | pkg/sentry/fsimpl/kernfs.InodeAlwaysValid
+         1.593µs |        1 |          1.593µs | pkg/sentry/kernel/auth.Credentials
+         1.584µs |        1 |          1.584µs | pkg/sentry/fsimpl/mqfs.RegistryImpl
+         1.568µs |        4 |            392ns | pkg/sentry/kernel/auth.idMapFlatSegment
+         1.498µs |        1 |          1.498µs | pkg/sentry/kernel.UTSNamespace
+         1.485µs |        6 |            247ns | pkg/sentry/vfs.followerList
+         1.462µs |        6 |            243ns | pkg/sentry/vfs.mountLockFlags
+         1.428µs |        1 |          1.428µs | pkg/sentry/fsimpl/cgroup2fs.memory
+         1.402µs |        2 |            701ns | pkg/sentry/fsimpl/kernfs.slotList
+         1.363µs |        1 |          1.363µs | pkg/sentry/fsimpl/cgroup2fs.pids
+         1.293µs |        6 |            215ns | pkg/sentry/vfs.VirtualDentry
+          1.19µs |        9 |            132ns | pkg/sentry/fsimpl/kernfs.InodeTemporary
+          1.16µs |        1 |           1.16µs | pkg/sentry/kernel/semaphore.Registry
+         1.155µs |        1 |          1.155µs | pkg/sentry/fsimpl/pipefs.filesystem
+         1.149µs |        3 |            383ns | pkg/sentry/memmap.FileRange
+         1.134µs |        8 |            141ns | pkg/sentry/fsimpl/kernfs.InodeNotAnonymous
+         1.107µs |        2 |            553ns | pkg/sentry/mm.SpecialMappableRefs
+         1.045µs |        1 |          1.045µs | pkg/sentry/fsimpl/mqfs.filesystem
+         1.041µs |        7 |            148ns | pkg/sentry/fsimpl/kernfs.InodeNoStatFS
+         1.022µs |        2 |            511ns | pkg/waiter.waiterList
+           997ns |        1 |            997ns | pkg/sentry/fsimpl/nsfs.filesystem
+           961ns |        2 |            480ns | pkg/sentry/fsimpl/kernfs.dentryEntry
+           912ns |        1 |            912ns | pkg/sentry/fsimpl/sockfs.filesystem
+           878ns |        7 |            125ns | pkg/sentry/fsimpl/kernfs.InodeAnonymous
+           862ns |        1 |            862ns | pkg/sentry/fsimpl/cgroup2fs.cpuset
+           831ns |        1 |            831ns | pkg/sentry/vfs.anonFilesystem
+           828ns |        1 |            828ns | pkg/sentry/kernel/shm.Registry
+           755ns |        1 |            755ns | pkg/sentry/usage.CPUStats
+           754ns |        1 |            754ns | pkg/sentry/socket/netlink/port.Manager
+           753ns |        1 |            753ns | pkg/sentry/inet.AbstractSocketNamespace
+           747ns |        1 |            747ns | pkg/sentry/kernel.CheckpointWaitable
+           734ns |        1 |            734ns | pkg/sentry/inet.McastTable
+           727ns |        1 |            727ns | pkg/sentry/ktime.Time
+           704ns |        2 |            352ns | pkg/sentry/vfs/memxattr.SimpleExtendedAttributes
+           701ns |        1 |            701ns | pkg/sentry/fsimpl/cgroup2fs.cgroupStat
+           669ns |        1 |            669ns | pkg/sentry/fsimpl/tmpfs.dentryList
+           655ns |        1 |            655ns | pkg/sentry/kernel/msgqueue.Registry
+           622ns |        1 |            622ns | pkg/sentry/kernel.pidNamespaceData
+           615ns |        1 |            615ns | pkg/sentry/kernel.sessionList
+           599ns |        1 |            599ns | pkg/sentry/kernel/futex.bucket
+           595ns |        1 |            595ns | pkg/sentry/fsimpl/tmpfs.inodeRefs
+           580ns |        1 |            580ns | pkg/sentry/kernel.syslog
+           573ns |        1 |            573ns | pkg/sentry/fsimpl/mqfs.rootInodeRefs
+           550ns |        1 |            550ns | pkg/sentry/fsimpl/cgroup2fs.cgroupProcs
+           542ns |        1 |            542ns | pkg/sentry/fsimpl/cgroup2fs.cpuStat
+           533ns |        1 |            533ns | pkg/sentry/vfs.RegisterFilesystemTypeOptions
+           511ns |        1 |            511ns | pkg/sentry/fsimpl/cgroup2fs.cgroupControllers
+           511ns |        1 |            511ns | pkg/sentry/devices/nvproxy/nvconf.DriverVersion
+           509ns |        1 |            509ns | pkg/sentry/kernel/auth.KeySet
+           497ns |        1 |            497ns | pkg/sentry/vfs.WriteCount
+           496ns |        1 |            496ns | pkg/sentry/kernel.CheckpointGeneration
+           488ns |        2 |            244ns | pkg/sentry/fsimpl/kernfs.InodeDirectoryNoNewChildren
+           481ns |        1 |            481ns | pkg/cpuid.hwCap
+           464ns |        1 |            464ns | pkg/sentry/fsimpl/pipefs.filesystemType
+           457ns |        1 |            457ns | pkg/sentry/fsimpl/cgroup2fs.cgroupMaxDescendants
+           457ns |        1 |            457ns | pkg/sentry/checkpoint.ResourceID
+           430ns |        2 |            215ns | pkg/sentry/memmap.MappableNoHugepages
+           429ns |        1 |            429ns | pkg/sentry/fsimpl/cgroup2fs.cgroupSubtreeControl
+           401ns |        1 |            401ns | pkg/sentry/fsimpl/cgroup2fs.FilesystemType
+           385ns |        1 |            385ns | pkg/sentry/fsimpl/cgroup2fs.cgroupMaxDepth
+           377ns |        1 |            377ns | pkg/sentry/vfs.anonFilesystemType
+           350ns |        1 |            350ns | pkg/sentry/fsimpl/mqfs.FilesystemType
+           348ns |        1 |            348ns | pkg/sentry/fsimpl/nsfs.filesystemType
+           348ns |        1 |            348ns | pkg/sentry/fsimpl/sockfs.filesystemType
+           345ns |        1 |            345ns | pkg/sentry/kernel.SpecialOpts
+           326ns |        1 |            326ns | pkg/sentry/fsimpl/tmpfs.FilesystemType
+           296ns |        1 |            296ns | pkg/sentry/fsimpl/cgroup2fs.implStatFS
+-----------------+----------+------------------+----------------
+       1.20133ms |      636 |          1.888µs | [all]
+I1112 03:14:54.591737      49 kernel.go:961] Kernel save took [1.360172ms].
+I1112 03:14:54.591750      49 save_restore.go:546] MemoryFile(0x3fd906b31008): save scanning took 4.884µs for 12288 allocated bytes: 0 bytes of zero pages (0 bytes expected including 0 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 12288 bytes of non-zero pages (0 bytes expected + 12288 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:54.591776      49 save_restore.go:581] MemoryFile(0x3fd906b31008): saved metadata in 11.696µs
+I1112 03:14:54.591788      49 save_restore.go:611] MemoryFile(0x3fd906b31008): saved pages in 1.41µs (12288 bytes, 8714.894 MB/s)
+I1112 03:14:54.591811      49 kernel.go:1077] Memory files save took [66.312µs].
+I1112 03:14:54.592343      49 kernel.go:1000] Overall save took [2.157633ms].
+I1112 03:14:54.592360      49 calibrated_clock.go:82] CalibratedClock(Monotonic): ready
+I1112 03:14:54.592367      49 calibrated_clock.go:82] CalibratedClock(Realtime): ready
+I1112 03:14:54.592377      49 state.go:202] Save CPU usage: 2.832158ms
+I1112 03:14:54.592383      49 state.go:204] Save succeeded: exiting...
+I1112 03:14:54.592391      49 watchdog.go:220] Starting watchdog, period: 15s, timeout: 1m0s, action: logWarning
+I1112 03:14:54.592415      49 state.go:152] Tasks resumed after save.
+I1112 03:14:54.593088      49 watchdog.go:240] Stopping watchdog
+I1112 03:14:54.593101      49 watchdog.go:244] Watchdog stopped
+--- PASS: TestStateSaveGraphEngineOverride (0.01s)
+    --- PASS: TestStateSaveGraphEngineOverride/override_wire_with_graph (0.01s)
+    --- PASS: TestStateSaveGraphEngineOverride/override_graph_with_wire (0.00s)
+PASS

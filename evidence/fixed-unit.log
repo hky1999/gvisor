@@ -1,0 +1,28 @@
+INFO: Invocation ID: 26accc7d-e9d0-4687-9ae5-95ce4b6df62e
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 2 targets (0 packages loaded, 5 targets configured).
+[2,560 / 2,572] GoLink runsc/boot/filter/config/config_test_/config_test; 1s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[2,563 / 2,573] PrecompileSeccomp runsc/boot/filter/filter_precompiled.go; 1s disk-cache, linux-sandbox ... (2 actions running)
+[2,564 / 2,573] Testing //runsc/boot/filter/config:config_test; 5s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[2,566 / 2,573] Testing //runsc/boot/filter/config:config_test; 6s disk-cache, linux-sandbox ... (3 actions running)
+[2,567 / 2,573] Testing //runsc/boot/filter/config:config_test; 8s disk-cache, linux-sandbox ... (2 actions running)
+[2,567 / 2,573] Testing //runsc/boot/filter/config:config_test; 19s disk-cache, linux-sandbox ... (2 actions running)
+[2,568 / 2,573] Testing //runsc/boot/filter/config:config_test; 23s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[2,570 / 2,573] Testing //runsc/boot/filter/config:config_test; 24s disk-cache, linux-sandbox ... (2 actions running)
+[2,573 / 2,574] 1 / 2 tests; Testing //runsc/boot/filter/config:config_test; 26s disk-cache, linux-sandbox
+[2,573 / 2,574] 1 / 2 tests; Testing //runsc/boot/filter/config:config_test; 37s disk-cache, linux-sandbox
+[2,573 / 2,574] 2 / 2 tests; Testing //runsc/boot/filter/config:config_test; 38s disk-cache, linux-sandbox
+INFO: Found 2 test targets...
+INFO: Elapsed time: 40.990s, Critical Path: 40.47s
+INFO: 22 processes: 8 action cache hit, 4 internal, 18 linux-sandbox.
+INFO: Build completed successfully, 22 total actions
+//runsc/boot/filter:filter_test                                          PASSED in 0.1s
+//runsc/boot/filter/config:config_test                                   PASSED in 38.7s
+
+Executed 2 out of 2 tests: 2 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

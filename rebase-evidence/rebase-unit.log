@@ -1,0 +1,76 @@
+Starting local Bazel server (9.3.1) and connecting to it...
+INFO: Invocation ID: c4cae9cc-ea31-44a6-9234-aa2049d485dd
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Loading: 
+Loading: 4 packages loaded
+DEBUG: /root/filestore-rebase-20261105/bazel-cache/1c10fcf96211c93ca6d5025f36ba7422/external/gazelle+/internal/bzlmod/go_deps.bzl:705:36: The following Go modules were required by the root module at the given versions, but were implicitly updated to higher versions due to transitive dependencies:
+ 
+  go.opentelemetry.io/auto/sdk: v1.1.0 -> v1.2.1 
+  go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc: v0.61.0 -> v0.67.0 
+  go.opentelemetry.io/otel: v1.37.0 -> v1.43.0 
+  go.opentelemetry.io/otel/metric: v1.28.0 -> v1.43.0 
+  github.com/felixge/httpsnoop: v1.0.2 -> v1.0.4 
+  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp: v0.53.0 -> v0.67.0 
+  go.opentelemetry.io/otel/trace: v1.28.0 -> v1.43.0 
+  github.com/opencontainers/image-spec: v1.0.2 -> v1.1.1 
+  cloud.google.com/go: v0.105.0 -> v0.123.0 
+  cloud.google.com/go/iam: v0.8.0 -> v1.7.0 
+  github.com/googleapis/enterprise-certificate-proxy: v0.3.6 -> v0.3.14 
+  golang.org/x/oauth2: v0.30.0 -> v0.36.0 
+  google.golang.org/genproto: v0.0.0-20250707201910-8d1bb00bc6a7 -> v0.0.0-20260319201613-d00831a3d3e7 
+
+Update the root module's dependencies to match the resolved versions via:
+
+  bazel run @io_bazel_rules_go//go -- get go.opentelemetry.io/auto/sdk@v1.2.1 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc@v0.67.0 go.opentelemetry.io/otel@v1.43.0 go.opentelemetry.io/otel/metric@v1.43.0 github.com/felixge/httpsnoop@v1.0.4 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp@v0.67.0 go.opentelemetry.io/otel/trace@v1.43.0 github.com/opencontainers/image-spec@v1.1.1 cloud.google.com/go@v0.123.0 cloud.google.com/go/iam@v1.7.0 github.com/googleapis/enterprise-certificate-proxy@v0.3.14 golang.org/x/oauth2@v0.36.0 google.golang.org/genproto@v0.0.0-20260319201613-d00831a3d3e7 
+
+Analyzing: 5 targets (9 packages loaded)
+Analyzing: 5 targets (13 packages loaded, 6 targets configured)
+Analyzing: 5 targets (13 packages loaded, 6 targets configured)
+
+Analyzing: 5 targets (325 packages loaded, 4650 targets configured)
+
+Analyzing: 5 targets (769 packages loaded, 37552 targets configured)
+
+INFO: Analyzed 5 targets (770 packages loaded, 38785 targets configured, 132 aspect applications).
+[1,785 / 3,013] GoCompilePkg pkg/state/state.a [for tool]; 0s disk-cache, linux-sandbox ... (9 actions running)
+[2,641 / 3,013] GoCompilePkg pkg/zip/zip.a [for tool]; 0s disk-cache, linux-sandbox ... (16 actions running)
+[2,690 / 3,013] GoCompilePkg pkg/abi/nvgpu/nvgpu.a; 0s disk-cache, linux-sandbox ... (2 actions running)
+[2,774 / 3,013] Analyzing @@//pkg/state:state; 0s local, disk-cache ... (6 actions, 4 running)
+[2,791 / 3,013] Analyzing @@//pkg/state:state; 1s local, disk-cache ... (5 actions, 3 running)
+[2,825 / 3,013] GoCompilePkg pkg/tcpip/stack/stack.a; 0s disk-cache, linux-sandbox ... (15 actions running)
+[2,883 / 3,014] GoLink pkg/sentry/platform/systrap/stubfilter_precompiled_gen_dynamic_bin_/stubfilter_precompiled_gen_dynamic_bin; 0s disk-cache, linux-sandbox ... (16 actions, 15 running)
+[2,919 / 3,014] 1 / 5 tests; Analyzing @@//pkg/abi/linux:linux; 1s local, disk-cache ... (14 actions running)
+[2,938 / 3,015] 2 / 5 tests; Analyzing @@//pkg/abi/linux:linux; 2s local, disk-cache ... (2 actions, 1 running)
+[2,942 / 3,015] 2 / 5 tests; Analyzing @@//pkg/abi/linux:linux; 3s local, disk-cache ... (3 actions, 2 running)
+[2,950 / 3,015] 2 / 5 tests; [Prepa] Analyzing @@//pkg/sighandling:sighandling
+[2,953 / 3,015] 2 / 5 tests; Analyzing @@//pkg/unet:unet; 0s local, disk-cache
+[2,955 / 3,015] 2 / 5 tests; Analyzing @@//pkg/metric:metric; 0s local, disk-cache
+[2,960 / 3,015] 2 / 5 tests; GoCompilePkg pkg/sentry/kernel/kernel.a; 1s disk-cache, linux-sandbox
+[2,971 / 3,015] 2 / 5 tests; GoCompilePkg pkg/sentry/devices/rdmaproxy/rdmaproxy.a; 0s disk-cache, linux-sandbox ... (10 actions running)
+[2,986 / 3,015] 2 / 5 tests; GoCompilePkg pkg/sentry/socket/unix/unix.a; 0s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[2,996 / 3,015] 2 / 5 tests; GoLink runsc/boot/filter/config/config_test_/config_test; 1s disk-cache, linux-sandbox ... (3 actions, 2 running)
+[3,001 / 3,016] 2 / 5 tests; PrecompileSeccomp runsc/boot/filter/filter_precompiled.go; 0s disk-cache, linux-sandbox ... (3 actions running)
+[3,004 / 3,016] 2 / 5 tests; PrecompileSeccomp runsc/boot/filter/filter_precompiled.go; 1s disk-cache, linux-sandbox ... (3 actions running)
+[3,006 / 3,017] 3 / 5 tests; PrecompileSeccomp runsc/boot/filter/filter_precompiled.go; 3s disk-cache, linux-sandbox ... (3 actions running)
+[3,007 / 3,017] 3 / 5 tests; PrecompileSeccomp runsc/boot/filter/filter_precompiled.go; 4s disk-cache, linux-sandbox ... (2 actions running)
+[3,008 / 3,017] 3 / 5 tests; Testing //runsc/boot/filter/config:config_test; 5s disk-cache, linux-sandbox ... (2 actions running)
+[3,011 / 3,017] 3 / 5 tests; Testing //runsc/boot/filter/config:config_test; 7s disk-cache, linux-sandbox ... (2 actions running)
+[3,011 / 3,017] 3 / 5 tests; Testing //runsc/boot/filter/config:config_test; 18s disk-cache, linux-sandbox ... (2 actions running)
+[3,012 / 3,017] 3 / 5 tests; Testing //runsc/boot/filter/config:config_test; 23s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[3,015 / 3,017] 3 / 5 tests; Testing //runsc/boot/filter/config:config_test; 25s disk-cache, linux-sandbox ... (2 actions, 1 running)
+[3,017 / 3,018] 4 / 5 tests; Testing //runsc/boot/filter/config:config_test; 26s disk-cache, linux-sandbox
+[3,017 / 3,018] 4 / 5 tests; Testing //runsc/boot/filter/config:config_test; 37s disk-cache, linux-sandbox
+INFO: Found 5 test targets...
+INFO: Elapsed time: 66.375s, Critical Path: 57.61s
+INFO: 376 processes: 2642 action cache hit, 31 internal, 324 linux-sandbox, 21 local.
+INFO: Build completed successfully, 376 total actions
+//pkg/sentry/control:control_test                                        PASSED in 0.1s
+//pkg/sentry/pgalloc:pgalloc_test                                        PASSED in 0.1s
+//runsc/boot/filter:filter_test                                          PASSED in 0.1s
+//runsc/boot/filter/config:config_test                                   PASSED in 38.4s
+//runsc/config:config_test                                               PASSED in 0.2s
+
+Executed 5 out of 5 tests: 5 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

@@ -1,0 +1,22 @@
+INFO: Invocation ID: 0fb69c38-8d2a-4fc0-80ad-88ba468de6c6
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //runsc/container:container_test (0 packages loaded, 0 targets configured)
+Analyzing: target //runsc/container:container_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //runsc/container:container_test (0 packages loaded, 43 targets configured).
+[4,163 / 4,164] Testing //runsc/container:container_test; 1s disk-cache, local
+[4,163 / 4,164] Testing //runsc/container:container_test; 11s disk-cache, local
+[4,163 / 4,164] Testing //runsc/container:container_test; 41s disk-cache, local
+[4,163 / 4,164] 1 / 1 tests; Testing //runsc/container:container_test; 78s disk-cache, local
+INFO: Found 1 test target...
+Target //runsc/container:container_test up-to-date:
+  bazel-bin/runsc/container/container_test_/container_test
+INFO: Elapsed time: 79.117s, Critical Path: 78.45s
+INFO: 31 processes: 15 action cache hit, 26 disk cache hit, 4 internal, 1 local.
+INFO: Build completed successfully, 31 total actions
+//runsc/container:container_test                                         PASSED in 77.3s
+
+Executed 1 out of 1 test: 1 test passes.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

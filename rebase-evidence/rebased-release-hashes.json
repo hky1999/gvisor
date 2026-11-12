@@ -1,0 +1,38 @@
+{
+  "runsc": {
+    "bytes": 19528484,
+    "sha256": "23441ac34c3a635bd6763827ad8c9584896e28d319212f018363abf5b0c87b31"
+  },
+  "containerd-shim-runsc-v1": {
+    "bytes": 24408741,
+    "sha256": "3ed00eed2989ec4ef2479a9ce0ebd065829e0284802c4ca835120aaa566cd803"
+  },
+  "gvisor-bin/runsc-netgofer": {
+    "bytes": 18616364,
+    "sha256": "62bfa35a878543d480c94a1ddbdb4450ae0e2f504f311c3bcf443627b33b6266"
+  },
+  "gvisor-bin/runsc-fd-parking": {
+    "bytes": 1272,
+    "sha256": "a5cf9c989cf13a18486eb36e3e7621dcf3fec735e2119087a772439fe2602d41"
+  },
+  "gvisor-bin/gvisor_sentry": {
+    "bytes": 59755567,
+    "sha256": "6769d9dc44f37267897261c5593885cacdda0a669486f1fd68c467e45973af82"
+  },
+  "gvisor-bin/gvisor-sentry-prewarmer": {
+    "bytes": 1720,
+    "sha256": "40e6cd6a4899440b567e1a052e28eca7dd8630d8b3b901844197500c9df0ccce"
+  },
+  "gvisor-bin/runsc-metric-server": {
+    "bytes": 21660366,
+    "sha256": "9b9dc4590ae4f71e0e157b96a18e7570a3d77b1cea65cb7cf8cf73d4a060cbb7"
+  },
+  "gvisor-bin/checkpointgofer": {
+    "bytes": 48790941,
+    "sha256": "8e1b62da55f5cc79bbcf1660ad785b702772ac5f125bea1029df04f393aebe45"
+  },
+  "gvisor-bin/gvisor-proc-umounter": {
+    "bytes": 1256,
+    "sha256": "2d91f016e9827bd723ea891ba5489d74de2bd4a0620eb47ebbcb8800e0f505eb"
+  }
+}

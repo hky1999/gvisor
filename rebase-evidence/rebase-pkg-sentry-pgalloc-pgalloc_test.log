@@ -1,0 +1,231 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //pkg/sentry/pgalloc:pgalloc_test
+-----------------------------------------------------------------------------
+=== RUN   TestFindAllocatable
+=== RUN   TestFindAllocatable/initial_small_allocation,_bottom-up
+=== RUN   TestFindAllocatable/initial_small_allocation,_top-down
+=== RUN   TestFindAllocatable/initial_small_allocation,_multiple_pages,_top-down
+=== RUN   TestFindAllocatable/initial_small_allocation,_recycling_enabled,_bottom-up
+=== RUN   TestFindAllocatable/initial_huge_allocation,_bottom-up
+=== RUN   TestFindAllocatable/initial_huge_allocation,_top-down
+=== RUN   TestFindAllocatable/initial_huge_allocation,_multiple_pages,_top-down
+=== RUN   TestFindAllocatable/initial_huge_allocation,_recycling_enabled,_bottom-up
+=== RUN   TestFindAllocatable/huge_allocation_uses_huge_pages_in_new_chunk
+=== RUN   TestFindAllocatable/huge_allocation_uses_huge_pages_in_existing_chunk
+=== RUN   TestFindAllocatable/hugepage-sized_non-huge_allocation_uses_small_pages_in_new_chunk
+=== RUN   TestFindAllocatable/hugepage-sized_non-huge_allocation_uses_small_pages_in_existing_chunk
+=== RUN   TestFindAllocatable/bottom-up_small_allocation_begins_at_start_of_file
+=== RUN   TestFindAllocatable/top-down_small_allocation_begins_at_end_of_last_chunk
+=== RUN   TestFindAllocatable/bottom-up_huge_allocation_begins_at_start_of_file
+=== RUN   TestFindAllocatable/top-down_huge_allocation_begins_at_end_of_last_chunk
+=== RUN   TestFindAllocatable/bottom-up_small_allocation_can_extend_multiple_chunks
+=== RUN   TestFindAllocatable/top-down_small_allocation_can_extend_multiple_chunks
+=== RUN   TestFindAllocatable/bottom-up_huge_allocation_can_extend_multiple_chunks
+=== RUN   TestFindAllocatable/top-down_huge_allocation_can_extend_multiple_chunks
+=== RUN   TestFindAllocatable/bottom-up_small_allocation_finds_first_free_gap
+=== RUN   TestFindAllocatable/top-down_small_allocation_finds_last_free_gap
+=== RUN   TestFindAllocatable/bottom-up_huge_allocation_finds_first_free_gap
+=== RUN   TestFindAllocatable/top-down_huge_allocation_finds_last_free_gap
+=== RUN   TestFindAllocatable/bottom-up_small_allocation_skips_undersized_free_gap
+=== RUN   TestFindAllocatable/top-down_small_allocation_skips_undersized_free_gap
+=== RUN   TestFindAllocatable/bottom-up_huge_allocation_skips_undersized_free_gap
+=== RUN   TestFindAllocatable/top-down_huge_allocation_skips_undersized_free_gap
+=== RUN   TestFindAllocatable/recycling_bottom-up_small_allocation_skips_used_pages
+=== RUN   TestFindAllocatable/recycling_top-down_small_allocation_skips_used_pages
+=== RUN   TestFindAllocatable/recycling_bottom-up_huge_allocation_skips_used_pages
+=== RUN   TestFindAllocatable/recycling_top-down_huge_allocation_skips_used_pages
+=== RUN   TestFindAllocatable/non-recycling_bottom-up_small_allocation_skips_waste_pages
+=== RUN   TestFindAllocatable/non-recycling_top-down_small_allocation_skips_waste_pages
+=== RUN   TestFindAllocatable/non-recycling_bottom-up_huge_allocation_skips_waste_pages
+=== RUN   TestFindAllocatable/non-recycling_top-down_huge_allocation_skips_waste_pages
+=== RUN   TestFindAllocatable/recycling_bottom-up_small_allocation_recycles_waste_pages
+=== RUN   TestFindAllocatable/recycling_top-down_small_allocation_recycles_waste_pages
+=== RUN   TestFindAllocatable/recycling_bottom-up_huge_allocation_recycles_waste_pages
+=== RUN   TestFindAllocatable/recycling_top-down_huge_allocation_recycles_waste_pages
+=== RUN   TestFindAllocatable/recycling_bottom-up_huge_allocation_aligns_within_unaligned_waste_pages
+=== RUN   TestFindAllocatable/recycling_top-down_huge_allocation_aligns_within_unaligned_waste_pages
+=== RUN   TestFindAllocatable/recycling_bottom-up_huge_allocation_aligns_within_barely_large_enough_waste_pages
+=== RUN   TestFindAllocatable/recycling_top-down_huge_allocation_aligns_within_barely_large_enough_waste_pages
+=== RUN   TestFindAllocatable/recycling_bottom-up_huge_allocation_skips_unaligned_waste_pages_that_can't_fit
+=== RUN   TestFindAllocatable/recycling_bottom-up_huge_allocation_skips_to_later_waste_pages_that_fit
+=== RUN   TestFindAllocatable/recycling_top-down_huge_allocation_skips_to_earlier_waste_pages_that_fit
+=== RUN   TestFindAllocatable/non-recycling_bottom-up_small_allocation_skips_releasing_pages
+=== RUN   TestFindAllocatable/non-recycling_top-down_small_allocation_skips_releasing_pages
+=== RUN   TestFindAllocatable/non-recycling_bottom-up_huge_allocation_skips_releasing_pages
+=== RUN   TestFindAllocatable/non-recycling_top-down_huge_allocation_skips_releasing_pages
+=== RUN   TestFindAllocatable/recycling_bottom-up_small_allocation_skips_releasing_pages
+=== RUN   TestFindAllocatable/recycling_top-down_small_allocation_skips_releasing_pages
+=== RUN   TestFindAllocatable/recycling_bottom-up_huge_allocation_skips_releasing_pages
+=== RUN   TestFindAllocatable/recycling_top-down_huge_allocation_skips_releasing_pages
+--- PASS: TestFindAllocatable (0.00s)
+    --- PASS: TestFindAllocatable/initial_small_allocation,_bottom-up (0.00s)
+    --- PASS: TestFindAllocatable/initial_small_allocation,_top-down (0.00s)
+    --- PASS: TestFindAllocatable/initial_small_allocation,_multiple_pages,_top-down (0.00s)
+    --- PASS: TestFindAllocatable/initial_small_allocation,_recycling_enabled,_bottom-up (0.00s)
+    --- PASS: TestFindAllocatable/initial_huge_allocation,_bottom-up (0.00s)
+    --- PASS: TestFindAllocatable/initial_huge_allocation,_top-down (0.00s)
+    --- PASS: TestFindAllocatable/initial_huge_allocation,_multiple_pages,_top-down (0.00s)
+    --- PASS: TestFindAllocatable/initial_huge_allocation,_recycling_enabled,_bottom-up (0.00s)
+    --- PASS: TestFindAllocatable/huge_allocation_uses_huge_pages_in_new_chunk (0.00s)
+    --- PASS: TestFindAllocatable/huge_allocation_uses_huge_pages_in_existing_chunk (0.00s)
+    --- PASS: TestFindAllocatable/hugepage-sized_non-huge_allocation_uses_small_pages_in_new_chunk (0.00s)
+    --- PASS: TestFindAllocatable/hugepage-sized_non-huge_allocation_uses_small_pages_in_existing_chunk (0.00s)
+    --- PASS: TestFindAllocatable/bottom-up_small_allocation_begins_at_start_of_file (0.00s)
+    --- PASS: TestFindAllocatable/top-down_small_allocation_begins_at_end_of_last_chunk (0.00s)
+    --- PASS: TestFindAllocatable/bottom-up_huge_allocation_begins_at_start_of_file (0.00s)
+    --- PASS: TestFindAllocatable/top-down_huge_allocation_begins_at_end_of_last_chunk (0.00s)
+    --- PASS: TestFindAllocatable/bottom-up_small_allocation_can_extend_multiple_chunks (0.00s)
+    --- PASS: TestFindAllocatable/top-down_small_allocation_can_extend_multiple_chunks (0.00s)
+    --- PASS: TestFindAllocatable/bottom-up_huge_allocation_can_extend_multiple_chunks (0.00s)
+    --- PASS: TestFindAllocatable/top-down_huge_allocation_can_extend_multiple_chunks (0.00s)
+    --- PASS: TestFindAllocatable/bottom-up_small_allocation_finds_first_free_gap (0.00s)
+    --- PASS: TestFindAllocatable/top-down_small_allocation_finds_last_free_gap (0.00s)
+    --- PASS: TestFindAllocatable/bottom-up_huge_allocation_finds_first_free_gap (0.00s)
+    --- PASS: TestFindAllocatable/top-down_huge_allocation_finds_last_free_gap (0.00s)
+    --- PASS: TestFindAllocatable/bottom-up_small_allocation_skips_undersized_free_gap (0.00s)
+    --- PASS: TestFindAllocatable/top-down_small_allocation_skips_undersized_free_gap (0.00s)
+    --- PASS: TestFindAllocatable/bottom-up_huge_allocation_skips_undersized_free_gap (0.00s)
+    --- PASS: TestFindAllocatable/top-down_huge_allocation_skips_undersized_free_gap (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_small_allocation_skips_used_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_small_allocation_skips_used_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_huge_allocation_skips_used_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_huge_allocation_skips_used_pages (0.00s)
+    --- PASS: TestFindAllocatable/non-recycling_bottom-up_small_allocation_skips_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/non-recycling_top-down_small_allocation_skips_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/non-recycling_bottom-up_huge_allocation_skips_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/non-recycling_top-down_huge_allocation_skips_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_small_allocation_recycles_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_small_allocation_recycles_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_huge_allocation_recycles_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_huge_allocation_recycles_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_huge_allocation_aligns_within_unaligned_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_huge_allocation_aligns_within_unaligned_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_huge_allocation_aligns_within_barely_large_enough_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_huge_allocation_aligns_within_barely_large_enough_waste_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_huge_allocation_skips_unaligned_waste_pages_that_can't_fit (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_huge_allocation_skips_to_later_waste_pages_that_fit (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_huge_allocation_skips_to_earlier_waste_pages_that_fit (0.00s)
+    --- PASS: TestFindAllocatable/non-recycling_bottom-up_small_allocation_skips_releasing_pages (0.00s)
+    --- PASS: TestFindAllocatable/non-recycling_top-down_small_allocation_skips_releasing_pages (0.00s)
+    --- PASS: TestFindAllocatable/non-recycling_bottom-up_huge_allocation_skips_releasing_pages (0.00s)
+    --- PASS: TestFindAllocatable/non-recycling_top-down_huge_allocation_skips_releasing_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_small_allocation_skips_releasing_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_small_allocation_skips_releasing_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_bottom-up_huge_allocation_skips_releasing_pages (0.00s)
+    --- PASS: TestFindAllocatable/recycling_top-down_huge_allocation_skips_releasing_pages (0.00s)
+=== RUN   TestZeroDiskBackedSkipsZeroUnwritablePage
+--- PASS: TestZeroDiskBackedSkipsZeroUnwritablePage (0.00s)
+=== RUN   TestZeroDiskBackedPanicsOnNonzeroUnwritablePage
+--- PASS: TestZeroDiskBackedPanicsOnNonzeroUnwritablePage (0.00s)
+=== RUN   TestFilestoreSnapshotSurvivesRelease
+=== RUN   TestFilestoreSnapshotSurvivesRelease/small
+    save_restore_external_test.go:67: reflink unsupported: operation not supported
+=== RUN   TestFilestoreSnapshotSurvivesRelease/huge
+    save_restore_external_test.go:67: reflink unsupported: operation not supported
+--- PASS: TestFilestoreSnapshotSurvivesRelease (0.00s)
+    --- SKIP: TestFilestoreSnapshotSurvivesRelease/small (0.00s)
+    --- SKIP: TestFilestoreSnapshotSurvivesRelease/huge (0.00s)
+=== RUN   TestOrdinaryCheckpointClearsRestoreClone
+I1112 03:14:40.524022      22 save_restore.go:546] MemoryFile(0x3059638f3008): save scanning took 19.081µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 61440 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.524350      22 save_restore.go:581] MemoryFile(0x3059638f3008): saved metadata in 252.432µs
+I1112 03:14:40.524377      22 save_restore.go:611] MemoryFile(0x3059638f3008): saved pages in 9.771µs (4096 bytes, 419.200 MB/s)
+I1112 03:14:40.524474      22 save_restore.go:1225] MemoryFile(0x305963926008): loaded metadata in 26.142µs
+I1112 03:14:40.528052      22 save_restore.go:1392] MemoryFile(0x305963926008): loaded pages in 3.559649ms (4096 bytes, 1.151 MB/s)
+--- PASS: TestOrdinaryCheckpointClearsRestoreClone (0.00s)
+=== RUN   TestDestroyAfterLoadFailsBeforeMmap
+I1112 03:14:40.528255      22 save_restore.go:546] MemoryFile(0x305963927008): save scanning took 1.781µs for 65536 allocated bytes: 65536 bytes of zero pages (65536 bytes expected including 65536 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 0 bytes of non-zero pages (0 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.528287      22 save_restore.go:581] MemoryFile(0x305963927008): saved metadata in 9.517µs
+I1112 03:14:40.528298      22 save_restore.go:611] MemoryFile(0x305963927008): saved pages in 78ns (0 bytes, 0.000 MB/s)
+I1112 03:14:40.528333      22 save_restore.go:1225] MemoryFile(0x30596393a008): loaded metadata in 4.889µs
+--- PASS: TestDestroyAfterLoadFailsBeforeMmap (0.00s)
+=== RUN   TestHostFileDataSeeker
+W1112 03:14:40.528492      22 save_restore.go:641] MemoryFile(0x30596393e008): fstatfs failed, scanning all possibly committed pages: bad file descriptor
+--- PASS: TestHostFileDataSeeker (0.00s)
+=== RUN   TestSaveToPreservesContents
+=== RUN   TestSaveToPreservesContents/memfd
+I1112 03:14:40.528586      22 save_restore.go:546] MemoryFile(0x30596393f008): save scanning took 7.742µs for 65536 allocated bytes: 57344 bytes of zero pages (57344 bytes expected including 57344 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 8192 bytes of non-zero pages (0 bytes expected + 8192 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.528611      22 save_restore.go:581] MemoryFile(0x30596393f008): saved metadata in 5.938µs
+I1112 03:14:40.528622      22 save_restore.go:611] MemoryFile(0x30596393f008): saved pages in 678ns (8192 bytes, 12082.596 MB/s)
+I1112 03:14:40.528677      22 save_restore.go:546] MemoryFile(0x30596393f008): save scanning took 25.53µs for 65536 allocated bytes: 53248 bytes of zero pages (53248 bytes expected including 49152 bytes of host holes, decommitted in 1 syscalls, + 0 bytes new), 12288 bytes of non-zero pages (8192 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.528692      22 save_restore.go:581] MemoryFile(0x30596393f008): saved metadata in 4.443µs
+I1112 03:14:40.528719      22 save_restore.go:611] MemoryFile(0x30596393f008): saved pages in 18.282µs (12288 bytes, 672.137 MB/s)
+I1112 03:14:40.528760      22 save_restore.go:1225] MemoryFile(0x305963968008): loaded metadata in 6.105µs
+I1112 03:14:40.528801      22 save_restore.go:1392] MemoryFile(0x305963968008): loaded pages in 13.449µs (12288 bytes, 913.674 MB/s)
+=== RUN   TestSaveToPreservesContents/memfd_excluding_committed_zero_pages
+I1112 03:14:40.528984      22 save_restore.go:546] MemoryFile(0x305963969008): save scanning took 6.905µs for 65536 allocated bytes: 57344 bytes of zero pages (57344 bytes expected including 57344 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 8192 bytes of non-zero pages (0 bytes expected + 8192 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.529008      22 save_restore.go:581] MemoryFile(0x305963969008): saved metadata in 4.876µs
+I1112 03:14:40.529019      22 save_restore.go:611] MemoryFile(0x305963969008): saved pages in 452ns (8192 bytes, 18123.894 MB/s)
+I1112 03:14:40.531243      22 save_restore.go:546] MemoryFile(0x305963969008): save scanning took 86.554µs for 65536 allocated bytes: 57344 bytes of zero pages (53248 bytes expected including 49152 bytes of host holes, decommitted in 1 syscalls, + 4096 bytes new), 8192 bytes of non-zero pages (4096 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=true ExitAfterSaving=false
+I1112 03:14:40.531335      22 save_restore.go:581] MemoryFile(0x305963969008): saved metadata in 21.513µs
+I1112 03:14:40.531364      22 save_restore.go:611] MemoryFile(0x305963969008): saved pages in 15.745µs (8192 bytes, 520.292 MB/s)
+I1112 03:14:40.531435      22 save_restore.go:1225] MemoryFile(0x305963968008): loaded metadata in 7.891µs
+I1112 03:14:40.531473      22 save_restore.go:1392] MemoryFile(0x305963968008): loaded pages in 15.854µs (8192 bytes, 516.715 MB/s)
+=== RUN   TestSaveToPreservesContents/disk-backed
+I1112 03:14:40.531736      22 save_restore.go:546] MemoryFile(0x305963ac2008): save scanning took 16.722µs for 65536 allocated bytes: 57344 bytes of zero pages (57344 bytes expected including 57344 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 8192 bytes of non-zero pages (0 bytes expected + 8192 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.531765      22 save_restore.go:581] MemoryFile(0x305963ac2008): saved metadata in 6.693µs
+I1112 03:14:40.531776      22 save_restore.go:611] MemoryFile(0x305963ac2008): saved pages in 626ns (8192 bytes, 13086.262 MB/s)
+I1112 03:14:40.535179      22 save_restore.go:546] MemoryFile(0x305963ac2008): save scanning took 28.363µs for 65536 allocated bytes: 53248 bytes of zero pages (53248 bytes expected including 49152 bytes of host holes, decommitted in 1 syscalls, + 0 bytes new), 12288 bytes of non-zero pages (8192 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.535205      22 save_restore.go:581] MemoryFile(0x305963ac2008): saved metadata in 9.488µs
+I1112 03:14:40.535234      22 save_restore.go:611] MemoryFile(0x305963ac2008): saved pages in 18.778µs (12288 bytes, 654.383 MB/s)
+I1112 03:14:40.535307      22 save_restore.go:1225] MemoryFile(0x305963ac3008): loaded metadata in 6.763µs
+I1112 03:14:40.539016      22 save_restore.go:1392] MemoryFile(0x305963ac3008): loaded pages in 3.690641ms (12288 bytes, 3.330 MB/s)
+--- PASS: TestSaveToPreservesContents (0.01s)
+    --- PASS: TestSaveToPreservesContents/memfd (0.00s)
+    --- PASS: TestSaveToPreservesContents/memfd_excluding_committed_zero_pages (0.00s)
+    --- PASS: TestSaveToPreservesContents/disk-backed (0.01s)
+=== RUN   TestAsyncSaveToPreservesContents
+=== RUN   TestAsyncSaveToPreservesContents/memfd
+I1112 03:14:40.539308      22 save_restore.go:546] MemoryFile(0x305963ae0008): save scanning took 9.085µs for 65536 allocated bytes: 57344 bytes of zero pages (57344 bytes expected including 57344 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 8192 bytes of non-zero pages (0 bytes expected + 8192 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.539337      22 save_restore.go:581] MemoryFile(0x305963ae0008): saved metadata in 7.377µs
+I1112 03:14:40.539422      22 save_restore.go:1102] Async page saving completed in 0s (8192 bytes, 114.176 MB/s); queue full for 0s (0 bytes, NaN MB/s)
+I1112 03:14:40.539483      22 save_restore.go:546] MemoryFile(0x305963ae0008): save scanning took 21.906µs for 65536 allocated bytes: 57344 bytes of zero pages (57344 bytes expected including 53248 bytes of host holes, decommitted in 1 syscalls, + 0 bytes new), 8192 bytes of non-zero pages (8192 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.539499      22 save_restore.go:581] MemoryFile(0x305963ae0008): saved metadata in 4.557µs
+I1112 03:14:40.539529      22 save_restore.go:1102] Async page saving completed in 0s (8192 bytes, 414.659 MB/s); queue full for 0s (0 bytes, NaN MB/s)
+I1112 03:14:40.539595      22 save_restore.go:1225] MemoryFile(0x305963ae1008): loaded metadata in 8.159µs
+I1112 03:14:40.539617      22 save_restore.go:1390] MemoryFile(0x305963ae1008): loaded page file offsets in 2.983µs; async loading 8192 bytes
+I1112 03:14:40.539668      22 save_restore.go:2137] Async page loading completed in 0s (8192 bytes, 229.970 MB/s); 0 waiters waited 0s~0s for 0 bytes
+=== RUN   TestAsyncSaveToPreservesContents/memfd_excluding_committed_zero_pages
+I1112 03:14:40.539969      22 save_restore.go:546] MemoryFile(0x305963afc008): save scanning took 9.93µs for 65536 allocated bytes: 57344 bytes of zero pages (57344 bytes expected including 57344 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 8192 bytes of non-zero pages (0 bytes expected + 8192 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.540000      22 save_restore.go:581] MemoryFile(0x305963afc008): saved metadata in 6.726µs
+I1112 03:14:40.540065      22 save_restore.go:1102] Async page saving completed in 0s (8192 bytes, 152.582 MB/s); queue full for 0s (0 bytes, NaN MB/s)
+I1112 03:14:40.540125      22 save_restore.go:546] MemoryFile(0x305963afc008): save scanning took 18.519µs for 65536 allocated bytes: 61440 bytes of zero pages (57344 bytes expected including 53248 bytes of host holes, decommitted in 1 syscalls, + 4096 bytes new), 4096 bytes of non-zero pages (4096 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=true ExitAfterSaving=false
+I1112 03:14:40.540143      22 save_restore.go:581] MemoryFile(0x305963afc008): saved metadata in 5.657µs
+I1112 03:14:40.540162      22 save_restore.go:1102] Async page saving completed in 0s (4096 bytes, 103.353 MB/s); queue full for 0s (0 bytes, NaN MB/s)
+I1112 03:14:40.540224      22 save_restore.go:1225] MemoryFile(0x305963afd008): loaded metadata in 6.251µs
+I1112 03:14:40.540241      22 save_restore.go:1390] MemoryFile(0x305963afd008): loaded page file offsets in 1.438µs; async loading 4096 bytes
+I1112 03:14:40.540268      22 save_restore.go:2137] Async page loading completed in 0s (4096 bytes, 280.586 MB/s); 0 waiters waited 0s~0s for 0 bytes
+=== RUN   TestAsyncSaveToPreservesContents/disk-backed
+I1112 03:14:40.540524      22 save_restore.go:546] MemoryFile(0x305963742008): save scanning took 15.954µs for 65536 allocated bytes: 57344 bytes of zero pages (57344 bytes expected including 57344 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 8192 bytes of non-zero pages (0 bytes expected + 8192 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.540551      22 save_restore.go:581] MemoryFile(0x305963742008): saved metadata in 6.881µs
+I1112 03:14:40.540589      22 save_restore.go:1102] Async page saving completed in 0s (8192 bytes, 332.184 MB/s); queue full for 0s (0 bytes, NaN MB/s)
+I1112 03:14:40.540642      22 save_restore.go:546] MemoryFile(0x305963742008): save scanning took 27.687µs for 65536 allocated bytes: 57344 bytes of zero pages (57344 bytes expected including 53248 bytes of host holes, decommitted in 1 syscalls, + 0 bytes new), 8192 bytes of non-zero pages (8192 bytes expected + 0 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.540658      22 save_restore.go:581] MemoryFile(0x305963742008): saved metadata in 4.581µs
+I1112 03:14:40.540685      22 save_restore.go:1102] Async page saving completed in 0s (8192 bytes, 547.337 MB/s); queue full for 0s (0 bytes, NaN MB/s)
+I1112 03:14:40.540749      22 save_restore.go:1225] MemoryFile(0x305963743008): loaded metadata in 7.16µs
+I1112 03:14:40.540774      22 save_restore.go:1390] MemoryFile(0x305963743008): loaded page file offsets in 4.13µs; async loading 8192 bytes
+I1112 03:14:40.544014      22 save_restore.go:2137] Async page loading completed in 3ms (8192 bytes, 2.537 MB/s); 0 waiters waited 0s~0s for 0 bytes
+--- PASS: TestAsyncSaveToPreservesContents (0.00s)
+    --- PASS: TestAsyncSaveToPreservesContents/memfd (0.00s)
+    --- PASS: TestAsyncSaveToPreservesContents/memfd_excluding_committed_zero_pages (0.00s)
+    --- PASS: TestAsyncSaveToPreservesContents/disk-backed (0.00s)
+=== RUN   TestSaveToExitAfterSaving
+=== RUN   TestSaveToExitAfterSaving/resume
+I1112 03:14:40.544259      22 save_restore.go:546] MemoryFile(0x30596377a008): save scanning took 17.377µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 57344 bytes of host holes, decommitted in 1 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.544286      22 save_restore.go:581] MemoryFile(0x30596377a008): saved metadata in 5.913µs
+I1112 03:14:40.544297      22 save_restore.go:611] MemoryFile(0x30596377a008): saved pages in 682ns (4096 bytes, 6005.865 MB/s)
+=== RUN   TestSaveToExitAfterSaving/exit_after_saving
+I1112 03:14:40.544394      22 save_restore.go:546] MemoryFile(0x30596377b008): save scanning took 7.33µs for 65536 allocated bytes: 61440 bytes of zero pages (61440 bytes expected including 57344 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 4096 bytes of non-zero pages (0 bytes expected + 4096 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=true
+I1112 03:14:40.544425      22 save_restore.go:581] MemoryFile(0x30596377b008): saved metadata in 14.293µs
+I1112 03:14:40.544436      22 save_restore.go:611] MemoryFile(0x30596377b008): saved pages in 378ns (4096 bytes, 10835.979 MB/s)
+--- PASS: TestSaveToExitAfterSaving (0.00s)
+    --- PASS: TestSaveToExitAfterSaving/resume (0.00s)
+    --- PASS: TestSaveToExitAfterSaving/exit_after_saving (0.00s)
+=== RUN   TestAsyncLoadShortRead
+I1112 03:14:40.544535      22 save_restore.go:546] MemoryFile(0x30596377c008): save scanning took 6.892µs for 65536 allocated bytes: 53248 bytes of zero pages (53248 bytes expected including 53248 bytes of host holes, decommitted in 0 syscalls, + 0 bytes new), 12288 bytes of non-zero pages (0 bytes expected + 12288 bytes new); ExcludeCommittedZeroPages=false ExitAfterSaving=false
+I1112 03:14:40.544557      22 save_restore.go:581] MemoryFile(0x30596377c008): saved metadata in 4.241µs
+I1112 03:14:40.544677      22 save_restore.go:1102] Async page saving completed in 0s (12288 bytes, 119.189 MB/s); queue full for 0s (8192 bytes, 282.113 MB/s)
+I1112 03:14:40.544792      22 save_restore.go:1225] MemoryFile(0x30596388e008): loaded metadata in 16.83µs
+I1112 03:14:40.544819      22 save_restore.go:1390] MemoryFile(0x30596388e008): loaded page file offsets in 3.442µs; async loading 12288 bytes
+W1112 03:14:40.544866      22 save_restore.go:2164] Async page loading failed: read for MemoryFile(0x30596388e008) pages [[0x2000, 0x3000)] (total 4096 bytes) returned 1 bytes, error: EOF
+--- PASS: TestAsyncLoadShortRead (0.00s)
+PASS

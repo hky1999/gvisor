@@ -1,0 +1,93 @@
+{
+  "host": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43",
+  "cpu": "Architecture:                            x86_64\nCPU op-mode(s):                          32-bit, 64-bit\nAddress sizes:                           46 bits physical, 48 bits virtual\nByte Order:                              Little Endian\nCPU(s):                                  104\nOn-line CPU(s) list:                     0-103\nVendor ID:                               GenuineIntel\nModel name:                              Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz\nCPU family:                              6\nModel:                                   85\nThread(s) per core:                      2\nCore(s) per socket:                      26\nSocket(s):                               2\nStepping:                                7\nCPU(s) scaling MHz:                      96%\nCPU max MHz:                             3800.0000\nCPU min MHz:                             1200.0000\nBogoMIPS:                                5000.00\nFlags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb cat_l3 cdp_l3 intel_ppin ssbd mba ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid cqm mpx rdt_a avx512f avx512dq rdseed adx smap clflushopt clwb intel_pt avx512cd avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves cqm_llc cqm_occup_llc cqm_mbm_total cqm_mbm_local dtherm ida arat pln pts vnmi pku ospke avx512_vnni md_clear flush_l1d arch_capabilities\nVirtualization:                          VT-x\nL1d cache:                               1.6 MiB (52 instances)\nL1i cache:                               1.6 MiB (52 instances)\nL2 cache:                                52 MiB (52 instances)\nL3 cache:                                71.5 MiB (2 instances)\nNUMA node(s):                            2\nNUMA node0 CPU(s):                       0-25,52-77\nNUMA node1 CPU(s):                       26-51,78-103\nVulnerability Gather data sampling:      Vulnerable\nVulnerability Ghostwrite:                Not affected\nVulnerability Indirect target selection: Mitigation; Aligned branch/return thunks\nVulnerability Itlb multihit:             KVM: Mitigation: Split huge pages\nVulnerability L1tf:                      Not affected\nVulnerability Mds:                       Not affected\nVulnerability Meltdown:                  Not affected\nVulnerability Mmio stale data:           Mitigation; Clear CPU buffers; SMT vulnerable\nVulnerability Old microcode:             Not affected\nVulnerability Reg file data sampling:    Not affected\nVulnerability Retbleed:                  Mitigation; Enhanced IBRS\nVulnerability Spec rstack overflow:      Not affected\nVulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\nVulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop\nVulnerability Srbds:                     Not affected\nVulnerability Tsa:                       Not affected\nVulnerability Tsx async abort:           Mitigation; TSX disabled\nVulnerability Vmscape:                   Mitigation; IBPB before exit to userspace\n",
+  "variants": {
+    "baseline": {
+      "files": {
+        "containerd-shim-runsc-v1": {
+          "bytes": 24413626,
+          "sha256": "bda71938e512951ff5e3b43264686b5ca48eaadb9bdc7f0b10839b52bb688203"
+        },
+        "gvisor-bin/checkpointgofer": {
+          "bytes": 48800122,
+          "sha256": "2f9bd3ab65eeb060053dc9e9f09ca0d32b31d0dc018ff45aa3cd106b8e81782f"
+        },
+        "gvisor-bin/gvisor-proc-umounter": {
+          "bytes": 1256,
+          "sha256": "2d91f016e9827bd723ea891ba5489d74de2bd4a0620eb47ebbcb8800e0f505eb"
+        },
+        "gvisor-bin/gvisor-sentry-prewarmer": {
+          "bytes": 1720,
+          "sha256": "40e6cd6a4899440b567e1a052e28eca7dd8630d8b3b901844197500c9df0ccce"
+        },
+        "gvisor-bin/gvisor_sentry": {
+          "bytes": 55379043,
+          "sha256": "8402ae19a8a8d4981d6e934ab2cf1b51b6f844083af510acaad5b8c880620789"
+        },
+        "gvisor-bin/runsc-fd-parking": {
+          "bytes": 1272,
+          "sha256": "a5cf9c989cf13a18486eb36e3e7621dcf3fec735e2119087a772439fe2602d41"
+        },
+        "gvisor-bin/runsc-metric-server": {
+          "bytes": 21669323,
+          "sha256": "e187a0b0e9699a93160f083330ad1d31609e5bcb04639b3b32919647c4aa6011"
+        },
+        "gvisor-bin/runsc-netgofer": {
+          "bytes": 18620446,
+          "sha256": "52008588470ca5dad265862de769b16719bf55b544b7493cf49dbb6074b34e7b"
+        },
+        "runsc": {
+          "bytes": 19532124,
+          "sha256": "12f1dc10965da4b55ee6f0c318f7d0d7802335392c4b5334b77869d7117d38bf"
+        }
+      },
+      "release_file_bytes": 188418932,
+      "generated_go_bytes": 20597828,
+      "program_count": 576
+    },
+    "fixed": {
+      "files": {
+        "containerd-shim-runsc-v1": {
+          "bytes": 24413626,
+          "sha256": "bda71938e512951ff5e3b43264686b5ca48eaadb9bdc7f0b10839b52bb688203"
+        },
+        "gvisor-bin/checkpointgofer": {
+          "bytes": 48800122,
+          "sha256": "2f9bd3ab65eeb060053dc9e9f09ca0d32b31d0dc018ff45aa3cd106b8e81782f"
+        },
+        "gvisor-bin/gvisor-proc-umounter": {
+          "bytes": 1256,
+          "sha256": "2d91f016e9827bd723ea891ba5489d74de2bd4a0620eb47ebbcb8800e0f505eb"
+        },
+        "gvisor-bin/gvisor-sentry-prewarmer": {
+          "bytes": 1720,
+          "sha256": "40e6cd6a4899440b567e1a052e28eca7dd8630d8b3b901844197500c9df0ccce"
+        },
+        "gvisor-bin/gvisor_sentry": {
+          "bytes": 59696803,
+          "sha256": "7ccf5c0a595717859f444b250c0c421cba798943131aeacb3fdcbf97d0ad56d3"
+        },
+        "gvisor-bin/runsc-fd-parking": {
+          "bytes": 1272,
+          "sha256": "a5cf9c989cf13a18486eb36e3e7621dcf3fec735e2119087a772439fe2602d41"
+        },
+        "gvisor-bin/runsc-metric-server": {
+          "bytes": 21669323,
+          "sha256": "e187a0b0e9699a93160f083330ad1d31609e5bcb04639b3b32919647c4aa6011"
+        },
+        "gvisor-bin/runsc-netgofer": {
+          "bytes": 18620446,
+          "sha256": "52008588470ca5dad265862de769b16719bf55b544b7493cf49dbb6074b34e7b"
+        },
+        "runsc": {
+          "bytes": 19532124,
+          "sha256": "12f1dc10965da4b55ee6f0c318f7d0d7802335392c4b5334b77869d7117d38bf"
+        }
+      },
+      "release_file_bytes": 192736692,
+      "generated_go_bytes": 41286271,
+      "program_count": 1152
+    }
+  },
+  "baseline_matches_previously_published_cd7_release": true
+}

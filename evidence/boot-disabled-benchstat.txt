@@ -1,0 +1,50 @@
+goos: linux
+goarch: amd64
+cpu: Intel(R) Xeon(R) Platinum 8269CY CPU @ 2.50GHz
+                                     │ /root/filestore-reflink-precompile-20261112/boot-disabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-disabled-fixed.txt │
+                                     │                                 sec/op                                 │                    sec/op                     vs base               │
+SandboxBoot/kvm/Boot-104                                                                          68.46m ± 2%                                    68.72m ± 3%       ~ (p=0.862 n=24)
+SandboxBoot/kvm/New-104                                                                           42.12m ± 3%                                    42.42m ± 3%       ~ (p=0.943 n=24)
+SandboxBoot/kvm/Run-104                                                                           2.997m ± 3%                                    2.972m ± 3%       ~ (p=1.000 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                  69.02m ± 2%                                    69.08m ± 1%       ~ (p=0.959 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                   42.19m ± 3%                                    42.35m ± 3%       ~ (p=0.588 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                   3.125m ± 3%                                    3.145m ± 2%       ~ (p=0.631 n=24)
+SandboxBoot/systrap/Boot-104                                                                      27.16m ± 2%                                    27.48m ± 2%       ~ (p=0.291 n=24)
+SandboxBoot/systrap/New-104                                                                       2.474m ± 2%                                    2.450m ± 2%       ~ (p=0.631 n=24)
+SandboxBoot/systrap/Run-104                                                                       2.631m ± 3%                                    2.570m ± 3%       ~ (p=0.384 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                              27.50m ± 3%                                    27.59m ± 2%       ~ (p=0.943 n=24)
+SandboxBoot/systrap_overlay/New-104                                                               2.550m ± 2%                                    2.503m ± 3%       ~ (p=0.125 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                               2.788m ± 1%                                    2.735m ± 3%       ~ (p=0.331 n=24)
+geomean                                                                                           10.87m                                         10.83m       -0.35%
+
+                                     │ /root/filestore-reflink-precompile-20261112/boot-disabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-disabled-fixed.txt │
+                                     │                                 p50.ns                                 │                    p50.ns                     vs base               │
+SandboxBoot/kvm/Boot-104                                                                          69.44M ± 4%                                    68.35M ± 3%       ~ (p=0.506 n=24)
+SandboxBoot/kvm/New-104                                                                           42.17M ± 4%                                    41.32M ± 4%       ~ (p=0.798 n=24)
+SandboxBoot/kvm/Run-104                                                                           3.009M ± 3%                                    2.979M ± 2%       ~ (p=0.846 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                  68.28M ± 2%                                    68.50M ± 3%       ~ (p=0.751 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                   41.39M ± 2%                                    41.76M ± 5%       ~ (p=0.690 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                   3.073M ± 4%                                    3.115M ± 4%       ~ (p=0.506 n=24)
+SandboxBoot/systrap/Boot-104                                                                      26.92M ± 2%                                    27.35M ± 2%       ~ (p=0.362 n=24)
+SandboxBoot/systrap/New-104                                                                       2.417M ± 4%                                    2.420M ± 2%       ~ (p=0.705 n=24)
+SandboxBoot/systrap/Run-104                                                                       2.610M ± 4%                                    2.571M ± 5%       ~ (p=0.455 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                              27.21M ± 4%                                    27.25M ± 2%       ~ (p=0.830 n=24)
+SandboxBoot/systrap_overlay/New-104                                                               2.540M ± 5%                                    2.448M ± 4%       ~ (p=0.185 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                               2.816M ± 1%                                    2.740M ± 4%       ~ (p=0.078 n=24)
+geomean                                                                                           10.80M                                         10.73M       -0.67%
+
+                                     │ /root/filestore-reflink-precompile-20261112/boot-disabled-baseline.txt │ /root/filestore-reflink-precompile-20261112/boot-disabled-fixed.txt │
+                                     │                                 p90.ns                                 │                    p90.ns                     vs base               │
+SandboxBoot/kvm/Boot-104                                                                          71.17M ± 2%                                    70.06M ± 3%       ~ (p=0.207 n=24)
+SandboxBoot/kvm/New-104                                                                           44.22M ± 5%                                    44.50M ± 6%       ~ (p=0.230 n=24)
+SandboxBoot/kvm/Run-104                                                                           3.108M ± 3%                                    3.047M ± 3%       ~ (p=0.192 n=24)
+SandboxBoot/kvm_overlay/Boot-104                                                                  70.03M ± 2%                                    70.61M ± 2%       ~ (p=0.690 n=24)
+SandboxBoot/kvm_overlay/New-104                                                                   43.65M ± 4%                                    43.98M ± 3%       ~ (p=0.862 n=24)
+SandboxBoot/kvm_overlay/Run-104                                                                   3.252M ± 2%                                    3.263M ± 4%       ~ (p=0.927 n=24)
+SandboxBoot/systrap/Boot-104                                                                      27.53M ± 4%                                    28.14M ± 2%       ~ (p=0.331 n=24)
+SandboxBoot/systrap/New-104                                                                       2.547M ± 6%                                    2.490M ± 6%       ~ (p=0.736 n=24)
+SandboxBoot/systrap/Run-104                                                                       2.706M ± 3%                                    2.707M ± 2%       ~ (p=0.798 n=24)
+SandboxBoot/systrap_overlay/Boot-104                                                              28.20M ± 3%                                    28.39M ± 2%       ~ (p=0.878 n=24)
+SandboxBoot/systrap_overlay/New-104                                                               2.636M ± 3%                                    2.554M ± 3%       ~ (p=0.093 n=24)
+SandboxBoot/systrap_overlay/Run-104                                                               2.880M ± 1%                                    2.848M ± 2%       ~ (p=0.255 n=24)
+geomean                                                                                           11.21M                                         11.17M       -0.38%
