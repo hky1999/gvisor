@@ -24,7 +24,50 @@ import (
 	"testing"
 
 	"gvisor.dev/gvisor/runsc/cgroup"
+	"gvisor.dev/gvisor/runsc/config"
 )
+
+func TestSandboxProcessEnvStartupCPUHint(t *testing.T) {
+	t.Setenv("GOMAXPROCS", "99")
+	t.Setenv("RUNSC_HOST_SENTINEL", "must-not-reach-sentry")
+	for _, unsafe := range []bool{false, true} {
+		for _, cpus := range []int{0, 2, 112} {
+			t.Run(fmt.Sprintf("unsafe=%t/cpus=%d", unsafe, cpus), func(t *testing.T) {
+				conf := &config.Config{TestOnlyAllowRunAsCurrentUserWithoutChroot: unsafe}
+				env := sandboxProcessEnv(conf, sandboxProcessEnvOptions{startupCPUs: cpus, sentryUsesCgo: true})
+				values := make(map[string]string)
+				for _, entry := range env {
+					key, value, ok := strings.Cut(entry, "=")
+					if ok {
+						if _, exists := values[key]; exists {
+							t.Fatalf("duplicate environment key %q", key)
+						}
+						values[key] = value
+					}
+				}
+				if unsafe {
+					if values["GOMAXPROCS"] != "99" || values["RUNSC_HOST_SENTINEL"] != "must-not-reach-sentry" {
+						t.Fatal("unsafe test environment changed its scheduler setting or sentinel")
+					}
+				} else {
+					if _, leaked := values["RUNSC_HOST_SENTINEL"]; leaked {
+						t.Fatal("host environment leaked into Sentry")
+					}
+					want := ""
+					if cpus > 0 {
+						want = fmt.Sprint(cpus)
+					}
+					if values["GOMAXPROCS"] != want {
+						t.Fatalf("startup GOMAXPROCS = %q, want %q", values["GOMAXPROCS"], want)
+					}
+				}
+				if values["GLIBC_TUNABLES"] != "glibc.pthread.rseq=0" {
+					t.Fatal("lost cgo rseq protection")
+				}
+			})
+		}
+	}
+}
 
 func TestGetGCSURIFromImagePath(t *testing.T) {
 	tmpDir := t.TempDir()

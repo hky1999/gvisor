@@ -918,6 +918,10 @@ func (s *Sandbox) connError(err error) error {
 
 type sandboxProcessEnvOptions struct {
 	sentryUsesCgo bool
+	// startupCPUs is the same CPU hint passed to boot. Applying it before
+	// exec avoids initializing a many-core Go scheduler before Loader.New
+	// applies the sandbox's much smaller scheduler base.
+	startupCPUs int
 }
 
 func sandboxProcessEnv(conf *config.Config, opts sandboxProcessEnvOptions) []string {
@@ -935,6 +939,9 @@ func sandboxProcessEnv(conf *config.Config, opts sandboxProcessEnvOptions) []str
 		}
 	}
 	env = gvisorbinaries.WithEnforceRelease(env)
+	if opts.startupCPUs > 0 && !conf.TestOnlyAllowRunAsCurrentUserWithoutChroot {
+		env = append(env, "GOMAXPROCS="+strconv.Itoa(opts.startupCPUs))
+	}
 	if opts.sentryUsesCgo {
 		// Platforms that use stub processes are not compatible with
 		// the glibc rseq, because they unmap everything from a process
@@ -1417,6 +1424,10 @@ func (s *Sandbox) createSandboxProcess(conf *config.Config, args *Args, startSyn
 			return err
 		}
 		cmd.Args = append(cmd.Args, "--cpu-num", strconv.Itoa(cpuNum))
+		cmd.Env = sandboxProcessEnv(conf, sandboxProcessEnvOptions{
+			sentryUsesCgo: sentryUsesCgo,
+			startupCPUs:   cpuNum,
+		})
 		if cpuQuota > 0 {
 			cmd.Args = append(cmd.Args, "--cpu-quota", strconv.FormatInt(cpuQuota, 10))
 		}
