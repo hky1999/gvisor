@@ -470,6 +470,17 @@ type Config struct {
 	// performed during restore.
 	RestoreSpecValidation RestoreSpecValidationPolicy `flag:"restore-spec-validation"`
 
+	// RestorePagePrefetch selects all-page background loading or demand-only
+	// loading. Empty preserves all-page loading for callers constructing Config.
+	RestorePagePrefetch string `flag:"restore-page-prefetch"`
+	// RestoreIOParallelism and RestoreIOReadSize tune local pages-file reads.
+	// Zero preserves the historical defaults of 12 reads and 4 MiB per read.
+	RestoreIOParallelism int    `flag:"restore-io-parallelism"`
+	RestoreIOReadSize    uint64 `flag:"restore-io-read-size"`
+	// RestoreMapUnit bounds asynchronous restore overmapping. Zero preserves
+	// the historical 32 MiB granularity.
+	RestoreMapUnit uint64 `flag:"restore-map-unit"`
+
 	// GVisorMarkerFile enables the /proc/gvisor/kernel_is_gvisor marker file.
 	GVisorMarkerFile bool `flag:"gvisor-marker-file"`
 
@@ -579,6 +590,18 @@ func (c *Config) PlatformDeviceFor(platform string) string {
 // Config.Override does not validate, so callers must call Validate once they
 // are done overriding.
 func (c *Config) Validate() error {
+	if unit := c.RestoreMapUnit; unit != 0 && (unit < 4096 || unit > 1<<30 || unit&(unit-1) != 0) {
+		return fmt.Errorf("restore-map-unit must be zero or a power of two between 4096 and 1073741824 bytes")
+	}
+	if c.RestorePagePrefetch != "" && c.RestorePagePrefetch != "all" && c.RestorePagePrefetch != "none" {
+		return fmt.Errorf("restore-page-prefetch must be all or none")
+	}
+	if c.RestoreIOParallelism < 0 || c.RestoreIOParallelism > 128 {
+		return fmt.Errorf("restore-io-parallelism must be zero or between 1 and 128")
+	}
+	if size := c.RestoreIOReadSize; size != 0 && (size < 4096 || size > 64<<20 || size%4096 != 0) {
+		return fmt.Errorf("restore-io-read-size must be zero or a page-aligned size between 4096 and 67108864 bytes")
+	}
 	if _, err := parsePlatformDevicePaths(c.PlatformDevicePath); err != nil {
 		return err
 	}
@@ -647,6 +670,18 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("--nvproxy-allowed-driver-capabilities=%q: unsupported capabilities: %v", c.NVProxyAllowedDriverCapabilities, unsupported)
 	}
 	return nil
+}
+
+// RestorePageReadParams returns the local pages-file read limits.
+func (c *Config) RestorePageReadParams() (uint64, int) {
+	size, parallelism := c.RestoreIOReadSize, c.RestoreIOParallelism
+	if size == 0 {
+		size = 4 << 20
+	}
+	if parallelism == 0 {
+		parallelism = 12
+	}
+	return size, parallelism
 }
 
 // Log logs important aspects of the configuration to the given log function.

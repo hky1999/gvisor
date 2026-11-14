@@ -36,6 +36,7 @@ import (
 	"gvisor.dev/gvisor/pkg/sentry/fscheckpoint"
 	"gvisor.dev/gvisor/pkg/sentry/fsimpl/erofs"
 	"gvisor.dev/gvisor/pkg/sentry/kernel"
+	"gvisor.dev/gvisor/pkg/sentry/pgalloc"
 	"gvisor.dev/gvisor/pkg/sentry/seccheck"
 	"gvisor.dev/gvisor/pkg/sentry/socket/netstack"
 	"gvisor.dev/gvisor/pkg/sentry/socket/plugin"
@@ -619,7 +620,7 @@ func (cm *containerManager) Restore(o *RestoreOpts, _ *struct{}) (retErr error) 
 		return fmt.Errorf("at least one file must be passed to Restore")
 	}
 
-	stateFile, pagesMetadata, pagesFile, err := getRestoreReaders(o)
+	stateFile, pagesMetadata, pagesFile, err := getRestoreReaders(o, cm.l.root.conf)
 	if err != nil {
 		return err
 	}
@@ -651,7 +652,10 @@ func (cm *containerManager) Restore(o *RestoreOpts, _ *struct{}) (retErr error) 
 
 	if o.HavePagesFile {
 		// This immediately starts loading the main MemoryFile asynchronously.
-		cm.restorer.asyncMFLoader = kernel.NewAsyncMFLoader(pagesMetadata, pagesFile, cm.restorer.mainMF, timer.Fork("PagesFileLoader")) // transfers ownership
+		cm.restorer.asyncMFLoader = kernel.NewAsyncMFLoaderWithOptions(pagesMetadata, pagesFile, cm.restorer.mainMF, timer.Fork("PagesFileLoader"), pgalloc.AsyncPagesFileLoadOptions{
+			Prefetch: cm.l.root.conf.RestorePagePrefetch != "none" || !o.Background,
+			MapUnit:  cm.l.root.conf.RestoreMapUnit,
+		}) // transfers ownership
 		pagesMetadata = nil
 		pagesFile = nil
 		timer.Reached("created async MF loader")
@@ -713,14 +717,14 @@ func (cm *containerManager) Restore(o *RestoreOpts, _ *struct{}) (retErr error) 
 	return cm.restorer.restoreContainerInfo(cm.l, &cm.l.root)
 }
 
-func getRestoreReaders(o *RestoreOpts) (io.ReadCloser, io.ReadCloser, stateio.AsyncReader, error) {
+func getRestoreReaders(o *RestoreOpts, conf *config.Config) (io.ReadCloser, io.ReadCloser, stateio.AsyncReader, error) {
 	if o.UseCheckpointGofer {
 		return getRestoreReadersForCheckpointGofer(o)
 	}
-	return getRestoreReadersForLocalCheckpointFiles(o)
+	return getRestoreReadersForLocalCheckpointFiles(o, conf)
 }
 
-func getRestoreReadersForLocalCheckpointFiles(o *RestoreOpts) (io.ReadCloser, io.ReadCloser, stateio.AsyncReader, error) {
+func getRestoreReadersForLocalCheckpointFiles(o *RestoreOpts, conf *config.Config) (io.ReadCloser, io.ReadCloser, stateio.AsyncReader, error) {
 	stateFile, err := o.ReleaseFD(0)
 	if err != nil {
 		return nil, nil, nil, err
@@ -753,9 +757,10 @@ func getRestoreReadersForLocalCheckpointFiles(o *RestoreOpts) (io.ReadCloser, io
 	// pagesMetadataFile to avoid making one syscall per read. For the state
 	// file, this buffering is handled by statefile.NewReader() =>
 	// compressio.Reader or compressio.NewSimpleReader().
+	maxReadBytes, maxParallel := conf.RestorePageReadParams()
 	return stateFile,
 		stateio.NewBufioReadCloser(pagesMetadataFile),
-		stateio.NewPagesFileFDReaderDefault(int32(pagesFile.Release())),
+		stateio.NewPagesFileFDReader(int32(pagesFile.Release()), maxReadBytes, maxParallel),
 		nil
 }
 
@@ -812,18 +817,18 @@ func (cm *containerManager) onRestoreFailed(err error) {
 	cm.l.mu.Lock()
 	cm.l.state = restoreFailed
 	cm.l.restoreErr = err
+	cm.restorer = nil
 	cm.l.mu.Unlock()
 	cm.l.restoreDone.Broadcast()
-	cm.restorer = nil
 }
 
 func (cm *containerManager) onRestoreDone(s Savings) {
 	cm.l.mu.Lock()
 	cm.l.state = restored
 	cm.l.savings = s
+	cm.restorer = nil
 	cm.l.mu.Unlock()
 	cm.l.restoreDone.Broadcast()
-	cm.restorer = nil
 }
 
 func (cm *containerManager) RestoreSubcontainer(args *StartArgs, _ *struct{}) (retErr error) {
@@ -962,6 +967,13 @@ func (cm *containerManager) WaitCheckpoint(*struct{}, *struct{}) error {
 
 func (cm *containerManager) WaitRestore(*struct{}, *struct{}) error {
 	log.Debugf("containerManager.WaitRestore")
+	// An explicit completion wait must finish even if some application pages
+	// are never accessed. Internal postRestore.Wait remains passive.
+	cm.l.mu.Lock()
+	if cm.restorer != nil && cm.restorer.asyncMFLoader != nil {
+		cm.restorer.asyncMFLoader.PrefetchAll()
+	}
+	cm.l.mu.Unlock()
 	err := cm.l.waitRestore()
 	log.Debugf("containerManager.WaitRestore done, err = %v", err)
 	return err

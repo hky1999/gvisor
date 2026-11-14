@@ -81,12 +81,12 @@ func (mm *MemoryManager) mapASLocked(ctx context.Context, pseg pmaIterator, ar h
 	} else if mapUnit := mm.p.MapUnit(); mapUnit != 0 {
 		// Limit the range we map to ar, aligned to mapUnit.
 		setMapUnit(mapUnit)
-	} else if mf, ok := pseg.ValuePtr().file.(*pgalloc.MemoryFile); ok && mf.IsAsyncLoading() {
-		// Impose an arbitrary mapUnit in order to avoid calling
-		// platform.AddressSpace.MapFile() => mf.DataFD() or mf.MapInternal()
-		// with unnecessarily large ranges, resulting in unnecessarily long
-		// waits.
-		setMapUnit(32 << 20)
+	} else if mf, ok := pseg.ValuePtr().file.(*pgalloc.MemoryFile); ok {
+		if mapUnit := mf.AsyncLoadMapUnit(); mapUnit != 0 {
+			// Bound platform overmapping while loading. MapFile calls
+			// mf.DataFD or mf.MapInternal, which awaits the entire range.
+			setMapUnit(mapUnit)
+		}
 	}
 	if checkInvariants {
 		if !mapAR.IsSupersetOf(ar) {

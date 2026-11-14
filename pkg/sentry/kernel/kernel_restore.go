@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"sync/atomic"
 
 	"gvisor.dev/gvisor/pkg/cleanup"
 	"gvisor.dev/gvisor/pkg/context"
@@ -344,6 +345,11 @@ func (k *Kernel) loadMemoryFiles(ctx context.Context, r io.Reader) error {
 //   - Wait for various events to occur before proceeding.
 //   - Report errors as they occur.
 type AsyncMFLoader struct {
+	// A completion waiter can request prefetch before the page loader starts.
+	// Publishing the loader before checking prefetchAll closes that race.
+	prefetchAll atomic.Bool
+	pageLoader  atomic.Pointer[pgalloc.AsyncPagesFileLoad]
+
 	// privateMFsChan is used to tell the background goroutine about private
 	// MemoryFiles, once they are known. This channel is written to exactly once.
 	privateMFsChan chan privateMFsInfo
@@ -375,17 +381,23 @@ type privateMFsInfo struct {
 // It takes ownership of the timeline, and will end it when done loading all
 // pages.
 func NewAsyncMFLoader(pagesMetadata io.ReadCloser, pagesFile stateio.AsyncReader, mainMF *pgalloc.MemoryFile, timeline *timing.Timeline) *AsyncMFLoader {
+	return NewAsyncMFLoaderWithOptions(pagesMetadata, pagesFile, mainMF, timeline, pgalloc.AsyncPagesFileLoadOptions{Prefetch: true})
+}
+
+// NewAsyncMFLoaderWithOptions is NewAsyncMFLoader with an explicit page-loading
+// policy. Demand-only loading retains the source until all pages are loaded.
+func NewAsyncMFLoaderWithOptions(pagesMetadata io.ReadCloser, pagesFile stateio.AsyncReader, mainMF *pgalloc.MemoryFile, timeline *timing.Timeline, options pgalloc.AsyncPagesFileLoadOptions) *AsyncMFLoader {
 	mfl := &AsyncMFLoader{
 		privateMFsChan: make(chan privateMFsInfo, 1),
 	}
 	mfl.mainMFStartWg.Add(1)
 	mfl.metadataWg.Add(1)
 	mfl.loadWg.Add(1)
-	go mfl.backgroundGoroutine(pagesMetadata, pagesFile, mainMF, timeline)
+	go mfl.backgroundGoroutine(pagesMetadata, pagesFile, mainMF, timeline, options)
 	return mfl
 }
 
-func (mfl *AsyncMFLoader) backgroundGoroutine(pagesMetadata io.ReadCloser, pagesFile stateio.AsyncReader, mainMF *pgalloc.MemoryFile, timeline *timing.Timeline) {
+func (mfl *AsyncMFLoader) backgroundGoroutine(pagesMetadata io.ReadCloser, pagesFile stateio.AsyncReader, mainMF *pgalloc.MemoryFile, timeline *timing.Timeline, options pgalloc.AsyncPagesFileLoadOptions) {
 	defer timeline.End()
 	defer pagesMetadata.Close()
 	cu := cleanup.Make(func() {
@@ -395,10 +407,10 @@ func (mfl *AsyncMFLoader) backgroundGoroutine(pagesMetadata io.ReadCloser, pages
 	defer cu.Clean()
 
 	mfl.loadWg.Add(1)
-	apfl, err := pgalloc.StartAsyncPagesFileLoad(pagesFile, func(err error) {
+	apfl, err := pgalloc.StartAsyncPagesFileLoadWithOptions(pagesFile, func(err error) {
 		defer mfl.loadWg.Done()
 		mfl.loadErr = err
-	}, timeline) // transfers ownership of pagesFile
+	}, timeline, options) // transfers ownership of pagesFile
 	if err != nil {
 		mfl.loadWg.Done()
 		mfl.mainMetadataErr = err
@@ -406,6 +418,10 @@ func (mfl *AsyncMFLoader) backgroundGoroutine(pagesMetadata io.ReadCloser, pages
 		mfl.mainMFStartWg.Done()
 		log.Warningf("Failed to start async page loading: %v", err)
 		return
+	}
+	mfl.pageLoader.Store(apfl)
+	if mfl.prefetchAll.Load() {
+		apfl.PrefetchAll()
 	}
 	cu.Add(apfl.MemoryFilesDone)
 
@@ -482,4 +498,13 @@ func (mfl *AsyncMFLoader) Wait() error {
 	}
 	mfl.loadWg.Wait()
 	return mfl.loadErr
+}
+
+// PrefetchAll requests all remaining pages without waiting for metadata or I/O.
+// Wait itself remains passive so postRestore does not defeat demand loading.
+func (mfl *AsyncMFLoader) PrefetchAll() {
+	mfl.prefetchAll.Store(true)
+	if apfl := mfl.pageLoader.Load(); apfl != nil {
+		apfl.PrefetchAll()
+	}
 }

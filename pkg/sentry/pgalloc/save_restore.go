@@ -1455,6 +1455,13 @@ type AsyncPagesFileLoad struct {
 	// immutable.
 	maxReadBytes uint64
 
+	// prefetch permits loading ranges without current waiters. An explicit
+	// restore completion wait can enable it after demand-only loading starts.
+	prefetch atomic.Bool
+	// mapUnit is the mapping granularity while source pages remain unloaded.
+	// It is immutable.
+	mapUnit uint64
+
 	// qavail is unused capacity in ar.
 	qavail int
 
@@ -1591,6 +1598,28 @@ func (op *aplOp) off() int64 {
 // StartAsyncPagesFileLoad constructs asynchronous loading state for the pages
 // file ar. It takes ownership of ar, even if it returns a non-nil error.
 func StartAsyncPagesFileLoad(ar stateio.AsyncReader, doneCallback func(error), timeline *timing.Timeline) (*AsyncPagesFileLoad, error) {
+	return StartAsyncPagesFileLoadWithOptions(ar, doneCallback, timeline, AsyncPagesFileLoadOptions{Prefetch: true})
+}
+
+// AsyncPagesFileLoadOptions controls optional loading of unawaited ranges.
+type AsyncPagesFileLoadOptions struct {
+	Prefetch bool
+	// MapUnit bounds platform overmapping, which also awaits the mapped range.
+	// Zero retains the historical 32 MiB granularity.
+	MapUnit uint64
+}
+
+// StartAsyncPagesFileLoadWithOptions is StartAsyncPagesFileLoad with an explicit
+// loading policy. Waiters are always served, including AwaitLoadAll for saves.
+func StartAsyncPagesFileLoadWithOptions(ar stateio.AsyncReader, doneCallback func(error), timeline *timing.Timeline, options AsyncPagesFileLoadOptions) (*AsyncPagesFileLoad, error) {
+	mapUnit := options.MapUnit
+	if mapUnit == 0 {
+		mapUnit = 32 << 20
+	}
+	if mapUnit < hostarch.PageSize || mapUnit&(mapUnit-1) != 0 {
+		ar.Close()
+		return nil, fmt.Errorf("async page load mapping granularity (%d) must be a power of two at least one page", mapUnit)
+	}
 	maxReadBytes := hostarch.PageRoundDown(ar.MaxReadBytes())
 	if maxReadBytes <= 0 {
 		ar.Close()
@@ -1604,10 +1633,12 @@ func StartAsyncPagesFileLoad(ar stateio.AsyncReader, doneCallback func(error), t
 		doneCallback:     doneCallback,
 		ar:               ar,
 		maxReadBytes:     maxReadBytes,
+		mapUnit:          mapUnit,
 		qavail:           maxParallel,
 		opsBusy:          bitmap.New(uint32(maxParallel)),
 		ops:              make([]aplOp, maxParallel),
 	}
+	apfl.prefetch.Store(options.Prefetch)
 	// Mark ops in opsBusy that don't actually exist as permanently busy.
 	for i, n := maxParallel, apfl.opsBusy.Size(); i < n; i++ {
 		apfl.opsBusy.Add(uint32(i))
@@ -1631,10 +1662,26 @@ func (apfl *AsyncPagesFileLoad) MemoryFilesDone() {
 	apfl.lfStatus.Notify(aplLFDone)
 }
 
+// PrefetchAll enables loading all remaining pages, including MemoryFiles whose
+// metadata has not arrived yet. It is idempotent and does not wait for I/O.
+func (apfl *AsyncPagesFileLoad) PrefetchAll() {
+	apfl.prefetch.Store(true)
+	apfl.lfStatus.Notify(aplLFPending)
+}
+
 // IsAsyncLoading returns true if async page loading is in progress or has
 // failed permanently.
 func (f *MemoryFile) IsAsyncLoading() bool {
 	return f.asyncPageLoad.Load() != nil
+}
+
+// AsyncLoadMapUnit returns the platform mapping granularity while loading, or
+// zero if no loading state remains. Overmapping also waits for the entire range.
+func (f *MemoryFile) AsyncLoadMapUnit() uint64 {
+	if amfl := f.asyncPageLoad.Load(); amfl != nil {
+		return amfl.pf.mapUnit
+	}
+	return 0
 }
 
 // AwaitLoadAll blocks until async page loading has completed. If async page
@@ -1705,6 +1752,8 @@ func (amfl *asyncMemoryFileLoad) awaitLoad(fr memmap.FileRange) error {
 	}
 	apfl.mu.Unlock()
 	if pending {
+		// Demand loading may be asleep with no reads in flight.
+		apfl.lfStatus.Notify(aplLFPending)
 		if logAwaitedLoads {
 			log.Infof("MemoryFile(%p): awaitLoad goid %d start: %v (%d bytes)", amfl.f, goid.Get(), fr, fr.Length())
 		}
@@ -1963,6 +2012,7 @@ func (apfl *AsyncPagesFileLoad) main() {
 		}()
 	}
 
+	memoryFilesDone := false
 	for {
 		// Enqueue as many reads as possible.
 		if !apfl.canEnqueue() {
@@ -2013,7 +2063,7 @@ func (apfl *AsyncPagesFileLoad) main() {
 		}
 		apfl.mu.Unlock()
 		// Fill remaining queue with reads for pages with no waiters.
-		if apfl.canEnqueue() {
+		if apfl.prefetch.Load() && apfl.canEnqueue() {
 			apfl.amflsMu.Lock()
 			// Unawaited loads from earlier MemoryFiles are prioritized over
 			// unawaited loads from later MemoryFiles. Callers of
@@ -2070,21 +2120,48 @@ func (apfl *AsyncPagesFileLoad) main() {
 		}
 
 		if apfl.qavail == maxParallel {
-			// We are out of work to do.
-			ev := apfl.lfStatus.Wait()
-			if ev&aplLFPending != 0 {
-				// We may have raced with MemoryFile.LoadFrom() inserting into
-				// asyncMemoryFileLoad.unloaded.
-				apfl.lfStatus.Ack(aplLFPending)
-				continue
+			// A demand-loaded MemoryFile can become empty through dropping
+			// the last references, without producing a read completion.
+			apfl.amflsMu.Lock()
+			apfl.mu.Lock()
+			for amfl := apfl.amfls.Front(); amfl != nil; {
+				next := amfl.Next()
+				if amfl.lfDone && amfl.unloaded.IsEmpty() {
+					amfl.minUnloaded.Store(math.MaxUint64)
+					apfl.amfls.Remove(amfl)
+					amfl.f.asyncPageLoad.Store(nil)
+					amfl.timeline.End()
+					if amfl.doneCallback != nil {
+						amfl.doneCallback(nil)
+						amfl.doneCallback = nil
+					}
+				}
+				amfl = next
 			}
-			if ev&aplLFDone != 0 {
-				// Successfully completed all loading for all MemoryFiles.
+			complete := memoryFilesDone && apfl.amfls.Empty()
+			apfl.mu.Unlock()
+			apfl.amflsMu.Unlock()
+			if complete {
 				durTotal := time.Duration(gohacks.Nanotime() - timeStart)
 				apfl.mu.Lock()
 				log.Infof("Async page loading completed in %s (%d bytes, %.3f MB/s); %d waiters waited %v~%v for %d bytes", durTotal.Round(time.Millisecond), apfl.bytesLoaded, float64(apfl.bytesLoaded)*1e-6/durTotal.Seconds(), apfl.totalWaiters, apfl.durWaitedOne.Round(time.Millisecond), apfl.durWaitedTotal.Round(time.Millisecond), apfl.bytesWaited)
 				apfl.mu.Unlock()
 				return
+			}
+			// Metadata completion does not imply that demand-loaded pages
+			// have been read. Keep the source alive for future waiters.
+			ev := apfl.lfStatus.Wait()
+			if ev&aplLFDone != 0 {
+				apfl.lfStatus.Ack(aplLFDone)
+				memoryFilesDone = true
+			}
+			if ev&aplLFPending != 0 {
+				// We may have raced with MemoryFile.LoadFrom() inserting into
+				// asyncMemoryFileLoad.unloaded.
+				apfl.lfStatus.Ack(aplLFPending)
+			}
+			if ev&(aplLFDone|aplLFPending) != 0 {
+				continue
 			}
 			panic(fmt.Sprintf("unknown events in lfStatus: %#x", ev))
 		}
@@ -2214,6 +2291,7 @@ func (amfl *asyncMemoryFileLoad) cancelWasteLoad(fr memmap.FileRange) {
 			panic(fmt.Sprintf("pages %v becoming waste with %d async load waiters", ulseg.Range(), n))
 		}
 	})
+	amfl.pf.lfStatus.Notify(aplLFPending)
 }
 
 type aplUnloadedSetFunctions struct{}

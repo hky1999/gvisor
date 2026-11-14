@@ -24,6 +24,84 @@ import (
 	"gvisor.dev/gvisor/runsc/flag"
 )
 
+func TestRestorePagePolicy(t *testing.T) {
+	for _, values := range [][]string{
+		{"none", "2", "1048576"}, {"all", "128", "67108864"},
+		{"bad", "12", "4194304"}, {"all", "-1", "4194304"},
+		{"all", "129", "4194304"}, {"all", "1", "4095"},
+		{"all", "1", "4194305"}, {"all", "1", "67112960"},
+	} {
+		t.Run(strings.Join(values, "/"), func(t *testing.T) {
+			flags := flag.NewFlagSet("test", flag.ContinueOnError)
+			RegisterFlags(flags)
+			for i, name := range []string{"restore-page-prefetch", "restore-io-parallelism", "restore-io-read-size"} {
+				if err := flags.Lookup(name).Value.Set(values[i]); err != nil {
+					t.Fatal(err)
+				}
+			}
+			conf, err := NewFromFlags(flags)
+			valid := values[0] == "none" || values[1] == "128"
+			if !valid {
+				if err == nil {
+					t.Fatal("invalid policy accepted")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			copyFlags := flag.NewFlagSet("copy", flag.ContinueOnError)
+			RegisterFlags(copyFlags)
+			if err := copyFlags.Parse(conf.ToFlags()); err != nil {
+				t.Fatal(err)
+			}
+			copied, err := NewFromFlags(copyFlags)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if copied.RestorePagePrefetch != conf.RestorePagePrefetch || copied.RestoreIOParallelism != conf.RestoreIOParallelism || copied.RestoreIOReadSize != conf.RestoreIOReadSize {
+				t.Fatal("policy lost during child flag propagation")
+			}
+		})
+	}
+	var conf Config
+	if size, parallel := conf.RestorePageReadParams(); size != 4<<20 || parallel != 12 {
+		t.Fatalf("zero-value defaults: %d, %d", size, parallel)
+	}
+}
+
+func TestRestoreMappingUnit(t *testing.T) {
+	for _, unit := range []string{"0", "4096", "65536", "2097152", "33554432", "1073741824", "1", "4095", "12288", "2147483648"} {
+		t.Run(unit, func(t *testing.T) {
+			flags := flag.NewFlagSet("test", flag.ContinueOnError)
+			RegisterFlags(flags)
+			if err := flags.Lookup("restore-map-unit").Value.Set(unit); err != nil {
+				t.Fatal(err)
+			}
+			conf, err := NewFromFlags(flags)
+			switch unit {
+			case "1", "4095", "12288", "2147483648":
+				if err == nil {
+					t.Fatal("invalid mapping granularity accepted")
+				}
+			default:
+				if err != nil {
+					t.Fatal(err)
+				}
+				copyFlags := flag.NewFlagSet("copy", flag.ContinueOnError)
+				RegisterFlags(copyFlags)
+				if err := copyFlags.Parse(conf.ToFlags()); err != nil {
+					t.Fatal(err)
+				}
+				copy, err := NewFromFlags(copyFlags)
+				if err != nil || copy.RestoreMapUnit != conf.RestoreMapUnit {
+					t.Fatalf("mapping granularity lost: %+v %v", copy, err)
+				}
+			}
+		})
+	}
+}
+
 func TestDefault(t *testing.T) {
 	testFlags := flag.NewFlagSet("test", flag.ContinueOnError)
 	RegisterFlags(testFlags)

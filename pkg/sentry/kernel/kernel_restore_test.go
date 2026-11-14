@@ -34,6 +34,7 @@ func TestAsyncMFLoaderStartupError(t *testing.T) {
 		pages := stateio.NewIOReader(bytes.NewReader(nil), 1, 1, 1)
 		metadata := io.NopCloser(bytes.NewReader(nil))
 		loader := NewAsyncMFLoader(metadata, pages, nil, nil)
+		loader.PrefetchAll()
 
 		startErr := loader.WaitMainMFStart()
 		if startErr == nil {
@@ -45,6 +46,7 @@ func TestAsyncMFLoaderStartupError(t *testing.T) {
 		if err := loader.Wait(); err != startErr {
 			t.Errorf("Wait() = %v, want %v", err, startErr)
 		}
+		loader.PrefetchAll()
 	})
 }
 

@@ -20,14 +20,144 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"gvisor.dev/gvisor/pkg/hostarch"
 	"gvisor.dev/gvisor/pkg/sentry/checkpoint"
 	"gvisor.dev/gvisor/pkg/sentry/memmap"
+	"gvisor.dev/gvisor/pkg/sentry/state/stateio"
 	"gvisor.dev/gvisor/pkg/sentry/usage"
 )
+
+type countingPagesReader struct {
+	*bytes.Reader
+	readBytes atomic.Int64
+	closed    atomic.Bool
+}
+
+func (r *countingPagesReader) Close() error {
+	r.closed.Store(true)
+	return nil
+}
+
+func (r *countingPagesReader) ReadAt(p []byte, off int64) (int, error) {
+	n, err := r.Reader.ReadAt(p, off)
+	r.readBytes.Add(int64(n))
+	return n, err
+}
+
+// Demand loading must retain the source after metadata completion, wake for
+// later faults, drain before another save, and stop when unused pages are freed.
+func TestDemandPagesLoad(t *testing.T) {
+	for _, finish := range []string{"await", "cancel", "prefetch"} {
+		t.Run(finish, func(t *testing.T) {
+			dir := t.TempDir()
+			orig := newTestMemoryFile(t, filepath.Join(dir, "source"), false)
+			fr, err := orig.Allocate(3*hostarch.PageSize, AllocOpts{Kind: usage.Anonymous})
+			if err != nil {
+				t.Fatal(err)
+			}
+			writeTestRange(t, orig, fr, 0xab)
+			var metadata, pages bytes.Buffer
+			saved := make(chan error, 1)
+			apfs, err := StartAsyncPagesFileSave(stateio.NewIOWriter(&pages, hostarch.PageSize, 1, 1), func(err error) { saved <- err })
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := orig.SaveTo(context.Background(), &metadata, &SaveOpts{PagesFile: apfs}); err != nil {
+				t.Fatal(err)
+			}
+			apfs.MemoryFilesDone()
+			select {
+			case err := <-saved:
+				if err != nil {
+					t.Fatal(err)
+				}
+			case <-time.After(5 * time.Second):
+				t.Fatal("save timed out")
+			}
+			orig.DecRef(fr)
+			orig.Destroy()
+			reader := &countingPagesReader{Reader: bytes.NewReader(pages.Bytes())}
+			loaded := make(chan error, 1)
+			apfl, err := StartAsyncPagesFileLoadWithOptions(stateio.NewIOReader(reader, hostarch.PageSize, 1, 1), func(err error) { loaded <- err }, nil, AsyncPagesFileLoadOptions{Prefetch: false, MapUnit: 2 * hostarch.PageSize})
+			if err != nil {
+				t.Fatal(err)
+			}
+			mf := newTestMemoryFile(t, filepath.Join(dir, "target"), false)
+			if err := mf.LoadFrom(context.Background(), &metadata, &LoadOpts{PagesFile: apfl}); err != nil {
+				t.Fatal(err)
+			}
+			apfl.MemoryFilesDone()
+			if got := mf.AsyncLoadMapUnit(); got != 2*hostarch.PageSize {
+				t.Fatalf("mapping granularity %d", got)
+			}
+			select {
+			case err := <-loaded:
+				t.Fatalf("completed before demanded pages were loaded: %v", err)
+			case <-time.After(20 * time.Millisecond):
+			}
+			if got := reader.readBytes.Load(); got != 0 {
+				t.Fatalf("prefetched %d bytes", got)
+			}
+			first := memmap.FileRange{Start: fr.Start, End: fr.Start + hostarch.PageSize}
+			if got := readTestRange(t, mf, first); !bytes.Equal(got, bytes.Repeat([]byte{0xab}, int(hostarch.PageSize))) {
+				t.Fatal("first page contents differ")
+			}
+			if got := reader.readBytes.Load(); got != int64(hostarch.PageSize) {
+				t.Fatalf("read %d bytes for one page", got)
+			}
+			if finish == "cancel" {
+				mf.DecRef(fr)
+			} else {
+				if finish == "prefetch" {
+					apfl.PrefetchAll()
+					apfl.PrefetchAll()
+					select {
+					case err := <-loaded:
+						loaded <- err
+					case <-time.After(5 * time.Second):
+						t.Fatal("explicit prefetch did not complete unused pages")
+					}
+				}
+				if err := mf.AwaitLoadAll(); err != nil {
+					t.Fatal(err)
+				}
+				if got := readTestRange(t, mf, fr); !bytes.Equal(got, bytes.Repeat([]byte{0xab}, int(fr.Length()))) {
+					t.Fatal("full contents differ")
+				}
+				if got := reader.readBytes.Load(); got != int64(fr.Length()) {
+					t.Fatalf("full drain read %d bytes", got)
+				}
+				mf.DecRef(fr)
+			}
+			select {
+			case err := <-loaded:
+				if err != nil {
+					t.Fatal(err)
+				}
+			case <-time.After(5 * time.Second):
+				t.Fatal("loader did not finish after drain/cancel")
+			}
+			if !reader.closed.Load() || mf.AsyncLoadMapUnit() != 0 {
+				t.Fatal("completed loader retained source or loading state")
+			}
+			mf.Destroy()
+		})
+	}
+}
+
+func TestAsyncLoadRejectsInvalidMappingUnitAndClosesReader(t *testing.T) {
+	for _, unit := range []uint64{1, hostarch.PageSize - 1, 3 * hostarch.PageSize} {
+		reader := &countingPagesReader{Reader: bytes.NewReader(nil)}
+		_, err := StartAsyncPagesFileLoadWithOptions(stateio.NewIOReader(reader, hostarch.PageSize, 1, 1), nil, nil, AsyncPagesFileLoadOptions{MapUnit: unit})
+		if err == nil || !reader.closed.Load() {
+			t.Fatalf("unit %d: err=%v closed=%v", unit, err, reader.closed.Load())
+		}
+	}
+}
 
 func newTestMemoryFile(t *testing.T, path string, adopt bool) *MemoryFile {
 	t.Helper()

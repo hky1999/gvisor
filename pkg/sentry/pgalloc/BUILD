@@ -216,6 +216,7 @@ go_test(
         "//pkg/hostarch",
         "//pkg/sentry/checkpoint",
         "//pkg/sentry/memmap",
+        "//pkg/sentry/state/stateio",
         "//pkg/sentry/usage",
     ],
 )
