@@ -248,27 +248,32 @@ func (f *MemoryFile) BeginSaveWindow() {
 // SaveTo(ExternalContent) is called on the same MemoryFile afterwards. Both
 // the backing file and dst must be on a filesystem supporting reflink
 // (e.g. XFS/btrfs); otherwise this fails loudly (EOPNOTSUPP/EXDEV).
-func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string, err error) {
+func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string, delta *checkpoint.FilestoreDelta, err error) {
 	if f.file == nil {
-		return 0, "", fmt.Errorf("MemoryFile %p has no backing file to snapshot", f)
+		return 0, "", nil, fmt.Errorf("MemoryFile %p has no backing file to snapshot", f)
 	}
 	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, dst.Fd(), unix.FICLONE, f.file.Fd()); errno != 0 {
-		return 0, "", fmt.Errorf("FICLONE of filestore backing file to snapshot failed (%w); --filestore-snapshot-dir requires a reflink-capable filesystem (e.g. XFS) for both the backing filestore and the snapshot directory", errno)
+		return 0, "", nil, fmt.Errorf("FICLONE of filestore backing file to snapshot failed (%w); --filestore-snapshot-dir requires a reflink-capable filesystem (e.g. XFS) for both the backing filestore and the snapshot directory", errno)
 	}
 	if err := dst.Sync(); err != nil {
-		return 0, "", fmt.Errorf("failed to fsync filestore snapshot: %w", err)
+		return 0, "", nil, fmt.Errorf("failed to fsync filestore snapshot: %w", err)
 	}
 	fi, err := dst.Stat()
 	if err != nil {
-		return 0, "", fmt.Errorf("failed to stat filestore snapshot: %w", err)
+		return 0, "", nil, fmt.Errorf("failed to stat filestore snapshot: %w", err)
 	}
-	fp, err := checkpoint.FingerprintFile(dst)
+	var fp string
+	if f.lazy != nil {
+		delta, fp, err = f.lazy.snapshotDelta(dst, fi.Size())
+	} else {
+		fp, err = checkpoint.FingerprintFile(dst)
+	}
 	if err != nil {
-		return 0, "", fmt.Errorf("failed to fingerprint filestore snapshot: %w", err)
+		return 0, "", nil, fmt.Errorf("failed to fingerprint filestore snapshot: %w", err)
 	}
 	f.externalSavedSize = uint64(fi.Size())
 	f.externalSavedFingerprint = fp
-	return f.externalSavedSize, f.externalSavedFingerprint, nil
+	return f.externalSavedSize, f.externalSavedFingerprint, delta, nil
 }
 
 // ChunkCount returns the number of chunks currently tracked by f. It is used
@@ -299,6 +304,9 @@ func (f *MemoryFile) SaveTo(ctx context.Context, w io.Writer, opts *SaveOpts) er
 		panic(fmt.Sprintf("evictions still pending for %d users; call StartEvictions and WaitForEvictions before SaveTo", len(f.evictable)))
 	}
 
+	if f.lazy != nil && (!opts.ExternalContent || f.externalSavedFingerprint == "") {
+		return fmt.Errorf("lazy filestore checkpoint requires --skip-filestore-pages and --filestore-snapshot-dir")
+	}
 	if opts.ExternalContent {
 		// Only save segment metadata; page contents are expected to be
 		// captured out-of-band (the backing host file is preserved or
@@ -1185,16 +1193,23 @@ func (f *MemoryFile) LoadFrom(ctx context.Context, r io.Reader, opts *LoadOpts) 
 	log.Infof("MemoryFile(%p): loaded metadata in %s", f, time.Duration(gohacks.Nanotime()-timeMetadataStart))
 
 	fileSize := uint64(len(chunks)) * chunkSize
+	if f.lazy != nil && !pb.ContentExternal {
+		return fmt.Errorf("lazy filestore restore requires a checkpoint with external filestore contents")
+	}
 	if pb.ContentExternal {
+		artifact := f.file
+		if f.lazy != nil {
+			artifact = f.lazy.base
+		}
 		// Contents are expected to already be present in the backing file.
 		// Require that the MemoryFile adopted an existing host file (i.e.
 		// was not created empty) and that the file is at least as large as
 		// the saved chunk table requires; otherwise restore would silently
 		// produce zero-filled holes instead of the original contents.
-		if !f.opts.AdoptExistingFile {
+		if !f.opts.AdoptExistingFile && f.lazy == nil {
 			return fmt.Errorf("cannot restore externally-contented MemoryFile: backing file was not adopted")
 		}
-		fi, err := f.file.Stat()
+		fi, err := artifact.Stat()
 		if err != nil {
 			return fmt.Errorf("failed to stat adopted MemoryFile file: %w", err)
 		}
@@ -1210,13 +1225,16 @@ func (f *MemoryFile) LoadFrom(ctx context.Context, r io.Reader, opts *LoadOpts) 
 				return fmt.Errorf("adopted MemoryFile file size %d != checkpointed filestore size %d (wrong or diverged filestore artifact)", fi.Size(), pb.ContentExternalFileSize)
 			}
 		}
-		if pb.ContentExternalFingerprint != "" {
-			fp, err := checkpoint.FingerprintFile(f.file)
+		if pb.ContentExternalFingerprint != "" || f.lazy != nil {
+			fp, err := checkpoint.FingerprintFile(artifact)
 			if err != nil {
 				return fmt.Errorf("failed to fingerprint adopted MemoryFile file: %w", err)
 			}
-			if fp != pb.ContentExternalFingerprint {
+			if pb.ContentExternalFingerprint != "" && fp != pb.ContentExternalFingerprint {
 				return fmt.Errorf("adopted MemoryFile file fingerprint mismatch: got %.16s, checkpoint expects %.16s (artifact contents differ from the checkpointed filestore, e.g. the original filestore diverged after a leave-running checkpoint)", fp, pb.ContentExternalFingerprint)
+			}
+			if f.lazy != nil {
+				f.lazy.baseHash = fp
 			}
 		}
 	}

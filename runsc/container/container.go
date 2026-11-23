@@ -1311,6 +1311,28 @@ func (c *Container) createGoferFilestores(conf *config.Config, ovlConf config.Ov
 
 	// Handle rootfs first.
 	rootfsConf := c.GoferMountConfs[0]
+	if conf.FilestoreLazyRestore {
+		if adopter == nil || rootfsConf.Upper != specutils.AnonOverlay {
+			return nil, fmt.Errorf("--filestore-lazy-restore requires --filestore-adopt-dir and a root overlay2 dir")
+		}
+		for _, mountConf := range c.GoferMountConfs[1:] {
+			if mountConf.IsFilestorePresent() {
+				return nil, fmt.Errorf("--filestore-lazy-restore supports only a root filestore")
+			}
+		}
+		base, err := adopter.adopt(c, "/")
+		if err != nil {
+			return nil, err
+		}
+		local, err := c.createGoferFilestore(goferRootfs, ovlConf, rootfsConf, c.Spec.Root.Path, "/", mountHints, nil, conf.FilestoreParentMountNS)
+		if err != nil {
+			base.Close()
+			return nil, err
+		}
+		hostmm.IMAWorkAroundForMemFile(local.Fd())
+		// Keep the base next to the root backing file on the existing FD channel.
+		return []*os.File{local, base}, nil
+	}
 	filestore, err := c.createGoferFilestore(goferRootfs, ovlConf, rootfsConf, c.Spec.Root.Path, "/", mountHints, adopter, conf.FilestoreParentMountNS)
 	if err != nil {
 		return nil, err

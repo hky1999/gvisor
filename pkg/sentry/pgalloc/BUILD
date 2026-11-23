@@ -163,6 +163,7 @@ go_library(
         "debug.go",
         "evictable_range.go",
         "evictable_range_set.go",
+        "lazy_filestore.go",
         "memacct_set.go",
         "memory_file_mutex.go",
         "pgalloc.go",
@@ -207,6 +208,7 @@ go_test(
     name = "pgalloc_test",
     size = "small",
     srcs = [
+        "lazy_filestore_test.go",
         "pgalloc_64k_test.go",
         "pgalloc_test.go",
         "save_restore_external_test.go",

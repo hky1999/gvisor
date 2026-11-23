@@ -220,6 +220,9 @@ type MemoryFile struct {
 	// failed async page loading.
 	asyncPageLoad atomic.Pointer[asyncMemoryFileLoad]
 
+	// lazy is immutable after creation, and non-nil on a layered restore.
+	lazy *lazyFilestore
+
 	// file is the backing file. The file pointer is immutable.
 	file *os.File
 
@@ -362,6 +365,10 @@ type evictableMemoryUserInfo struct {
 
 // MemoryFileOpts provides options to NewMemoryFile.
 type MemoryFileOpts struct {
+	// LazyBase is the immutable source of a sparse local filestore. Ownership
+	// transfers to the returned MemoryFile on success.
+	LazyBase *os.File
+
 	// DelayedEviction controls the extent to which the MemoryFile may delay
 	// eviction of evictable allocations.
 	DelayedEviction DelayedEvictionType
@@ -471,6 +478,16 @@ func NewMemoryFile(file *os.File, opts MemoryFileOpts) (*MemoryFile, error) {
 		file: file,
 	}
 	f.initFields()
+	if opts.LazyBase != nil {
+		baseInfo, err := opts.LazyBase.Stat()
+		if err != nil {
+			return nil, fmt.Errorf("stat filestore baseline: %w", err)
+		}
+		if opts.AdoptExistingFile || !opts.DiskBackedFile || baseInfo.Size()%hostarch.PageSize != 0 {
+			return nil, fmt.Errorf("lazy filestore requires a fresh disk-backed file and a page-aligned baseline")
+		}
+		f.lazy = &lazyFilestore{base: opts.LazyBase, size: baseInfo.Size(), pages: make(map[uint64]lazyFilestorePage)}
+	}
 
 	if f.opts.DelayedEviction == DelayedEvictionEnabled && f.opts.UseHostMemcgPressure {
 		stop, err := hostmm.NotifyCurrentMemcgPressureCallback(func() {
@@ -535,6 +552,9 @@ func (f *MemoryFile) releaserDestroyLocked() {
 		}
 	}
 
+	if f.lazy != nil {
+		f.lazy.base.Close()
+	}
 	f.file.Close()
 	// Ensure that any attempts to use f.file.Fd() fail instead of getting a fd
 	// that has possibly been reassigned.
@@ -656,6 +676,11 @@ func (f *MemoryFile) Allocate(length uint64, opts AllocOpts) (memmap.FileRange, 
 	fr, err := f.findAllocatableAndMarkUsed(&alloc)
 	if err != nil {
 		return fr, err
+	}
+	if f.lazy != nil {
+		f.lazy.mu.Lock()
+		f.lazy.markCleared(fr)
+		f.lazy.mu.Unlock()
 	}
 
 	var dsts safemem.BlockSeq
@@ -1127,6 +1152,11 @@ func (f *MemoryFile) manuallyZero(fr memmap.FileRange) {
 }
 
 func (f *MemoryFile) decommitOrManuallyZero(fr memmap.FileRange) {
+	if f.lazy != nil {
+		f.lazy.mu.Lock()
+		defer f.lazy.mu.Unlock()
+		f.lazy.markCleared(fr)
+	}
 	if err := f.decommitFile(fr); err != nil {
 		log.Warningf("Failed to decommit %v: %v", fr, err)
 		// Zero the pages manually. This won't reduce memory usage, but at
@@ -1477,6 +1507,10 @@ func (f *MemoryFile) MapInternal(fr memmap.FileRange, at hostarch.AccessType) (s
 		if err := amfl.awaitLoad(fr); err != nil {
 			return safemem.BlockSeq{}, err
 		}
+	}
+
+	if err := f.ensureLazyRange(fr); err != nil {
+		return safemem.BlockSeq{}, err
 	}
 
 	chunks := ((fr.End + chunkMask) / chunkSize) - (fr.Start / chunkSize)
@@ -1841,6 +1875,9 @@ func (f *MemoryFile) DataFD(fr memmap.FileRange) (int, error) {
 		if err := amfl.awaitLoad(fr); err != nil {
 			return -1, err
 		}
+	}
+	if err := f.ensureLazyRange(fr); err != nil {
+		return -1, err
 	}
 	return f.FD(), nil
 }
