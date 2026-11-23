@@ -62,6 +62,25 @@ type FilestoreSidecarEntry struct {
 	ChunkCount uint64 `json:"chunk_count"`
 	// Fingerprint is the sampled SHA-256 (FingerprintFile) of the artifact.
 	Fingerprint string `json:"fingerprint"`
+	// Delta describes an unpublished local XFS snapshot. The size and
+	// fingerprint above describe the complete artifact after composition.
+	Delta *FilestoreDelta `json:"delta,omitempty"`
+}
+
+// FilestoreDelta lists the ranges to replace in the immutable baseline.
+type FilestoreDelta struct {
+	BaseFingerprint string            `json:"base_fingerprint"`
+	BaseSize        int64             `json:"base_size"`
+	BaseReadBytes   uint64            `json:"base_read_bytes"`
+	ScannedBytes    uint64            `json:"scanned_bytes"`
+	Extents         []FilestoreExtent `json:"extents"`
+}
+
+// FilestoreExtent replaces a page-aligned range with local data or a hole.
+type FilestoreExtent struct {
+	Offset int64 `json:"offset"`
+	Length int64 `json:"length"`
+	Zero   bool  `json:"zero,omitempty"`
 }
 
 // FilestoreSidecar is the top-level filestores.json document.
@@ -95,8 +114,13 @@ func FingerprintFile(file *os.File) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	return FingerprintReaderAt(file, fi.Size())
+}
+
+// FingerprintReaderAt fingerprints a logical file view using the filestore
+// artifact sampling layout.
+func FingerprintReaderAt(file io.ReaderAt, size int64) (string, error) {
 	h := sha256.New()
-	size := fi.Size()
 	var buf [fingerprintChunkSize]byte
 	readAt := func(off int64) error {
 		n, err := file.ReadAt(buf[:], off)

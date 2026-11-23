@@ -54,17 +54,19 @@ func (c *Container) filestoreResourceID(dest string) checkpoint.ResourceID {
 // filestoreAdopter adopts checkpoint-artifact filestores on restore, with
 // sidecar verification and clone-on-adopt.
 type filestoreAdopter struct {
-	dir     string
-	clone   bool
-	entries map[checkpoint.ResourceID]*checkpoint.FilestoreSidecarEntry
-	legacy  bool // no sidecar present: use index-based convention
-	nextIdx int
+	dir      string
+	clone    bool
+	readOnly bool
+	entries  map[checkpoint.ResourceID]*checkpoint.FilestoreSidecarEntry
+	legacy   bool // no sidecar present: use index-based convention
+	nextIdx  int
 }
 
 func newFilestoreAdopter(conf *config.Config, c *Container) (*filestoreAdopter, error) {
 	a := &filestoreAdopter{
-		dir:   conf.FilestoreAdoptDir,
-		clone: conf.FilestoreCloneOnAdopt,
+		dir:      conf.FilestoreAdoptDir,
+		clone:    conf.FilestoreCloneOnAdopt,
+		readOnly: conf.FilestoreLazyRestore,
 	}
 	if !path.IsAbs(a.dir) {
 		return nil, fmt.Errorf("filestore adopt directory %q must be an absolute path", a.dir)
@@ -89,6 +91,9 @@ func newFilestoreAdopter(conf *config.Config, c *Container) (*filestoreAdopter, 
 	a.entries = make(map[checkpoint.ResourceID]*checkpoint.FilestoreSidecarEntry, len(sc.Filestores))
 	for i := range sc.Filestores {
 		e := &sc.Filestores[i]
+		if e.Delta != nil {
+			return nil, fmt.Errorf("filestore sidecar in %q describes a local delta; compose the complete artifact before restore", a.dir)
+		}
 		rid := checkpoint.ResourceID{ContainerName: e.ResourceContainer, Path: e.ResourcePath}
 		if _, dup := a.entries[rid]; dup {
 			return nil, fmt.Errorf("filestore sidecar in %q has duplicate entry for resource %+v", a.dir, rid)
@@ -157,6 +162,9 @@ func (a *filestoreAdopter) adopt(c *Container, dest string) (*os.File, error) {
 				return nil, fmt.Errorf("failed to verify filestore artifact %q against sidecar: %w", artifactPath, err)
 			}
 		}
+	}
+	if a.readOnly {
+		return os.Open(artifactPath)
 	}
 	src, err := os.OpenFile(artifactPath, unix.O_RDWR|unix.O_CLOEXEC, 0)
 	if err != nil {

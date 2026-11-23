@@ -111,6 +111,10 @@ type Config struct {
 	// the private MemoryFile contents that the checkpoint does not carry.
 	FilestoreAdoptDir string `flag:"filestore-adopt-dir"`
 
+	// FilestoreLazyRestore uses the adopted root filestore as an immutable
+	// source for a separate local backing file.
+	FilestoreLazyRestore bool `flag:"filestore-lazy-restore"`
+
 	// FilestoreCloneOnAdopt makes restore adopt a reflink (FICLONE) private
 	// copy of each filestore artifact instead of the artifact itself. This
 	// keeps the artifact an immutable template: multiple restores from the
