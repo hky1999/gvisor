@@ -90,8 +90,18 @@ func (f *MemoryFile) ensureLazyRange(fr memmap.FileRange) error {
 // immutable host mapping can outlive any individual guest translation.
 type baselineFile struct{ *MemoryFile }
 
-func (b *baselineFile) FD() int                                 { return int(b.lazy.base.Fd()) }
-func (b *baselineFile) DataFD(fr memmap.FileRange) (int, error) { return b.FD(), nil }
+func (b *baselineFile) FD() int { return int(b.lazy.base.Fd()) }
+func (b *baselineFile) DataFD(fr memmap.FileRange) (int, error) {
+	// Populate only the faulting page before mapping a single-page translation.
+	// A host mmap fault can otherwise read ahead into unrelated remote blocks.
+	if fr.Length() == hostarch.PageSize {
+		var page [hostarch.PageSize]byte
+		if _, err := b.lazy.base.ReadAt(page[:], int64(fr.Start)); err != nil {
+			return -1, err
+		}
+	}
+	return b.FD(), nil
+}
 func (b *baselineFile) MapInternal(fr memmap.FileRange, at hostarch.AccessType) (safemem.BlockSeq, error) {
 	if at.Write || fr.End > uint64(len(b.lazy.mapping)) {
 		return safemem.BlockSeq{}, unix.EACCES
@@ -154,9 +164,9 @@ func (l *lazyFilestore) markCleared(fr memmap.FileRange) {
 	}
 }
 
-// snapshotDelta examines the local pages of the reflink snapshot while the
-// sandbox is quiesced. CPU stores to shared mappings are visible through dst.
-func (l *lazyFilestore) snapshotDelta(dst *os.File, size int64) (*checkpoint.FilestoreDelta, string, error) {
+// snapshotDelta reads dirty candidates through the live inode and its page cache.
+// All writers, including shared mappings, must stay quiesced through this call.
+func (l *lazyFilestore) snapshotDelta(frozenLive *os.File, size int64) (*checkpoint.FilestoreDelta, string, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -175,7 +185,7 @@ func (l *lazyFilestore) snapshotDelta(dst *os.File, size int64) (*checkpoint.Fil
 	}
 	var buf [hostarch.PageSize]byte
 	for _, offset := range offsets {
-		if _, err := dst.ReadAt(buf[:], int64(offset)); err != nil {
+		if _, err := frozenLive.ReadAt(buf[:], int64(offset)); err != nil {
 			return nil, "", fmt.Errorf("scan local filestore at %d: %w", offset, err)
 		}
 		delta.ScannedBytes += uint64(len(buf))
@@ -199,7 +209,7 @@ func (l *lazyFilestore) snapshotDelta(dst *os.File, size int64) (*checkpoint.Fil
 			Offset: int64(offset), Length: hostarch.PageSize, Zero: zero,
 		})
 	}
-	fp, err := checkpoint.FingerprintReaderAt(lazyFilestoreView{layer: l, local: dst}, size)
+	fp, err := checkpoint.FingerprintReaderAt(lazyFilestoreView{layer: l, local: frozenLive}, size)
 	if err != nil {
 		return nil, "", fmt.Errorf("fingerprint complete filestore view: %w", err)
 	}
