@@ -549,6 +549,15 @@ func (r *restorer) restore(l *Loader) error {
 		}
 	}
 
+	for _, mf := range restoreMnts.mfmap {
+		if mf.UsesLazyFilestore() {
+			if err := l.k.ResetFilestoreMappings(); err != nil {
+				return fmt.Errorf("reset filestore mappings: %w", err)
+			}
+			break
+		}
+	}
+
 	// Since we have a new kernel we also must make a new watchdog.
 	dogOpts := watchdog.DefaultOpts
 	if err := dogOpts.TaskTimeoutAction.Set(l.root.conf.WatchdogAction); err != nil {

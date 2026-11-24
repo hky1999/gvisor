@@ -135,6 +135,23 @@ func (mm *MemoryManager) getPMAsLocked(ctx context.Context, vseg vmaIterator, ar
 	ar = hostarch.AddrRange{ar.Start.RoundDown(), end}
 
 	pstart, pend, perr := mm.getPMAsInternalLocked(ctx, vseg, ar, at, callerIndirectCommit, forPin)
+	for {
+		retry, ok := perr.(memmap.TranslationRetry)
+		if !ok {
+			break
+		}
+		mm.activeMu.Unlock()
+		err := retry()
+		mm.activeMu.Lock()
+		if err != nil {
+			seg, gap := mm.pmas.Find(ar.Start)
+			if seg.Ok() {
+				gap = seg.PrevGap()
+			}
+			return pmaIterator{}, gap, err
+		}
+		pstart, pend, perr = mm.getPMAsInternalLocked(ctx, vseg, ar, at, callerIndirectCommit, forPin)
+	}
 	if pend.Start() <= ar.Start {
 		return pmaIterator{}, pend, perr
 	}
@@ -160,6 +177,7 @@ func (mm *MemoryManager) getPMAsLocked(ctx context.Context, vseg vmaIterator, ar
 // +checklocksread:mm.mappingMu
 // +checklocks:mm.activeMu
 func (mm *MemoryManager) getVecPMAsLocked(ctx context.Context, ars hostarch.AddrRangeSeq, at hostarch.AccessType, callerIndirectCommit bool) (hostarch.AddrRangeSeq, error) {
+restart:
 	for arsit := ars; !arsit.IsEmpty(); arsit = arsit.Tail() {
 		ar := arsit.Head()
 		if ar.Length() == 0 {
@@ -181,6 +199,15 @@ func (mm *MemoryManager) getVecPMAsLocked(ctx context.Context, ars hostarch.Addr
 		ar = hostarch.AddrRange{ar.Start.RoundDown(), end}
 
 		_, pend, perr := mm.getPMAsInternalLocked(ctx, mm.vmas.FindSegment(ar.Start), ar, at, callerIndirectCommit, false /* forPin */)
+		if retry, ok := perr.(memmap.TranslationRetry); ok {
+			mm.activeMu.Unlock()
+			err := retry()
+			mm.activeMu.Lock()
+			if err != nil {
+				return hostarch.AddrRangeSeq{}, err
+			}
+			goto restart
+		}
 		if perr != nil {
 			return truncatedAddrRangeSeq(ars, arsit, pend.Start()), perr
 		}
@@ -774,6 +801,18 @@ func (mm *MemoryManager) Pin(ctx context.Context, ar hostarch.AddrRange, at host
 	}
 
 	// Ensure that we have usable pmas.
+	for vs := vseg; vs.Ok() && vs.Start() < ar.End; vs = vs.NextSegment() {
+		if !vs.ValuePtr().private {
+			if p, ok := vs.ValuePtr().mappable.(interface {
+				PrepareSharedPin(memmap.MappableRange) error
+			}); ok {
+				if err := p.PrepareSharedPin(vs.mappableRangeOf(vs.Range().Intersect(ar))); err != nil {
+					mm.mappingMu.RUnlock()
+					return nil, err
+				}
+			}
+		}
+	}
 	mm.activeMu.Lock()
 	mm.hasPinned = true
 	pseg, pend, perr := mm.getPMAsLocked(ctx, vseg, ar, at, false /* callerIndirectCommit */, true /* forPin */)

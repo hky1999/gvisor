@@ -1103,22 +1103,34 @@ func (k *Kernel) saveMemoryFiles(ctx context.Context, w io.Writer, pagesMetadata
 
 // Preconditions: The kernel must be paused.
 func (k *Kernel) invalidateUnsavableMappings(ctx context.Context) error {
-	invalidated := make(map[*mm.MemoryManager]struct{})
+	return k.visitMemoryManagers(func(memMgr *mm.MemoryManager) error { return memMgr.InvalidateUnsavable(ctx) })
+}
+
+// ResetFilestoreMappings drops translations from older checkpoints that
+// serialized writable local-file PMAs. The restored file may now inherit G0.
+// The caller must have loaded private MF metadata and not started the tasks.
+func (k *Kernel) ResetFilestoreMappings() error {
+	return k.visitMemoryManagers((*mm.MemoryManager).ResetFilestoreMappings)
+}
+
+// The caller must keep the kernel paused.
+func (k *Kernel) visitMemoryManagers(visit func(*mm.MemoryManager) error) error {
+	visited := make(map[*mm.MemoryManager]struct{})
 	k.tasks.mu.RLock()
 	defer k.tasks.mu.RUnlock()
 	for t := range k.tasks.Root.tids {
 		// We can skip locking Task.mu here since the kernel is paused.
 		if memMgr := t.image.MemoryManager; memMgr != nil {
-			if _, ok := invalidated[memMgr]; !ok {
-				if err := memMgr.InvalidateUnsavable(ctx); err != nil {
+			if _, ok := visited[memMgr]; !ok {
+				if err := visit(memMgr); err != nil {
 					return err
 				}
-				invalidated[memMgr] = struct{}{}
+				visited[memMgr] = struct{}{}
 			}
 		}
 		// I really wish we just had a sync.Map of all MMs...
 		if r, ok := t.runState.(*runExecveAfterSiblingExitStop); ok {
-			if err := r.image.MemoryManager.InvalidateUnsavable(ctx); err != nil {
+			if err := visit(r.image.MemoryManager); err != nil {
 				return err
 			}
 		}

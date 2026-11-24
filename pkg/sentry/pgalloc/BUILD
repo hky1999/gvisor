@@ -188,6 +188,7 @@ go_library(
         "//pkg/safemem",
         "//pkg/sentry/arch",
         "//pkg/sentry/checkpoint",
+        "//pkg/sentry/hostfd",
         "//pkg/sentry/hostmm",
         "//pkg/sentry/memmap",
         "//pkg/sentry/state/stateio",
@@ -216,6 +217,7 @@ go_test(
     embed = [":pgalloc"],
     deps = [
         "//pkg/hostarch",
+        "//pkg/safemem",
         "//pkg/sentry/checkpoint",
         "//pkg/sentry/memmap",
         "//pkg/sentry/usage",

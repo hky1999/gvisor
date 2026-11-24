@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"gvisor.dev/gvisor/pkg/hostarch"
+	"gvisor.dev/gvisor/pkg/safemem"
 	"gvisor.dev/gvisor/pkg/sentry/checkpoint"
 	"gvisor.dev/gvisor/pkg/sentry/memmap"
 )
@@ -91,5 +92,61 @@ func TestLazyFilestoreDelta(t *testing.T) {
 	wantFP, err := checkpoint.FingerprintReaderAt(bytes.NewReader(baseData), size)
 	if err != nil || fp != wantFP {
 		t.Errorf("complete fingerprint = %q, want %q (%v)", fp, wantFP, err)
+	}
+}
+
+func TestDualFilestorePageSources(t *testing.T) {
+	const size = 3 * hostarch.PageSize
+	base, err := os.CreateTemp(t.TempDir(), "g0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer base.Close()
+	data := bytes.Repeat([]byte{0x47}, size)
+	clear(data[:hostarch.PageSize])
+	if _, err := base.Write(data); err != nil {
+		t.Fatal(err)
+	}
+	local, err := os.CreateTemp(t.TempDir(), "upper")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer local.Close()
+	if err := local.Truncate(size); err != nil {
+		t.Fatal(err)
+	}
+	f := &MemoryFile{file: local}
+	l := &lazyFilestore{base: base, size: size, mapping: data, source: baselineFile{f}, pages: make(map[uint64]lazyFilestorePage)}
+	f.lazy = l
+	whole := memmap.FileRange{Start: 0, End: size}
+	ro, run := f.ReadBacking(whole)
+	if ro.FD() != int(base.Fd()) || run != whole {
+		t.Fatalf("wrong initial source %v", run)
+	}
+	if _, err := ro.MapInternal(whole, hostarch.Write); err == nil {
+		t.Fatal("writable baseline mapping")
+	}
+	buf := bytes.Repeat([]byte{0x95}, hostarch.PageSize)
+	if err := f.OverwriteInheritedPage(hostarch.PageSize, safemem.BlockSeqOf(safemem.BlockFromSafeSlice(buf))); err != nil {
+		t.Fatal(err)
+	}
+	if l.baseReadBytes != 0 {
+		t.Fatalf("overwrite read %d old bytes", l.baseReadBytes)
+	}
+	for i, file := range []memmap.File{ro, f, ro} {
+		actual, run := f.ReadBacking(memmap.FileRange{Start: uint64(i) * hostarch.PageSize, End: size})
+		if actual != file || run.Length() != hostarch.PageSize {
+			t.Fatalf("page %d source %T range %v", i, actual, run)
+		}
+	}
+	// Simulate a failed full-page write to an inherited zero page.
+	if _, err := local.WriteAt([]byte("partial"), 0); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.DataFD(memmap.FileRange{Start: 0, End: hostarch.PageSize}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := local.ReadAt(buf, 0); err != nil || !bytes.Equal(buf, data[:hostarch.PageSize]) {
+		t.Fatal("stale upper bytes after retry", err)
 	}
 }

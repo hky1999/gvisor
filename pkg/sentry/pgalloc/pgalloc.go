@@ -487,6 +487,14 @@ func NewMemoryFile(file *os.File, opts MemoryFileOpts) (*MemoryFile, error) {
 			return nil, fmt.Errorf("lazy filestore requires a fresh disk-backed file and a page-aligned baseline")
 		}
 		f.lazy = &lazyFilestore{base: opts.LazyBase, size: baseInfo.Size(), pages: make(map[uint64]lazyFilestorePage)}
+		f.lazy.source.MemoryFile = f
+		if baseInfo.Size() > 0 {
+			mapping, err := unix.Mmap(int(opts.LazyBase.Fd()), 0, int(baseInfo.Size()), unix.PROT_READ, unix.MAP_SHARED)
+			if err != nil {
+				return nil, fmt.Errorf("map filestore baseline: %w", err)
+			}
+			f.lazy.mapping = mapping
+		}
 	}
 
 	if f.opts.DelayedEviction == DelayedEvictionEnabled && f.opts.UseHostMemcgPressure {
@@ -553,6 +561,9 @@ func (f *MemoryFile) releaserDestroyLocked() {
 	}
 
 	if f.lazy != nil {
+		if f.lazy.mapping != nil {
+			unix.Munmap(f.lazy.mapping)
+		}
 		f.lazy.base.Close()
 	}
 	f.file.Close()

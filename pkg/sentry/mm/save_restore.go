@@ -41,6 +41,31 @@ func (mm *MemoryManager) InvalidateUnsavable(ctx context.Context) error {
 	return nil
 }
 
+// ResetFilestoreMappings forces saved tmpfs translations to select the
+// current generation. Preserve stable local storage for possible shared pins
+// from older checkpoints, which never serialized a baseline File.
+func (mm *MemoryManager) ResetFilestoreMappings() error {
+	mm.activeMu.Lock()
+	defer mm.activeMu.Unlock()
+	for seg := mm.pmas.FirstSegment(); seg.Ok(); {
+		p := seg.ValuePtr()
+		mf, ok := p.file.(*pgalloc.MemoryFile)
+		if !ok || !mf.UsesLazyFilestore() || p.private {
+			seg = seg.NextSegment()
+			continue
+		}
+		if mm.hasPinned {
+			if _, err := mf.DataFD(seg.fileRange()); err != nil {
+				return err
+			}
+		}
+		ar := seg.Range()
+		mm.invalidateLocked(ar, false, true)
+		seg = mm.pmas.LowerBoundSegment(ar.End)
+	}
+	return nil
+}
+
 // afterLoad is invoked by stateify.
 func (mm *MemoryManager) afterLoad(ctx goContext.Context) {
 	mm.mf = pgalloc.MemoryFileFromContext(ctx)

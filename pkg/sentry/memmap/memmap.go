@@ -102,6 +102,13 @@ type Mappable interface {
 	InvalidateUnsavable(ctx context.Context) error
 }
 
+// TranslationRetry requests work that may invalidate mappings, including in
+// the faulting address space. MM runs it without its active mappings lock,
+// then re-translates from the beginning with fresh PMA iterators.
+type TranslationRetry func() error
+
+func (TranslationRetry) Error() string { return "mapping transition required" }
+
 // Translations are returned by Mappable.Translate.
 type Translation struct {
 	// Source is the translated range in the Mappable.
