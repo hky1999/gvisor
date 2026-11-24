@@ -13,7 +13,7 @@ import struct
 import subprocess
 import time
 
-from publish import compose, fingerprint, fsync_path
+from publish import compose, fingerprint, fsync_path, verify_images
 
 FIEMAP = 0xC020660B
 HEADER = struct.Struct("=QQIIII")
@@ -166,6 +166,27 @@ def plan(origin_size, previous, current):
     return changes, shared
 
 
+def capture_digests(snapshot, snapshot_id):
+    capture = json.loads((snapshot / "capture.json").read_text())
+    if capture["snapshot_id"] != snapshot_id:
+        raise ValueError("wrong process image capture ID")
+    images = capture["images"]
+    if set(images) not in (
+        {"checkpoint.img"},
+        {"checkpoint.img", "pages_meta.img", "pages.img"},
+    ):
+        raise ValueError("unknown capture image set")
+    return images
+
+
+def completed_generation(output, receipt, image):
+    if json.loads((output / "generation.json").read_text()) != receipt:
+        raise ValueError("generation name already in use")
+    verify_images(image, receipt["images"])
+    fsync_path(output.parent)
+    return {"alreadyPublished": True, "id": receipt["snapshot"]["id"]}
+
+
 def publish(origin_dir, parent, previous_dir, snapshot, image, output, mount):
     origin = origin_dir / "filestores/filestore-0"
     parent_file = parent / "filestores/filestore-0"
@@ -187,13 +208,10 @@ def publish(origin_dir, parent, previous_dir, snapshot, image, output, mount):
             "snapshot": current.identity,
             "parent": previous.identity["id"] if previous else None,
             "origin_inode": origin.stat().st_ino,
+            "images": capture_digests(snapshot, current.identity["id"]),
         }
         if output.exists():
-            existing = json.loads((output / "generation.json").read_text())
-            if existing != receipt:
-                raise ValueError("generation name already in use")
-            fsync_path(output.parent)
-            return {"alreadyPublished": True, "id": current.identity["id"]}
+            return completed_generation(output, receipt, image)
         changes, shared = plan(origin.stat().st_size, previous, current)
         entry = dict(current.entry)
         (parent_entry,) = json.loads(
@@ -205,16 +223,22 @@ def publish(origin_dir, parent, previous_dir, snapshot, image, output, mount):
             extents=[dict(r, zero=r["kind"] == "zero") for r in changes],
         )
         elapsed = time.monotonic() - started
-        result = compose(
-            parent_file,
-            snapshot / entry["file"],
-            entry,
-            image,
-            output,
-            mount,
-            origin=origin,
-            receipt=receipt,
-        )
+        try:
+            result = compose(
+                parent_file,
+                snapshot / entry["file"],
+                entry,
+                image,
+                output,
+                mount,
+                origin=origin,
+                receipt=receipt,
+            )
+        except OSError as err:
+            # Concurrent publishers race only on the final directory rename.
+            if err.errno not in (errno.EEXIST, errno.ENOTEMPTY) or not output.is_dir():
+                raise
+            return completed_generation(output, receipt, image)
         return dict(
             result,
             planSeconds=elapsed,

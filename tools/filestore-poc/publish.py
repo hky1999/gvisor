@@ -1,6 +1,7 @@
 """Publish a complete JuiceFS filestore from an immutable base and XFS changes."""
 
 import argparse
+import contextlib
 import ctypes
 import hashlib
 import json
@@ -67,6 +68,34 @@ def fsync_path(path):
         os.fsync(fd)
     finally:
         os.close(fd)
+
+
+def verify_images(image, expected, destination=None):
+    """Verify the bytes being published; reject missing and unexpected artifacts."""
+    if {path.name for path in image.iterdir()} != set(expected):
+        raise ValueError("process image file set differs from the capture")
+    if destination is not None:
+        destination.mkdir()
+    total = 0
+    for name, digest in expected.items():
+        path = image / name
+        if path.is_symlink() or not path.is_file():
+            raise ValueError(f"invalid process image artifact {name}")
+        hasher = hashlib.sha256()
+        with contextlib.ExitStack() as stack:
+            src = stack.enter_context(path.open("rb"))
+            dst = stack.enter_context((destination / name).open("xb")) if destination is not None else None
+            for block in iter(lambda: src.read(1 << 20), b""):
+                hasher.update(block)
+                total += len(block)
+                if dst is not None:
+                    dst.write(block)
+            if hasher.hexdigest() != digest:
+                raise ValueError(f"process image digest mismatch for {name}")
+            if dst is not None:
+                dst.flush()
+                os.fsync(dst.fileno())
+    return total
 
 
 def compose(base, delta_file, entry, image, output, mount, *, origin=None, receipt=None):
@@ -136,12 +165,17 @@ def compose(base, delta_file, entry, image, output, mount, *, origin=None, recei
 
         sidecar = filestores / "filestores.json"
         sidecar.write_text(json.dumps({"filestores": [{k: v for k, v in entry.items() if k != "delta"}]}) + "\n")
-        shutil.copytree(image, pending / "image")
-        image_bytes = 0
-        for path in (pending / "image").rglob("*"):
-            if path.is_file():
-                image_bytes += path.stat().st_size
-                fsync_path(path)
+        if receipt is not None:
+            if fingerprint(target) != entry["fingerprint"]:
+                raise ValueError("composed filestore differs from capture fingerprint")
+            image_bytes = verify_images(image, receipt["images"], pending / "image")
+        else:
+            shutil.copytree(image, pending / "image")
+            image_bytes = 0
+            for path in (pending / "image").rglob("*"):
+                if path.is_file():
+                    image_bytes += path.stat().st_size
+                    fsync_path(path)
         if receipt is not None:
             marker = pending / "generation.json"
             marker.write_text(json.dumps(receipt) + "\n")

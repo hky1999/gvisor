@@ -62,6 +62,13 @@ python3 tools/filestore-poc/extent_publish.py \
 
 For generation one, pass the origin as the parent and omit `--previous`.
 The snapshot flag records a per-capture ID and sorted ranges owned by XFS.
+After the save RPC, runsc hashes the completed local process image and binds the
+digests to that ID in capture.json before publishing filestores.json. Publication
+verifies the exact file set and hashes the bytes copied to the staging directory.
+Uncompressed images include checkpoint.img, pages_meta.img, and pages.img.
+Compressed images put their state in checkpoint.img. Older unbound local captures
+need the matching earlier publisher; existing complete generations remain
+readable with their compatible runtime.
 A local hole in an owned range reads as zero. An unowned range inside the
 baseline inherits it. Each generation's process image and memory pages come
 from its matching image directory. Only the private filestore uses range-based

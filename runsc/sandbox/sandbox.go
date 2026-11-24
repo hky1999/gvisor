@@ -17,6 +17,7 @@ package sandbox
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -1864,6 +1865,9 @@ func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, 
 		return err
 	}
 
+	if opts.ExtentSnapshot && (len(opts.FilestoreSnapshotFiles) != 1 || len(bundles) != 0) {
+		return fmt.Errorf("extent publication requires one filestore and a local process image")
+	}
 	if opts.FilestoreSnapshotDir != "" {
 		if !opts.SkipFilestorePages {
 			return fmt.Errorf("--filestore-snapshot-dir requires --skip-filestore-pages")
@@ -1926,6 +1930,13 @@ func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, 
 		if err := opts.FilestoreSidecarFile.Close(); err != nil {
 			return fmt.Errorf("failed to close filestores.json.tmp: %w", err)
 		}
+		// The RPC has finished. With --leave-running the guest can write again.
+		// Bind the actual memory image bytes before exposing the frozen manifest.
+		if opts.ExtentSnapshot {
+			if err := writeExtentImageManifest(opts.FilestoreSnapshotDir, imagePath, opt.FilestoreSnapshot[0].SnapshotID, opt.HavePagesFile); err != nil {
+				return fmt.Errorf("binding process image to filestore snapshot: %w", err)
+			}
+		}
 		final := filepath.Join(opts.FilestoreSnapshotDir, "filestores.json")
 		if err := os.Rename(opts.FilestoreSidecarFile.Name(), final); err != nil {
 			return fmt.Errorf("failed to rename filestores.json into place: %w", err)
@@ -1946,6 +1957,41 @@ func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, 
 	}
 	s.Checkpointed = true
 	return nil
+}
+
+// writeExtentImageManifest runs outside the sentry freeze window. The final
+// filestores.json rename and directory fsync commit both local manifests.
+func writeExtentImageManifest(snapshotDir, imageDir, id string, externalPages bool) error {
+	names := []string{checkpointfiles.StateFileName}
+	if externalPages {
+		names = append(names, checkpointfiles.PagesMetadataFileName, checkpointfiles.PagesFileName)
+	}
+	digests := make(map[string]string, len(names))
+	for _, name := range names {
+		f, err := os.Open(filepath.Join(imageDir, name))
+		if err != nil {
+			return err
+		}
+		hash := sha256.New()
+		_, err = io.Copy(hash, f)
+		f.Close()
+		if err != nil {
+			return err
+		}
+		digests[name] = fmt.Sprintf("%x", hash.Sum(nil))
+	}
+	marker, err := os.OpenFile(filepath.Join(snapshotDir, "capture.json"), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return err
+	}
+	defer marker.Close()
+	if err := json.NewEncoder(marker).Encode(struct {
+		SnapshotID string            `json:"snapshot_id"`
+		Images     map[string]string `json:"images"`
+	}{id, digests}); err != nil {
+		return err
+	}
+	return marker.Sync()
 }
 
 func (s *Sandbox) setCheckpointOptsFiles(conf *config.Config, imagePath string, opts CheckpointOpts, bundles []fscheckpoint.Bundle, opt *control.SaveOpts) error {

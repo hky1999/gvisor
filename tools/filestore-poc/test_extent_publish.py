@@ -1,6 +1,10 @@
 """Run on a reflink-capable XFS with TMPDIR on that filesystem."""
 
+from concurrent.futures import ThreadPoolExecutor
 import contextlib
+import errno
+import threading
+from unittest import mock
 import fcntl
 import hashlib
 import json
@@ -55,7 +59,7 @@ class Generations(unittest.TestCase):
         (directory / "filestores.json").write_text(json.dumps(dict(filestores=[entry])))
         return LocalSnapshot(directory, self.origin, self.stack)
 
-    def test_publish_and_retry(self):
+    def publication(self):
         origin = self.root / "g0"
         stores = origin / "filestores"
         stores.mkdir(parents=True)
@@ -69,7 +73,8 @@ class Generations(unittest.TestCase):
         (self.root / ".stats").touch()
         images = self.root / "i1"
         images.mkdir()
-        (images / "pages.img").write_bytes(os.urandom(PAGE))
+        for name in ("checkpoint.img", "pages.img", "pages_meta.img"):
+            (images / name).write_bytes(os.urandom(PAGE))
         self.owned.add(3)
         os.pwrite(self.live.fileno(), b"B" * PAGE, 3 * PAGE)
         self.capture(1)
@@ -78,8 +83,17 @@ class Generations(unittest.TestCase):
         saved = json.loads(manifest.read_text())
         saved["filestores"][0]["fingerprint"] = entry["fingerprint"]
         manifest.write_text(json.dumps(saved))
-        output = self.root / "g1"
-        args = origin, origin, None, first, images, output, self.root
+        hashes = {
+            p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in images.iterdir()
+        }
+        (first / "capture.json").write_text(
+            json.dumps(dict(snapshot_id="1", images=hashes))
+        )
+        return origin, origin, None, first, images, self.root / "g1", self.root
+
+    def test_publish_and_retry(self):
+        args = self.publication()
+        origin, _, _, snap, images, output, mount = args
         self.assertEqual(publish(*args)["deltaBytes"], PAGE)
         self.assertTrue(publish(*args)["alreadyPublished"])
         expected = bytearray(self.origin.read_bytes())
@@ -90,8 +104,89 @@ class Generations(unittest.TestCase):
             (images / "pages.img").read_bytes(),
         )
         self.capture(2)
+        binding = json.loads((snap / "capture.json").read_text())
+        binding["snapshot_id"] = "2"
+        (self.root / "2/capture.json").write_text(json.dumps(binding))
         with self.assertRaisesRegex(ValueError, "already in use"):
-            publish(origin, origin, None, self.root / "2", images, output, self.root)
+            publish(origin, origin, None, self.root / "2", images, output, mount)
+
+    def test_mismatched_memory_artifacts(self):
+        args = self.publication()
+        image, output = args[4:6]
+        for name in ("checkpoint.img", "pages_meta.img", "pages.img"):
+            file = image / name
+            original = file.read_bytes()
+            file.write_bytes(os.urandom(len(original)))
+            with self.assertRaisesRegex(ValueError, "digest mismatch"):
+                publish(*args)
+            self.assertFalse(output.exists())
+            file.unlink()
+            with self.assertRaisesRegex(ValueError, "file set"):
+                publish(*args)
+            file.write_bytes(original)
+        (image / "extra").touch()
+        with self.assertRaisesRegex(ValueError, "file set"):
+            publish(*args)
+        self.assertEqual(list(self.root.glob(".g1.pending-*")), [])
+        binding = args[3] / "capture.json"
+        bad = json.loads(binding.read_text())
+        bad["snapshot_id"] = "unrelated"
+        binding.write_text(json.dumps(bad))
+        with self.assertRaisesRegex(ValueError, "capture ID"):
+            publish(*args)
+
+    def test_concurrent_publish(self):
+        import publish as publisher
+
+        args = self.publication()
+        barrier = threading.Barrier(2)
+        original = publisher.fingerprint
+
+        def meet(path):
+            if path.name == "filestore-0" and ".pending-" in str(path):
+                barrier.wait(timeout=5)
+            return original(path)
+
+        with (
+            mock.patch.object(publisher, "fingerprint", side_effect=meet),
+            ThreadPoolExecutor(2) as pool,
+        ):
+            results = list(pool.map(lambda _: publish(*args), range(2)))
+        self.assertEqual(sum(r.get("alreadyPublished", False) for r in results), 1)
+        self.assertEqual(list(self.root.glob(".g1.pending-*")), [])
+
+    def test_enospc_and_post_rename_retry(self):
+        args = self.publication()
+        with mock.patch(
+            "publish.range_copy", side_effect=OSError(errno.ENOSPC, "full")
+        ):
+            with self.assertRaises(OSError):
+                publish(*args)
+        self.assertFalse(args[5].exists())
+        from publish import fsync_path
+
+        def fail_after_rename(path):
+            if path == args[5].parent and args[5].exists():
+                raise OSError(errno.EIO, "commit acknowledgement lost")
+            fsync_path(path)
+
+        with mock.patch("publish.fsync_path", side_effect=fail_after_rename):
+            with self.assertRaises(OSError):
+                publish(*args)
+        self.assertTrue(publish(*args)["alreadyPublished"])
+
+    def test_sparse_fiemap_pagination(self):
+        size = 1400 * PAGE
+        self.live.truncate(size)
+        for n in range(0, 1400, 2):
+            os.pwrite(self.live.fileno(), b"A" * PAGE, n * PAGE)
+            self.owned.add(n)
+        first = self.capture(1)
+        self.assertGreater(len(first.map), 512)
+        os.pwrite(self.live.fileno(), b"B" * PAGE, 1398 * PAGE)
+        second = self.capture(2)
+        changes, _ = plan(self.origin.stat().st_size, first, second)
+        self.assertEqual(changes, [dict(kind="data", offset=1398 * PAGE, length=PAGE)])
 
     def test_randomized_oracle(self):
         rng = random.Random(311)
