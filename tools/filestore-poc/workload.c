@@ -47,25 +47,32 @@ static void report(uint64_t *samples, unsigned operations, uint64_t elapsed, uin
            samples[(operations * 99 + 99) / 100 - 1] / 1e3, operations * 1e9 / elapsed, checksum);
 }
 
-static void cold_read(int sequential, unsigned operations) {
+enum read_mode { RANDOM_MMAP, SEQUENTIAL_PREAD, SEQUENTIAL_MMAP };
+
+static void cold_read(enum read_mode mode, unsigned operations) {
     int fd = open("/payload", O_RDONLY);
     check(fd >= 0, "open payload");
     struct stat info;
     check(fstat(fd, &info) == 0 && info.st_size >= 2L*MIB, "stat payload");
+    int sequential = mode != RANDOM_MMAP;
     size_t chunk = sequential ? 256 * 1024 : PAGE;
     unsigned char *buffer = malloc(chunk);
     uint64_t *samples = malloc(operations * sizeof(*samples));
     check(buffer && samples, "allocate benchmark buffers");
     // The mmap sequence also tests the platform fault path directly.
-    volatile const unsigned char *mapped = sequential ? NULL :
+    check(!sequential || (uint64_t)operations * chunk <= (uint64_t)info.st_size, "sequential range");
+    volatile const unsigned char *mapped = mode == SEQUENTIAL_PREAD ? NULL :
         mmap(NULL, info.st_size, PROT_READ, MAP_SHARED, fd, 0);
-    check(sequential || mapped != MAP_FAILED, "map payload");
+    check(mapped != MAP_FAILED, "map payload");
     uint64_t checksum = 0, seed = 0xdacf114f0912feabULL;
     uint64_t started = now();
     for (unsigned i = 0; i < operations; ++i) {
         off_t offset = sequential ? (off_t)i * chunk : (off_t)(step(&seed) % (info.st_size / PAGE)) * PAGE;
         uint64_t begin = now();
-        if (sequential) {
+        if (mode == SEQUENTIAL_MMAP) {
+            for (size_t j = 0; j < chunk; j += PAGE)
+                checksum = checksum * 13 + mapped[offset + j];
+        } else if (sequential) {
             check(pread(fd, buffer, chunk, offset) == chunk, "read sequential");
             checksum = (checksum * 13) + buffer[0];
         } else {
@@ -177,21 +184,50 @@ static void aliases(int verify) {
     puts("{\"readOnlyAlias\":true,\"mmapByteWrite\":true,\"wholePagePwrite\":true}");
 }
 
+static void interior_hole(const char *action) {
+    int seed = strcmp(action, "hole-seed") == 0;
+    int fd = open("/hole-probe", seed ? O_CREAT | O_EXCL | O_RDWR : O_RDWR, 0600);
+    check(fd >= 0, "open hole probe");
+    unsigned char pages[3 * PAGE];
+    memset(pages, 0x57, sizeof(pages));
+    if (seed) {
+        check(write(fd, pages, sizeof(pages)) == sizeof(pages), "seed hole probe");
+    } else {
+        int supported = 1;
+        if (strcmp(action, "hole-mutate") == 0 && fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, PAGE, PAGE) < 0) {
+            check(errno == EOPNOTSUPP || errno == ENOSYS, "guest punch hole");
+            supported = 0;
+        }
+        if (strcmp(action, "hole-unavailable") == 0) supported = 0;
+        unsigned char actual[sizeof(pages)];
+        if (supported) memset(pages + PAGE, 0, PAGE);
+        struct stat st;
+        check(fstat(fd, &st) == 0 && st.st_size == sizeof(actual), "hole file size");
+        check(pread(fd, actual, sizeof(actual), 0) == sizeof(actual) &&
+              memcmp(actual, pages, sizeof(actual)) == 0, "hole and both neighbours");
+        printf("{\"guestPunchSupported\":%s}\n", supported ? "true" : "false");
+    }
+    check(close(fd) == 0, "close hole probe");
+}
+
 int main(int argc, char **argv) {
     if (argc < 2) return 2;
     unsigned operations = argc == 3 ? strtoul(argv[2], NULL, 10) : 1;
     if (operations == 0 || operations > 65536) return 2;
     if (strcmp(argv[1], "seed") == 0) {
         make_warm();
+        interior_hole("hole-seed");
         int fd=open("/alias-pages",O_CREAT|O_EXCL|O_WRONLY,0600);
         unsigned char buf[2*PAGE];
         memset(buf,0x37,sizeof(buf));
         check(fd>=0 && write(fd,buf,sizeof(buf))==sizeof(buf) && close(fd)==0,"seed aliases");
     }
+    else if (strncmp(argv[1], "hole-", 5) == 0) interior_hole(argv[1]);
     else if(strcmp(argv[1],"aliases")==0) aliases(0);
     else if(strcmp(argv[1],"aliases-verify")==0) aliases(1);
-    else if (strcmp(argv[1], "seq") == 0) cold_read(1, operations);
-    else if (strcmp(argv[1], "random-read") == 0) cold_read(0, operations);
+    else if (strcmp(argv[1], "seq") == 0) cold_read(SEQUENTIAL_PREAD, operations);
+    else if (strcmp(argv[1], "seq-mmap") == 0) cold_read(SEQUENTIAL_MMAP, operations);
+    else if (strcmp(argv[1], "random-read") == 0) cold_read(RANDOM_MMAP, operations);
     else if (strcmp(argv[1], "warm-write") == 0) warm_write(operations, 0);
     else if (strcmp(argv[1], "fsync-write") == 0) warm_write(operations, 1);
     else if (strcmp(argv[1], "mmap-mutate") == 0) shared_mmap(0);

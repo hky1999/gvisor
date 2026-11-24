@@ -252,25 +252,31 @@ func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string
 	if f.file == nil {
 		return 0, "", nil, fmt.Errorf("MemoryFile %p has no backing file to snapshot", f)
 	}
+	started := time.Now()
 	if _, _, errno := unix.Syscall(unix.SYS_IOCTL, dst.Fd(), unix.FICLONE, f.file.Fd()); errno != 0 {
 		return 0, "", nil, fmt.Errorf("FICLONE of filestore backing file to snapshot failed (%w); --filestore-snapshot-dir requires a reflink-capable filesystem (e.g. XFS) for both the backing filestore and the snapshot directory", errno)
 	}
+	cloned := time.Now()
 	if err := dst.Sync(); err != nil {
 		return 0, "", nil, fmt.Errorf("failed to fsync filestore snapshot: %w", err)
 	}
+	synced := time.Now()
 	fi, err := dst.Stat()
 	if err != nil {
 		return 0, "", nil, fmt.Errorf("failed to stat filestore snapshot: %w", err)
 	}
 	var fp string
 	if f.lazy != nil {
-		delta, fp, err = f.lazy.snapshotDelta(dst, fi.Size())
+		// The live inode and clone still have identical contents. Publish the
+		// durable clone, but reuse cached live pages when classifying the delta.
+		delta, fp, err = f.lazy.snapshotDelta(f.file, fi.Size())
 	} else {
 		fp, err = checkpoint.FingerprintFile(dst)
 	}
 	if err != nil {
 		return 0, "", nil, fmt.Errorf("failed to fingerprint filestore snapshot: %w", err)
 	}
+	log.Infof("Filestore snapshot timing: clone_us=%d sync_us=%d scan_and_fingerprint_us=%d", cloned.Sub(started).Microseconds(), synced.Sub(cloned).Microseconds(), time.Since(synced).Microseconds())
 	f.externalSavedSize = uint64(fi.Size())
 	f.externalSavedFingerprint = fp
 	return f.externalSavedSize, f.externalSavedFingerprint, delta, nil
