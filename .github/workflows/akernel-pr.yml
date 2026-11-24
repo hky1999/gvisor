@@ -72,7 +72,7 @@ jobs:
       run: |
         set -euo pipefail
         make test OPTIONS="-c opt --test_timeout=600" \
-          TARGETS="//runsc/config:config_test //runsc/boot:boot_test //runsc/container:filestore_snapshot_test //runsc/container:state_file_inventory_test //runsc/specutils:specutils_test //runsc/container:serialization_test"
+          TARGETS="//pkg/sentry/checkpoint:checkpoint_test //pkg/sentry/fsimpl/tmpfs:tmpfs_test //pkg/sentry/mm:mm_test //pkg/sentry/pgalloc:pgalloc_test //runsc/sandbox:sandbox_test //runsc/config:config_test //runsc/boot:boot_test //runsc/container:filestore_snapshot_test //runsc/container:state_file_inventory_test //runsc/specutils:specutils_test //runsc/container:serialization_test"
         # The canonical build container has no sudo. Build there, then use the
         # existing make sudo wrapper to execute the test on the privileged host.
         make sudo BAZEL_OPTIONS="${BAZEL_OPTIONS} -c opt" TARGETS="//runsc/cmd:cmd_test" \
