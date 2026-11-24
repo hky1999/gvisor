@@ -372,21 +372,37 @@ func newTestMemoryFileDecommit(t *testing.T, path string, decommit bool) *Memory
 	return mf
 }
 
-func hostFilePatternOk(t *testing.T, path string, fill byte, length uint64) bool {
+// checkDestroyedRange waits for the asynchronous releaser to close the backing
+// file, then checks only the allocated range through a fresh host descriptor.
+func checkDestroyedRange(t *testing.T, mf *MemoryFile, path string, fr memmap.FileRange, want byte) {
 	t.Helper()
-	got, err := os.ReadFile(path)
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		mf.mu.Lock()
+		released := mf.file == nil
+		mf.mu.Unlock()
+		if released {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("timed out waiting for MemoryFile destruction")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	f, err := os.Open(path)
 	if err != nil {
-		t.Fatalf("reading host file %q: %v", path, err)
+		t.Fatal(err)
 	}
-	if uint64(len(got)) < length {
-		t.Fatalf("host file %q is %d bytes, want >= %d", path, len(got), length)
+	defer f.Close()
+	got := make([]byte, fr.Length())
+	if _, err := f.ReadAt(got, int64(fr.Start)); err != nil {
+		t.Fatal(err)
 	}
-	for i := uint64(0); i < length; i++ {
-		if got[i] != fill {
-			return false
+	for off, value := range got {
+		if value != want {
+			t.Fatalf("host backing at offset %d after Destroy: got %#x, want %#x", fr.Start+uint64(off), value, want)
 		}
 	}
-	return true
 }
 
 // TestExternalContentSurvivesDestroy verifies the fd-hold invariant: after
@@ -409,18 +425,7 @@ func TestExternalContentSurvivesDestroy(t *testing.T) {
 	}
 	mf.Destroy()
 
-	// Destroy is asynchronous (releaser goroutine). Poll: the contents must
-	// remain intact; the pre-fix behavior would punch holes (read as zeros).
-	deadline := time.Now().Add(5 * time.Second)
-	for {
-		if !hostFilePatternOk(t, path, fill, size) {
-			t.Fatalf("host file contents were destroyed despite ExternalContent save (decommitted on destroy)")
-		}
-		if time.Now().After(deadline) {
-			return
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
+	checkDestroyedRange(t, mf, path, fr, fill)
 }
 
 // TestDefaultSaveStillDecommitsOnDestroy is the control for the above: the
@@ -442,17 +447,7 @@ func TestDefaultSaveStillDecommitsOnDestroy(t *testing.T) {
 	}
 	mf.Destroy()
 
-	// Poll until the releaser decommits (contents become holes/zeros).
-	deadline := time.Now().Add(5 * time.Second)
-	for {
-		if !hostFilePatternOk(t, path, fill, size) {
-			return // decommitted as expected
-		}
-		if time.Now().After(deadline) {
-			t.Fatalf("host file contents survived Destroy after a default (non-external) save; DecommitOnDestroy regression")
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
+	checkDestroyedRange(t, mf, path, fr, 0)
 }
 
 // TestExternalContentSnapshotCredentialsResetPerSaveWindow verifies that the

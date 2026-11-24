@@ -102,7 +102,7 @@ jobs:
         path: ${{ runner.temp }}/inventory-evidence
         if-no-files-found: ignore
 
-    - name: Race-test upstream metadata concurrency
+    - name: Race-test metadata and filestore concurrency
       if: matrix.arch == 'amd64'
       shell: bash
       env:
@@ -110,7 +110,7 @@ jobs:
       run: |
         set -euo pipefail
         make test OPTIONS="-c opt --test_timeout=600 --runs_per_test=3" \
-          TARGETS="//runsc/container:state_file_inventory_test //runsc/specutils:specutils_test"
+          TARGETS="//runsc/container:state_file_inventory_test //runsc/specutils:specutils_test //pkg/sentry/pgalloc:pgalloc_test //pkg/sentry/fsimpl/tmpfs:tmpfs_test"
 
     - name: Upload inventory race test logs
       if: always() && matrix.arch == 'amd64'
