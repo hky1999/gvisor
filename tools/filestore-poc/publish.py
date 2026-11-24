@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import shutil
 import time
+import tempfile
 
 PAGE = 4096
 COUNTERS = {
@@ -68,15 +69,14 @@ def fsync_path(path):
         os.close(fd)
 
 
-def compose(base, delta_file, entry, image, output, mount):
+def compose(base, delta_file, entry, image, output, mount, *, origin=None, receipt=None):
     started = time.monotonic()
     delta = entry["delta"]
     size = entry["size_bytes"]
     if base.stat().st_size != delta["base_size"] or fingerprint(base) != delta["base_fingerprint"]:
         raise ValueError("wrong baseline for filestore delta")
     stages = {"before": stats(mount)}
-    pending = output.with_name("." + output.name + ".pending")
-    pending.mkdir()
+    pending = Path(tempfile.mkdtemp(prefix="."+output.name+".pending-", dir=output.parent))
     try:
         filestores = pending / "filestores"
         filestores.mkdir()
@@ -93,6 +93,9 @@ def compose(base, delta_file, entry, image, output, mount):
                 if not previous_end <= offset < offset + length <= size:
                     raise ValueError(f"bad filestore extent {extent}")
                 previous_end = offset + length
+                if extent.get("kind") == "origin":
+                    extents.append((offset, length, "origin"))
+                    continue
                 if extent.get("zero"):
                     extents.append((offset, length, None))
                     zero_length += length
@@ -119,7 +122,10 @@ def compose(base, delta_file, entry, image, output, mount):
             dest.truncate(size)
             with packed.open("rb", buffering=0) as pack:
                 for offset, length, pack_offset in extents:
-                    if pack_offset is None:
+                    if pack_offset == "origin":
+                        with origin.open("rb", buffering=0) as original:
+                            range_copy(original.fileno(), dest.fileno(), length, offset, offset)
+                    elif pack_offset is None:
                         punch(dest.fileno(), offset, length)
                     else:
                         range_copy(pack.fileno(), dest.fileno(), length, pack_offset, offset)
@@ -136,6 +142,10 @@ def compose(base, delta_file, entry, image, output, mount):
             if path.is_file():
                 image_bytes += path.stat().st_size
                 fsync_path(path)
+        if receipt is not None:
+            marker = pending / "generation.json"
+            marker.write_text(json.dumps(receipt) + "\n")
+            fsync_path(marker)
         for path in (pending / "image", sidecar, filestores, pending):
             fsync_path(path)
         pending.rename(output)

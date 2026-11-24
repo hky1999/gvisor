@@ -164,6 +164,38 @@ func (l *lazyFilestore) markCleared(fr memmap.FileRange) {
 	}
 }
 
+// freezeLayer captures the interpretation of the immutable clone. It never
+// reads candidate page contents; only the existing restore fingerprint is sampled.
+func (l *lazyFilestore) freezeLayer(clone *os.File, size int64, id string) (*checkpoint.FilestoreDelta, string, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	var st unix.Stat_t
+	if err := unix.Fstat(int(l.base.Fd()), &st); err != nil {
+		return nil, "", err
+	}
+	layer := &checkpoint.FrozenLayer{SnapshotID: id, BaseInode: st.Ino, BaseSize: l.size, BaseFingerprint: l.baseHash}
+	offsets := make([]uint64, 0, len(l.pages))
+	for off := range l.pages {
+		if off < uint64(size) {
+			offsets = append(offsets, off)
+		}
+	}
+	sort.Slice(offsets, func(i, j int) bool { return offsets[i] < offsets[j] })
+	for _, off := range offsets {
+		length := min(int64(hostarch.PageSize), size-int64(off))
+		if n := len(layer.LocalRanges); n > 0 {
+			last := &layer.LocalRanges[n-1]
+			if last.Offset+last.Length == int64(off) {
+				last.Length += length
+				continue
+			}
+		}
+		layer.LocalRanges = append(layer.LocalRanges, checkpoint.FilestoreExtent{Offset: int64(off), Length: length})
+	}
+	fp, err := checkpoint.FingerprintReaderAt(lazyFilestoreView{layer: l, local: clone}, size)
+	return &checkpoint.FilestoreDelta{Frozen: layer}, fp, err
+}
+
 // snapshotDelta reads dirty candidates through the live inode and its page cache.
 // All writers, including shared mappings, must stay quiesced through this call.
 func (l *lazyFilestore) snapshotDelta(frozenLive *os.File, size int64) (*checkpoint.FilestoreDelta, string, error) {

@@ -71,6 +71,7 @@ type State struct {
 // FilestoreSnapshotTarget identifies one filestore snapshot destination for
 // the Save RPC's FilePayload.
 type FilestoreSnapshotTarget struct {
+	SnapshotID string                `json:"snapshot_id,omitempty"`
 	ResourceID checkpoint.ResourceID `json:"resource_id"`
 	// Name is the artifact file name the destination will get in the
 	// snapshot directory (e.g. "filestore-0"); it is recorded in the
@@ -277,9 +278,10 @@ func setSaveOptsForLocalCheckpointFiles(o *SaveOpts, saveOpts *state.SaveOpts) e
 			return err
 		}
 		saveOpts.FilestoreSnapshots = append(saveOpts.FilestoreSnapshots, checkpoint.FilestoreSnapshot{
-			ID:   t.ResourceID,
-			Name: t.Name,
-			Dest: dest.ReleaseToFile("filestore snapshot dest"),
+			SnapshotID: t.SnapshotID,
+			ID:         t.ResourceID,
+			Name:       t.Name,
+			Dest:       dest.ReleaseToFile("filestore snapshot dest"),
 		})
 	}
 	if haveFilestoreSidecar {

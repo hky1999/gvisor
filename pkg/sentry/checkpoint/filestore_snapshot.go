@@ -32,6 +32,8 @@ import (
 // It is defined here (rather than in pkg/sentry/state) so that both
 // pkg/sentry/kernel and pkg/sentry/state can use it without an import cycle.
 type FilestoreSnapshot struct {
+	// SnapshotID requests a frozen ownership map for adjacent-snapshot publication.
+	SnapshotID string
 	// ID identifies the private MemoryFile to snapshot.
 	ID ResourceID
 	// Name is the artifact file name the destination will get in the
@@ -67,8 +69,20 @@ type FilestoreSidecarEntry struct {
 	Delta *FilestoreDelta `json:"delta,omitempty"`
 }
 
-// FilestoreDelta lists the ranges to replace in the immutable baseline.
+// FrozenLayer describes ownership at the instant of the XFS reflink.
+type FrozenLayer struct {
+	SnapshotID      string `json:"snapshot_id"`
+	BaseInode       uint64 `json:"base_inode"`
+	BaseFingerprint string `json:"base_fingerprint"`
+	BaseSize        int64  `json:"base_size"`
+	// Every byte inside these ranges resolves through the local snapshot.
+	// A hole there reads as zero. Outside the ranges, inherit up to BaseSize.
+	LocalRanges []FilestoreExtent `json:"local_ranges"`
+}
+
+// FilestoreDelta describes either a legacy classified delta or a frozen layer.
 type FilestoreDelta struct {
+	Frozen          *FrozenLayer      `json:"frozen,omitempty"`
 	BaseFingerprint string            `json:"base_fingerprint"`
 	BaseSize        int64             `json:"base_size"`
 	BaseReadBytes   uint64            `json:"base_read_bytes"`

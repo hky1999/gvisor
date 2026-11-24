@@ -40,6 +40,7 @@ type Checkpoint struct {
 	excludeCommittedZeroPages bool
 	skipFilestorePages        bool
 	filestoreSnapshotDir      string
+	extentSnapshot            bool
 	cudaCheckpointPath        string
 	cudaCheckpointSequential  bool
 	saveRestoreExecArgv       string
@@ -77,6 +78,7 @@ func (c *Checkpoint) SetFlags(f *flag.FlagSet) {
 	f.BoolVar(&c.excludeCommittedZeroPages, "exclude-committed-zero-pages", false, "exclude committed zero-filled pages from checkpoint")
 	f.BoolVar(&c.skipFilestorePages, "skip-filestore-pages", false, "skip saving page contents of private (disk-backed) MemoryFiles; only segment metadata is saved and the backing host filestore files must be captured out-of-band and adopted on restore (experimental)")
 	f.StringVar(&c.filestoreSnapshotDir, "filestore-snapshot-dir", "", "directory in which reflink (FICLONE) snapshots of the writable-layer filestores are written inside the checkpoint's freeze window, together with a filestores.json artifact manifest. Requires --skip-filestore-pages, a fresh (empty) directory, and a reflink-capable filesystem (e.g. XFS); valid with --leave-running (snapshots and metadata describe the same instant). Restores adopt the directory via --filestore-adopt-dir (experimental)")
+	f.BoolVar(&c.extentSnapshot, "filestore-extent-snapshot", false, "capture local ownership ranges for asynchronous adjacent XFS snapshot comparison")
 	f.BoolVar(&c.direct, "direct", false, "use O_DIRECT for writing checkpoint pages file")
 	f.StringVar(&c.cudaCheckpointPath, "cuda-checkpoint-path", "", "path to the cuda-checkpoint binary in the container")
 	f.BoolVar(&c.cudaCheckpointSequential, "cuda-checkpoint-sequential", false, "run cuda-checkpoint sequentially in the container")
@@ -120,7 +122,11 @@ func (c *Checkpoint) Execute(_ context.Context, f *flag.FlagSet, args ...any) su
 		util.Fatalf("making directories at path provided: %v", err)
 	}
 
+	if c.extentSnapshot && (c.filestoreSnapshotDir == "" || !c.skipFilestorePages) {
+		util.Fatalf("--filestore-extent-snapshot requires --filestore-snapshot-dir and --skip-filestore-pages")
+	}
 	opts := sandbox.CheckpointOpts{
+		ExtentSnapshot:             c.extentSnapshot,
 		Compression:                c.compression.Level(),
 		Resume:                     c.leaveRunning,
 		Direct:                     c.direct,

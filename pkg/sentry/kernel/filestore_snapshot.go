@@ -48,7 +48,7 @@ func (k *Kernel) snapshotFilestores(mfsToSave map[checkpoint.ResourceID]*pgalloc
 		if mf == nil {
 			return nil, fmt.Errorf("filestore snapshot target %+v has no matching private memory file; the caller's mount enumeration is inconsistent with the sandbox's", s.ID)
 		}
-		size, fp, delta, err := mf.SnapshotToFd(s.Dest)
+		size, fp, delta, err := mf.SnapshotToFd(s.Dest, s.SnapshotID)
 		if err != nil {
 			return nil, fmt.Errorf("snapshotting filestore %+v failed: %w", s.ID, err)
 		}
