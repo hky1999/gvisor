@@ -15,12 +15,13 @@
 package sandbox
 
 import (
+	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"testing"
 
 	"gvisor.dev/gvisor/runsc/cgroup"
@@ -176,6 +177,48 @@ func TestCalculateCPUNum(t *testing.T) {
 			}
 			if gotPeriod != tc.cpuPeriod {
 				t.Errorf("calculateCPUNum() got cpuPeriod = %d, want %d", gotPeriod, tc.cpuPeriod)
+			}
+		})
+	}
+}
+
+func TestExtentImageManifest(t *testing.T) {
+	for _, external := range []bool{false, true} {
+		t.Run(fmt.Sprintf("externalPages=%t", external), func(t *testing.T) {
+			image, snapshot := t.TempDir(), t.TempDir()
+			names := []string{"checkpoint.img"}
+			if external {
+				names = append(names, "pages_meta.img", "pages.img")
+			}
+			for _, name := range names {
+				if err := os.WriteFile(filepath.Join(image, name), []byte(name), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := writeExtentImageManifest(snapshot, image, "capture-1", external); err != nil {
+				t.Fatal(err)
+			}
+			data, err := os.ReadFile(filepath.Join(snapshot, "capture.json"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			var manifest struct {
+				ID      string            `json:"snapshot_id"`
+				Digests map[string]string `json:"images"`
+			}
+			if err := json.Unmarshal(data, &manifest); err != nil {
+				t.Fatal(err)
+			}
+			if manifest.ID != "capture-1" || len(manifest.Digests) != len(names) {
+				t.Fatalf("unexpected manifest: %s", data)
+			}
+			for _, name := range names {
+				if got, want := manifest.Digests[name], fmt.Sprintf("%x", sha256.Sum256([]byte(name))); got != want {
+					t.Errorf("%s digest %q, want %q", name, got, want)
+				}
+			}
+			if err := writeExtentImageManifest(snapshot, image, "capture-2", external); !errors.Is(err, os.ErrExist) {
+				t.Errorf("overwrite capture: %v", err)
 			}
 		})
 	}

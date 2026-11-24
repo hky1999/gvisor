@@ -15,6 +15,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -1151,4 +1152,43 @@ func TestSignalUnkillablePolicy(t *testing.T) {
 		}()
 		_ = SignalUnkillablePolicy(-1).String()
 	})
+}
+
+func TestFilestoreRestoreModes(t *testing.T) {
+	for _, tc := range []struct {
+		args []string
+		want FilestoreRestoreMode
+	}{
+		{nil, RestoreDefault}, {[]string{"--filestore-lazy-restore"}, RestoreLazy},
+		{[]string{"--filestore-lazy-restore=true"}, RestoreLazy}, {[]string{"--filestore-lazy-restore=false"}, RestoreStandard},
+		{[]string{"--filestore-lazy-restore=standard"}, RestoreStandard}, {[]string{"--filestore-lazy-restore=lazy"}, RestoreLazy},
+	} {
+		fs := flag.NewFlagSet("test", flag.ContinueOnError)
+		RegisterFlags(fs)
+		if err := fs.Parse(tc.args); err != nil {
+			t.Fatal(err)
+		}
+		cfg, err := NewFromFlags(fs)
+		if err != nil || cfg.FilestoreLazyRestore != tc.want {
+			t.Fatalf("parse %v: got %v, %v", tc.args, cfg, err)
+		}
+		again := flag.NewFlagSet("test", flag.ContinueOnError)
+		RegisterFlags(again)
+		if err := again.Parse(cfg.ToFlags()); err != nil {
+			t.Fatal(err)
+		}
+		if got := flag.Get(again.Lookup("filestore-lazy-restore").Value); got != tc.want {
+			t.Errorf("propagated %v, want %v", got, tc.want)
+		}
+	}
+	for raw, want := range map[string]FilestoreRestoreMode{"true": RestoreLazy, "false": RestoreStandard, `"lazy"`: RestoreLazy, `""`: RestoreDefault} {
+		var mode FilestoreRestoreMode
+		if err := json.Unmarshal([]byte(raw), &mode); err != nil || mode != want {
+			t.Errorf("decode %s: %v, %v", raw, mode, err)
+		}
+	}
+	var mode FilestoreRestoreMode
+	if err := mode.Set("typo"); err == nil {
+		t.Fatal("invalid mode accepted")
+	}
 }

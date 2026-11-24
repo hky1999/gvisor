@@ -18,6 +18,7 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -113,7 +114,7 @@ type Config struct {
 
 	// FilestoreLazyRestore uses the adopted root filestore as an immutable
 	// source for a separate local backing file.
-	FilestoreLazyRestore bool `flag:"filestore-lazy-restore"`
+	FilestoreLazyRestore FilestoreRestoreMode `flag:"filestore-lazy-restore"`
 
 	// FilestoreCloneOnAdopt makes restore adopt a reflink (FICLONE) private
 	// copy of each filestore artifact instead of the artifact itself. This
@@ -1510,6 +1511,69 @@ func (p HostSettingsPolicy) String() string {
 	default:
 		panic(fmt.Sprintf("Invalid host settings policy %d", p))
 	}
+}
+
+// FilestoreRestoreMode selects how the root filestore is adopted on restore.
+type FilestoreRestoreMode string
+
+// RestoreDefault retains the default adoption behavior. RestoreStandard explicitly
+// selects it. RestoreLazy uses a read-only base and a local writable backing.
+const (
+	RestoreDefault  FilestoreRestoreMode = ""
+	RestoreStandard FilestoreRestoreMode = "standard"
+	RestoreLazy     FilestoreRestoreMode = "lazy"
+)
+
+func (m FilestoreRestoreMode) String() string {
+	if m == RestoreDefault {
+		return "default"
+	}
+	return string(m)
+}
+
+// Get implements flag.Getter.
+func (m *FilestoreRestoreMode) Get() any { return *m }
+
+// IsBoolFlag preserves the original bare --filestore-lazy-restore invocation.
+func (*FilestoreRestoreMode) IsBoolFlag() bool { return true }
+
+// Set implements flag.Value.
+func (m *FilestoreRestoreMode) Set(v string) error {
+	switch v {
+	case "default":
+		*m = RestoreDefault
+	case "standard":
+		*m = RestoreStandard
+	case "lazy":
+		*m = RestoreLazy
+	default:
+		enabled, err := strconv.ParseBool(v)
+		if err != nil {
+			return fmt.Errorf("unknown filestore restore mode %q", v)
+		}
+		if enabled {
+			*m = RestoreLazy
+		} else {
+			*m = RestoreStandard
+		}
+	}
+	return nil
+}
+
+// UnmarshalJSON also accepts configurations saved with the original boolean flag.
+func (m *FilestoreRestoreMode) UnmarshalJSON(raw []byte) error {
+	var value string
+	if string(raw) == "true" || string(raw) == "false" {
+		return m.Set(string(raw))
+	}
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return err
+	}
+	if value == "" {
+		*m = RestoreDefault
+		return nil
+	}
+	return m.Set(value)
 }
 
 // SidecarReleasePolicy controls sidecar release version enforcement policy.

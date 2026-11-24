@@ -1311,7 +1311,7 @@ func (c *Container) createGoferFilestores(conf *config.Config, ovlConf config.Ov
 
 	// Handle rootfs first.
 	rootfsConf := c.GoferMountConfs[0]
-	if conf.FilestoreLazyRestore {
+	if conf.FilestoreLazyRestore == config.RestoreLazy {
 		if adopter == nil || rootfsConf.Upper != specutils.AnonOverlay {
 			return nil, fmt.Errorf("--filestore-lazy-restore requires --filestore-adopt-dir and a root overlay2 dir")
 		}

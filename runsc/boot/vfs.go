@@ -1812,7 +1812,7 @@ func (c *containerMounter) configureRestore(restoreMnts *restoreMounts) error {
 		local := c.goferFilestoreFDs.removeAsFD().ReleaseToFile("overlay-filestore")
 		conf := c.l.root.conf
 		var base *os.File
-		if conf.FilestoreLazyRestore {
+		if conf.FilestoreLazyRestore == config.RestoreLazy {
 			base = c.goferFilestoreFDs.removeAsFD().ReleaseToFile("filestore-baseline")
 		}
 		mf, loaded, err := createPrivateMemoryFile(local, rootKey, c.containerID, c.l.fsRestore, conf.FilestoreAdoptDir != "" && base == nil, base)

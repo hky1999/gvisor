@@ -66,7 +66,7 @@ func newFilestoreAdopter(conf *config.Config, c *Container) (*filestoreAdopter, 
 	a := &filestoreAdopter{
 		dir:      conf.FilestoreAdoptDir,
 		clone:    conf.FilestoreCloneOnAdopt,
-		readOnly: conf.FilestoreLazyRestore,
+		readOnly: conf.FilestoreLazyRestore == config.RestoreLazy,
 	}
 	if !path.IsAbs(a.dir) {
 		return nil, fmt.Errorf("filestore adopt directory %q must be an absolute path", a.dir)
