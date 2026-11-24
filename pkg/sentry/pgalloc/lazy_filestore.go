@@ -21,8 +21,11 @@ import (
 	"os"
 	"sort"
 
+	"golang.org/x/sys/unix"
 	"gvisor.dev/gvisor/pkg/hostarch"
+	"gvisor.dev/gvisor/pkg/safemem"
 	"gvisor.dev/gvisor/pkg/sentry/checkpoint"
+	"gvisor.dev/gvisor/pkg/sentry/hostfd"
 	"gvisor.dev/gvisor/pkg/sentry/memmap"
 	"gvisor.dev/gvisor/pkg/sync"
 )
@@ -37,8 +40,10 @@ type lazyFilestorePage struct {
 }
 
 type lazyFilestore struct {
-	base *os.File
-	size int64
+	base    *os.File
+	mapping []byte
+	source  baselineFile
+	size    int64
 
 	// mu serializes filling and clearing. It is never held when acquiring
 	// MemoryFile.mu or waiting on Sentry mappings.
@@ -71,15 +76,73 @@ func (f *MemoryFile) ensureLazyRange(fr memmap.FileRange) error {
 		}
 		l.baseReadBytes += uint64(len(buf))
 		hash := sha256.Sum256(buf[:])
-		// The backing starts sparse, and zeroed or reused pages already
-		// have an explicit entry. An inherited zero page can stay sparse.
-		if hash != zeroPageHash {
-			if _, err := f.file.WriteAt(buf[:], int64(offset)); err != nil {
-				return fmt.Errorf("fill local filestore at %d: %w", offset, err)
-			}
+		// Even an inherited zero page may cover a failed partial host write.
+		// Publish the local location only after replacing every byte.
+		if _, err := f.file.WriteAt(buf[:], int64(offset)); err != nil {
+			return fmt.Errorf("fill local filestore at %d: %w", offset, err)
 		}
 		l.pages[offset] = lazyFilestorePage{inherited: true, hash: hash}
 	}
+	return nil
+}
+
+// baselineFile shares allocation references with its owning MemoryFile. Its
+// immutable host mapping can outlive any individual guest translation.
+type baselineFile struct{ *MemoryFile }
+
+func (b *baselineFile) FD() int                                 { return int(b.lazy.base.Fd()) }
+func (b *baselineFile) DataFD(fr memmap.FileRange) (int, error) { return b.FD(), nil }
+func (b *baselineFile) MapInternal(fr memmap.FileRange, at hostarch.AccessType) (safemem.BlockSeq, error) {
+	if at.Write || fr.End > uint64(len(b.lazy.mapping)) {
+		return safemem.BlockSeq{}, unix.EACCES
+	}
+	return safemem.BlockSeqOf(safemem.BlockFromUnsafeSlice(b.lazy.mapping[fr.Start:fr.End])), nil
+}
+
+// ReadBacking returns the longest initial run sharing a backing file.
+// The tmpfs data lock serializes selection with transitions for this inode.
+func (f *MemoryFile) ReadBacking(fr memmap.FileRange) (memmap.File, memmap.FileRange) {
+	l := f.lazy
+	if l == nil {
+		return f, fr
+	}
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	inherited := func(off uint64) bool {
+		_, local := l.pages[off]
+		return off < uint64(l.size) && !local
+	}
+	start := hostarch.PageRoundDown(fr.Start)
+	base := inherited(start)
+	for off := start + hostarch.PageSize; off < fr.End; off += hostarch.PageSize {
+		if inherited(off) != base {
+			fr.End = off
+			break
+		}
+	}
+	if base {
+		return &l.source, fr
+	}
+	return f, fr
+}
+
+// OverwriteInheritedPage commits a completely supplied page without fetching
+// its predecessor. A short write leaves the baseline authoritative.
+func (f *MemoryFile) OverwriteInheritedPage(offset uint64, src safemem.BlockSeq) error {
+	if offset%hostarch.PageSize != 0 || src.NumBytes() != hostarch.PageSize {
+		panic("unaligned inherited page overwrite")
+	}
+	l := f.lazy
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	n, err := hostfd.Pwritev2(int32(f.file.Fd()), src, int64(offset), 0)
+	if err != nil {
+		return err
+	}
+	if n != hostarch.PageSize {
+		return io.ErrShortWrite
+	}
+	l.pages[offset] = lazyFilestorePage{}
 	return nil
 }
 

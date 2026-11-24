@@ -15,6 +15,7 @@
 package tmpfs
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"math"
@@ -74,6 +75,12 @@ type regularFile struct {
 	//
 	// Protected by dataMu.
 	data fsutil.FileRangeSet
+
+	// switching excludes new translations while old aliases are being revoked. Protected by dataMu.
+	switching memmap.MappableRange `state:"nosave"`
+	// A baseline translation may survive until the last mapping is removed.
+	// Protected by dataMu.
+	baselineMapped bool `state:"nosave"`
 
 	// seals represents file seals on this inode.
 	//
@@ -246,6 +253,14 @@ func (rf *regularFile) truncateNoTimeUpdateLocked(newSize uint64) error {
 		return linuxerr.EPERM
 	}
 
+	if rf.inode.fs.mf.UsesLazyFilestore() && newSize%hostarch.PageSize != 0 {
+		rf.dataMu.Unlock()
+		err := rf.PrepareSharedPin(memmap.MappableRange{hostarch.PageRoundDown(newSize), offsetPageEnd(int64(newSize))})
+		if err != nil {
+			return err
+		}
+		rf.dataMu.Lock()
+	}
 	rf.size.Store(newSize)
 	rf.dataMu.Unlock()
 
@@ -304,6 +319,11 @@ func (rf *regularFile) RemoveMapping(ctx context.Context, ms memmap.MappingSpace
 	defer rf.mapsMu.Unlock()
 
 	rf.mappings.RemoveMapping(ms, ar, offset, writable)
+	if rf.inode.fs.mf.UsesLazyFilestore() && rf.mappings.IsEmpty() {
+		rf.dataMu.Lock()
+		rf.baselineMapped = false
+		rf.dataMu.Unlock()
+	}
 
 	if writable {
 		pagesBefore := rf.writableMappingPages
@@ -320,6 +340,53 @@ func (rf *regularFile) RemoveMapping(ctx context.Context, ms memmap.MappingSpace
 // CopyMapping implements memmap.Mappable.CopyMapping.
 func (rf *regularFile) CopyMapping(ctx context.Context, ms memmap.MappingSpace, srcAR, dstAR hostarch.AddrRange, offset uint64, writable bool) error {
 	return rf.AddMapping(ctx, ms, dstAR, offset, writable)
+}
+
+// beginBackingChange serializes first writers. Never call Invalidate with
+// dataMu held: an MM may already hold activeMu while entering Translate.
+func (rf *regularFile) beginBackingChange(mr memmap.MappableRange) {
+	rf.mapsMu.Lock()
+	rf.dataMu.Lock()
+	for seg := rf.data.LowerBoundSegment(mr.Start); seg.Ok() && seg.Start() < mr.End; seg = seg.NextSegment() {
+		fr := seg.FileRangeOf(seg.Range().Intersect(mr))
+		for fr.Start < fr.End {
+			file, run := rf.inode.fs.mf.ReadBacking(fr)
+			if file != rf.inode.fs.mf {
+				rf.switching = mr
+				rf.dataMu.Unlock()
+				rf.mappings.Invalidate(mr, memmap.InvalidateOpts{})
+				return
+			}
+			fr.Start = run.End
+		}
+	}
+	rf.dataMu.Unlock()
+}
+
+func (rf *regularFile) endBackingChange() {
+	rf.dataMu.Lock()
+	rf.switching = memmap.MappableRange{}
+	rf.dataMu.Unlock()
+	rf.mapsMu.Unlock()
+}
+
+// PrepareSharedPin also services a shared first-write fault. A long-term
+// shared pin needs stable storage even if the pin itself is read-only.
+func (rf *regularFile) PrepareSharedPin(mr memmap.MappableRange) error {
+	mf := rf.inode.fs.mf
+	if !mf.UsesLazyFilestore() {
+		return nil
+	}
+	rf.beginBackingChange(mr)
+	defer rf.endBackingChange()
+	rf.dataMu.Lock()
+	defer rf.dataMu.Unlock()
+	for seg := rf.data.LowerBoundSegment(mr.Start); seg.Ok() && seg.Start() < mr.End; seg = seg.NextSegment() {
+		if _, err := mf.DataFD(seg.FileRangeOf(seg.Range().Intersect(mr))); err != nil {
+			return &memmap.BusError{err}
+		}
+	}
+	return nil
 }
 
 // Translate implements memmap.Mappable.Translate.
@@ -384,16 +451,33 @@ func (rf *regularFile) Translate(ctx context.Context, required, optional memmap.
 	const maxTranslateBytes = 2 << 20 // 2 MiB
 	translateRange := maxOptionalRange(required, optional, maxTranslateBytes)
 
+	mf := rf.inode.fs.mf
+	if mf.UsesLazyFilestore() {
+		translateRange = required
+		if rf.switching.Intersect(required).Length() != 0 {
+			return nil, memmap.TranslationRetry(func() error { rf.mapsMu.Lock(); rf.mapsMu.Unlock(); return nil })
+		}
+	}
 	var ts []memmap.Translation
 	var translatedEnd uint64
 	for seg := rf.data.FindSegment(required.Start); seg.Ok() && seg.Start() < required.End; seg, _ = seg.NextNonEmpty() {
 		segMR := seg.Range().Intersect(translateRange)
-		ts = append(ts, memmap.Translation{
-			Source: segMR,
-			File:   rf.inode.fs.mf,
-			Offset: seg.FileRangeOf(segMR).Start,
-			Perms:  hostarch.AnyAccess,
-		})
+		fr := seg.FileRangeOf(segMR)
+		for fr.Start < fr.End {
+			file, run := mf.ReadBacking(fr)
+			perms := hostarch.AnyAccess
+			if file != mf {
+				perms.Write = false
+				rf.baselineMapped = true
+				if at.Write {
+					return nil, memmap.TranslationRetry(func() error { return rf.PrepareSharedPin(required) })
+				}
+			}
+			mr := memmap.MappableRange{segMR.Start, segMR.Start + run.Length()}
+			ts = append(ts, memmap.Translation{Source: mr, File: file, Offset: run.Start, Perms: perms})
+			segMR.Start = mr.End
+			fr.Start = run.End
+		}
 		translatedEnd = segMR.End
 	}
 
@@ -430,7 +514,12 @@ func maxOptionalRange(required, optional memmap.MappableRange, maxBytes uint64) 
 }
 
 // InvalidateUnsavable implements memmap.Mappable.InvalidateUnsavable.
-func (*regularFile) InvalidateUnsavable(context.Context) error {
+func (rf *regularFile) InvalidateUnsavable(context.Context) error {
+	if rf.inode.fs.mf.UsesLazyFilestore() {
+		rf.mapsMu.Lock()
+		rf.mappings.InvalidateAll(memmap.InvalidateOpts{})
+		rf.mapsMu.Unlock()
+	}
 	return nil
 }
 
@@ -630,6 +719,11 @@ func (fd *regularFileFD) pwrite(ctx context.Context, src usermem.IOSequence, off
 	// Perform the write.
 	rw := getRegularFileReadWriter(f, offset, pgalloc.MemoryCgroupIDFromContext(ctx))
 	n, err := src.CopyInTo(ctx, rw)
+	if err == errRevokeBaseline {
+		var extra int64
+		extra, err = rw.writeLazy(ctx, src.DropFirst64(n))
+		n += extra
+	}
 
 	f.inode.touchCMtimeLocked()
 	for {
@@ -697,6 +791,8 @@ func offsetPageEnd(offset int64) uint64 {
 
 // regularFileReadWriter implements safemem.Reader and Safemem.Writer.
 type regularFileReadWriter struct {
+	revoking bool // writer holds mapsMu and has revoked inherited aliases
+
 	file *regularFile
 
 	// Offset into the file to read/write at. Note that this may be
@@ -749,7 +845,9 @@ func (rw *regularFileReadWriter) ReadToBlocks(dsts safemem.BlockSeq) (uint64, er
 		switch {
 		case seg.Ok():
 			// Get internal mappings.
-			ims, err := rw.file.inode.fs.mf.MapInternal(seg.FileRangeOf(seg.Range().Intersect(mr)), hostarch.Read)
+			fr := seg.FileRangeOf(seg.Range().Intersect(mr))
+			file, run := rw.file.inode.fs.mf.ReadBacking(fr)
+			ims, err := file.MapInternal(run, hostarch.Read)
 			if err != nil {
 				return done, err
 			}
@@ -764,6 +862,9 @@ func (rw *regularFileReadWriter) ReadToBlocks(dsts safemem.BlockSeq) (uint64, er
 			}
 
 			// Continue.
+			if run.End < fr.End {
+				continue
+			}
 			seg, gap = seg.NextNonEmpty()
 
 		case gap.Ok():
@@ -785,6 +886,38 @@ func (rw *regularFileReadWriter) ReadToBlocks(dsts safemem.BlockSeq) (uint64, er
 	return done, nil
 }
 
+var errRevokeBaseline = errors.New("inherited alias requires revocation")
+
+// Stage guest bytes before revoking aliases: CopyInTo can hold the caller's
+// activeMu and its source can itself be a mapping of the destination file.
+func (rw *regularFileReadWriter) writeLazy(ctx context.Context, src usermem.IOSequence) (int64, error) {
+	rw.revoking = true
+	defer func() { rw.revoking = false }()
+	buf := make([]byte, min(src.NumBytes(), int64(64<<10)))
+	var total int64
+	for src.NumBytes() > 0 {
+		n, readErr := src.CopyIn(ctx, buf[:min(int64(len(buf)), src.NumBytes())])
+		if n > 0 {
+			mr := memmap.MappableRange{hostarch.PageRoundDown(rw.off), offsetPageEnd(int64(rw.off) + int64(n))}
+			rw.file.beginBackingChange(mr)
+			written, err := rw.WriteFromBlocks(safemem.BlockSeqOf(safemem.BlockFromSafeSlice(buf[:n])))
+			rw.file.endBackingChange()
+			total += int64(written)
+			if err != nil || written < uint64(n) {
+				return total, err
+			}
+		}
+		if readErr != nil {
+			return total, readErr
+		}
+		if n == 0 {
+			return total, io.ErrNoProgress
+		}
+		src = src.DropFirst(n)
+	}
+	return total, nil
+}
+
 // WriteFromBlocks implements safemem.Writer.WriteFromBlocks.
 //
 // Preconditions: rw.file.inode.mu must be held.
@@ -801,6 +934,13 @@ func (rw *regularFileReadWriter) WriteFromBlocks(srcs safemem.BlockSeq) (uint64,
 	end := rw.off + srcs.NumBytes()
 	if end <= rw.off {
 		end = math.MaxInt64
+	}
+
+	// The common case can write directly from the user's blocks. If
+	// Translate has exposed a G0 alias, leave the MM callback before
+	// acquiring mapsMu or invalidating any mappings.
+	if !rw.revoking && (rw.file.baselineMapped || rw.file.switching.Length() != 0) {
+		return 0, errRevokeBaseline
 	}
 
 	// Check if seals prevent either file growth or all writes.
@@ -917,6 +1057,40 @@ exitLoop:
 }
 
 func (rw *regularFileReadWriter) writeToMF(fr memmap.FileRange, srcs safemem.BlockSeq) (uint64, error) {
+	mf := rw.file.inode.fs.mf
+	if mf.UsesLazyFilestore() {
+		var done uint64
+		for fr.Start < fr.End {
+			file, run := mf.ReadBacking(fr)
+			if file != mf {
+				run.End = min(run.End, hostarch.PageRoundDown(run.Start)+hostarch.PageSize)
+				if run.Length() == hostarch.PageSize {
+					if err := mf.OverwriteInheritedPage(run.Start, srcs.TakeFirst64(run.Length())); err != nil {
+						return done, err
+					}
+					done += run.Length()
+					fr.Start = run.End
+					srcs = srcs.DropFirst64(run.Length())
+					continue
+				}
+			}
+			fd, err := mf.DataFD(run)
+			if err != nil {
+				return done, err
+			}
+			n, err := hostfd.Pwritev2(int32(fd), srcs.TakeFirst64(run.Length()), int64(run.Start), 0)
+			done += n
+			if err != nil {
+				return done, err
+			}
+			if n != run.Length() {
+				return done, io.ErrShortWrite
+			}
+			fr.Start = run.End
+			srcs = srcs.DropFirst64(n)
+		}
+		return done, nil
+	}
 	if rw.file.inode.fs.mf.IsDiskBacked() {
 		// Disk-backed files are not prepopulated. The safemem.CopySeq() approach
 		// used below incurs a lot of page faults without page prepopulation, which
