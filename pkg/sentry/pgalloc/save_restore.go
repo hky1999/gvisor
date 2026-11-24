@@ -248,7 +248,7 @@ func (f *MemoryFile) BeginSaveWindow() {
 // SaveTo(ExternalContent) is called on the same MemoryFile afterwards. Both
 // the backing file and dst must be on a filesystem supporting reflink
 // (e.g. XFS/btrfs); otherwise this fails loudly (EOPNOTSUPP/EXDEV).
-func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string, delta *checkpoint.FilestoreDelta, err error) {
+func (f *MemoryFile) SnapshotToFd(dst *os.File, snapshotID string) (size uint64, fingerprint string, delta *checkpoint.FilestoreDelta, err error) {
 	if f.file == nil {
 		return 0, "", nil, fmt.Errorf("MemoryFile %p has no backing file to snapshot", f)
 	}
@@ -266,7 +266,9 @@ func (f *MemoryFile) SnapshotToFd(dst *os.File) (size uint64, fingerprint string
 		return 0, "", nil, fmt.Errorf("failed to stat filestore snapshot: %w", err)
 	}
 	var fp string
-	if f.lazy != nil {
+	if f.lazy != nil && snapshotID != "" {
+		delta, fp, err = f.lazy.freezeLayer(dst, fi.Size(), snapshotID)
+	} else if f.lazy != nil {
 		// The live inode and clone still have identical contents. Publish the
 		// durable clone, but reuse cached live pages when classifying the delta.
 		delta, fp, err = f.lazy.snapshotDelta(f.file, fi.Size())

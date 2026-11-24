@@ -44,3 +44,43 @@ python3 tools/filestore-poc/publish.py BASE_FILE SNAPSHOT_DIR IMAGE_DIR OUTPUT_D
 The publisher uploads the modified ranges, composes the full file with
 `copy_file_range`, applies holes, and publishes the image and its filestore
 together. A new sandbox uses the complete published filestore as its base.
+
+### Successive checkpoints on one running sandbox
+
+Keep the restored sandbox on its original read-only JuiceFS baseline and its
+live XFS inode. Capture a unique image directory and snapshot directory per
+generation, in the same checkpoint call:
+
+```sh
+runsc checkpoint --leave-running --skip-filestore-pages --filestore-extent-snapshot \
+  --filestore-snapshot-dir="$local/s2" --image-path="$local/i2" "$container"
+
+python3 tools/filestore-poc/extent_publish.py \
+  --origin "$shared/g0" --parent "$shared/g1" --previous "$local/s1" \
+  --snapshot "$local/s2" --image "$local/i2" --output "$shared/g2" --mount "$shared_mount"
+```
+
+For generation one, pass the origin as the parent and omit `--previous`.
+The snapshot flag records a per-capture ID and sorted ranges owned by XFS.
+A local hole in an owned range reads as zero. An unowned range inside the
+baseline inherits it. Each generation's process image and memory pages come
+from its matching image directory. Only the private filestore uses range-based
+incremental publication. Use immutable, uniquely named directories and one
+ordered publishing task per lineage. Keep the parent generation and its local
+snapshot until its successor commits. A retry of an already committed
+generation verifies the receipt. Restore directly from the chosen generation.
+
+The experimental publisher supports one filestore per sandbox and a stable
+JuiceFS volume. Keep both frozen files on a managed XFS mount without concurrent
+extent relocation, deduplication or defragmentation. The fast path compares
+synced, known written shared extents by logical offset, device and physical
+address. It replays uncertain ranges conservatively. Snapshot identity binds
+the published parent to its retained local manifest and inode. Use the matching
+image directory from the same capture. After a publisher process crash an
+uncommitted private staging directory can be reclaimed once no writer holds it.
+
+Run the disk-level oracle on a scratch XFS filesystem:
+
+```sh
+TMPDIR=/path/to/writable/xfs python3 tools/filestore-poc/test_extent_publish.py -v
+```

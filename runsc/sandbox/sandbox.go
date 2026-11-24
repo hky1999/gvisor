@@ -16,6 +16,7 @@
 package sandbox
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -1809,6 +1810,7 @@ type CheckpointOpts struct {
 	// process under this directory), and the filestores.json manifest is
 	// written to FilestoreSidecarFile and renamed into place on success.
 	// Requires SkipFilestorePages.
+	ExtentSnapshot           bool
 	FilestoreSnapshotDir     string
 	FilestoreSnapshotTargets []checkpoint.ResourceID
 	FilestoreSnapshotFiles   []*os.File
@@ -1874,7 +1876,12 @@ func (s *Sandbox) Checkpoint(conf *config.Config, cid string, imagePath string, 
 		// the save freeze window.
 		base := len(opt.FilePayload.Files)
 		for i, dest := range opts.FilestoreSnapshotFiles {
+			var snapshotID string
+			if opts.ExtentSnapshot {
+				snapshotID = rand.Text()
+			}
 			opt.FilestoreSnapshot = append(opt.FilestoreSnapshot, control.FilestoreSnapshotTarget{
+				SnapshotID: snapshotID,
 				ResourceID: opts.FilestoreSnapshotTargets[i],
 				Name:       fmt.Sprintf("filestore-%d", i),
 				FDIndex:    base + i,
