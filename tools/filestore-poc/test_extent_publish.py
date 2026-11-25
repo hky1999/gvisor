@@ -15,7 +15,7 @@ import random
 import tempfile
 import unittest
 
-from extent_publish import LocalSnapshot, plan, publish
+from extent_publish import LAST, SHARED, UNWRITTEN, LocalSnapshot, plan, publish
 from publish import fingerprint, punch
 
 PAGE = 4096
@@ -187,6 +187,53 @@ class Generations(unittest.TestCase):
         second = self.capture(2)
         changes, _ = plan(self.origin.stat().st_size, first, second)
         self.assertEqual(changes, [dict(kind="data", offset=1398 * PAGE, length=PAGE)])
+
+    def test_snapshot_uses_backing_inode_filesystem(self):
+        self.capture(0)
+        file = self.root / "0" / "filestore-0"
+        # A file can live on another mount than its containing directory.
+        with tempfile.TemporaryDirectory(dir="/dev/shm") as tmp:
+            foreign = Path(tmp) / file.name
+            with foreign.open("wb") as f:
+                f.truncate(file.stat().st_size)
+            file.unlink()
+            file.symlink_to(foreign)
+            with mock.patch("extent_publish.mappings") as fiemap:
+                snapshot = LocalSnapshot(file.parent, self.origin, self.stack)
+                fiemap.assert_not_called()
+                self.assertFalse(snapshot.mapped)
+
+    def test_uncertain_fiemap_replays_dirty_bytes(self):
+        self.owned.add(0)
+        os.pwrite(self.live.fileno(), b"A" * PAGE, 0)
+        previous = self.capture(1)
+        os.pwrite(self.live.fileno(), b"B" * PAGE, 0)
+        current = self.capture(2)
+        # Simulate kernel responses for the same logical range on both frozen
+        # files. Identical ambiguous physical hints never prove shared data.
+        for flags, physical in (
+            (LAST, 8192),
+            (LAST | SHARED, 0),
+            (0x2 | SHARED, 8192),  # UNKNOWN
+            (0x4 | UNWRITTEN, 8192),  # DELALLOC
+            (0x40000000 | SHARED | UNWRITTEN, 8192),  # future flags
+            (None, 0),  # FIEMAP unsupported
+        ):
+            for snapshot in (previous, current):
+                snapshot.mapped = flags is not None
+                snapshot.map = [(0, PAGE, physical, flags)]
+                snapshot.map_starts = [0]
+            with self.subTest(flags=flags, physical=physical):
+                changes, shared = plan(self.origin.stat().st_size, previous, current)
+                self.assertEqual(changes, [dict(kind="data", offset=0, length=PAGE)])
+                self.assertEqual(shared, 0)
+        for snapshot in (previous, current):
+            snapshot.mapped = True
+            snapshot.map = [(0, PAGE, 8192, SHARED)]
+        current.identity["device"] += 1
+        changes, shared = plan(self.origin.stat().st_size, previous, current)
+        self.assertEqual(changes, [dict(kind="data", offset=0, length=PAGE)])
+        self.assertEqual(shared, 0)
 
     def test_randomized_oracle(self):
         rng = random.Random(311)

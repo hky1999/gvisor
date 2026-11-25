@@ -102,6 +102,14 @@ type Mappable interface {
 	InvalidateUnsavable(ctx context.Context) error
 }
 
+// SharedPinPreparer is implemented by Mappables whose shared translations
+// need stable backing before a long-term pin. Mappables that wrap such a
+// Mappable must forward this operation. The caller must not hold a
+// MappingSpace lock needed by Invalidate.
+type SharedPinPreparer interface {
+	PrepareSharedPin(mr MappableRange) error
+}
+
 // TranslationRetry requests work that may invalidate mappings, including in
 // the faulting address space. MM runs it without its active mappings lock,
 // then re-translates from the beginning with fresh PMA iterators.

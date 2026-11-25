@@ -1063,16 +1063,22 @@ func (rw *regularFileReadWriter) writeToMF(fr memmap.FileRange, srcs safemem.Blo
 		for fr.Start < fr.End {
 			file, run := mf.ReadBacking(fr)
 			if file != mf {
-				run.End = min(run.End, hostarch.PageRoundDown(run.Start)+hostarch.PageSize)
-				if run.Length() == hostarch.PageSize {
-					if err := mf.OverwriteInheritedPage(run.Start, srcs.TakeFirst64(run.Length())); err != nil {
+				// Consume every fully supplied page in this inherited run
+				// before looking up the next backing transition.
+				for hostarch.IsPageAligned(run.Start) && run.Length() >= hostarch.PageSize {
+					if err := mf.OverwriteInheritedPage(run.Start, srcs.TakeFirst64(hostarch.PageSize)); err != nil {
 						return done, err
 					}
-					done += run.Length()
-					fr.Start = run.End
-					srcs = srcs.DropFirst64(run.Length())
+					run.Start += hostarch.PageSize
+					done += hostarch.PageSize
+					srcs = srcs.DropFirst64(hostarch.PageSize)
+				}
+				fr.Start = run.Start
+				if run.Length() == 0 {
 					continue
 				}
+				// Preserve the rest of a partially supplied page.
+				run.End = min(run.End, hostarch.PageRoundDown(run.Start)+hostarch.PageSize)
 			}
 			fd, err := mf.DataFD(run)
 			if err != nil {

@@ -481,6 +481,19 @@ func (d *dentry) CopyMapping(ctx context.Context, ms memmap.MappingSpace, srcAR,
 	return nil
 }
 
+// PrepareSharedPin implements memmap.SharedPinPreparer.
+func (d *dentry) PrepareSharedPin(mr memmap.MappableRange) error {
+	// Stabilize wrappedMappable against copy-up with mapsMu. The wrapped
+	// operation may invalidate mappings and acquire an MM's activeMu,
+	// which precedes the dataMu taken by Translate in the lock order.
+	d.mapsMu.Lock()
+	defer d.mapsMu.Unlock()
+	if p, ok := d.wrappedMappable.(memmap.SharedPinPreparer); ok {
+		return p.PrepareSharedPin(mr)
+	}
+	return nil
+}
+
 // Translate implements memmap.Mappable.Translate.
 func (d *dentry) Translate(ctx context.Context, required, optional memmap.MappableRange, at hostarch.AccessType) ([]memmap.Translation, error) {
 	d.dataMu.RLock()

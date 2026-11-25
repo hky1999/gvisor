@@ -43,7 +43,15 @@ jobs:
         sudo -E apt-get update
         sudo -E apt-get install -y binutils bzip2 make busybox-static libfuse2t64 python3-venv xfsprogs
 
-    - name: Test adjacent filestore generations on XFS
+    - name: Build and verify release archive
+      shell: bash
+      env:
+        ARCH: ${{ matrix.arch }}
+      run: |
+        set -euo pipefail
+        bash tools/akernel-release-archive.sh build "${ARCH}" "${RUNNER_TEMP}/gvisor-pr"
+
+    - name: Test adjacent filestore generations and shared mmap on XFS
       if: matrix.arch == 'amd64'
       shell: bash
       run: |
@@ -56,14 +64,9 @@ jobs:
         trap 'sudo umount "${scratch}/mnt"' EXIT
         sudo install -d -o "$(id -u)" -g "$(id -g)" "${scratch}/mnt/tests"
         TMPDIR="${scratch}/mnt/tests" python3 tools/filestore-poc/test_extent_publish.py -v
-
-    - name: Build and verify release archive
-      shell: bash
-      env:
-        ARCH: ${{ matrix.arch }}
-      run: |
-        set -euo pipefail
-        bash tools/akernel-release-archive.sh build "${ARCH}" "${RUNNER_TEMP}/gvisor-pr"
+        tar -xjf "${RUNNER_TEMP}/gvisor-pr/gvisor-amd64.tar.bz2" -C "${scratch}"
+        sudo timeout -k 10s 180s unshare --mount --pid --fork --mount-proc \
+          bash tools/filestore-poc/test_shared_mmap.sh "${scratch}/runsc" "${scratch}/mnt/tests"
 
     - name: Test runtime compatibility
       shell: bash
@@ -72,7 +75,7 @@ jobs:
       run: |
         set -euo pipefail
         make test OPTIONS="-c opt --test_timeout=600" \
-          TARGETS="//pkg/sentry/checkpoint:checkpoint_test //pkg/sentry/fsimpl/tmpfs:tmpfs_test //pkg/sentry/mm:mm_test //pkg/sentry/pgalloc:pgalloc_test //runsc/sandbox:sandbox_test //runsc/config:config_test //runsc/boot:boot_test //runsc/container:filestore_snapshot_test //runsc/container:state_file_inventory_test //runsc/specutils:specutils_test //runsc/container:serialization_test"
+          TARGETS="//pkg/sentry/checkpoint:checkpoint_test //pkg/sentry/fsimpl/overlay:lazy_filestore_test //pkg/sentry/fsimpl/tmpfs:tmpfs_test //pkg/sentry/mm:mm_test //pkg/sentry/pgalloc:pgalloc_test //runsc/sandbox:sandbox_test //runsc/config:config_test //runsc/boot:boot_test //runsc/container:filestore_snapshot_test //runsc/container:state_file_inventory_test //runsc/specutils:specutils_test //runsc/container:serialization_test"
         # The canonical build container has no sudo. Build there, then use the
         # existing make sudo wrapper to execute the test on the privileged host.
         make sudo BAZEL_OPTIONS="${BAZEL_OPTIONS} -c opt" TARGETS="//runsc/cmd:cmd_test" \
@@ -110,7 +113,7 @@ jobs:
       run: |
         set -euo pipefail
         make test OPTIONS="-c opt --test_timeout=600 --runs_per_test=3" \
-          TARGETS="//runsc/container:state_file_inventory_test //runsc/specutils:specutils_test //pkg/sentry/pgalloc:pgalloc_test //pkg/sentry/fsimpl/tmpfs:tmpfs_test"
+          TARGETS="//runsc/container:state_file_inventory_test //runsc/specutils:specutils_test //pkg/sentry/pgalloc:pgalloc_test //pkg/sentry/fsimpl/overlay:lazy_filestore_test //pkg/sentry/fsimpl/tmpfs:tmpfs_test"
 
     - name: Upload inventory race test logs
       if: always() && matrix.arch == 'amd64'

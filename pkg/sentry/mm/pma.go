@@ -803,9 +803,7 @@ func (mm *MemoryManager) Pin(ctx context.Context, ar hostarch.AddrRange, at host
 	// Ensure that we have usable pmas.
 	for vs := vseg; vs.Ok() && vs.Start() < ar.End; vs = vs.NextSegment() {
 		if !vs.ValuePtr().private {
-			if p, ok := vs.ValuePtr().mappable.(interface {
-				PrepareSharedPin(memmap.MappableRange) error
-			}); ok {
+			if p, ok := vs.ValuePtr().mappable.(memmap.SharedPinPreparer); ok {
 				if err := p.PrepareSharedPin(vs.mappableRangeOf(vs.Range().Intersect(ar))); err != nil {
 					mm.mappingMu.RUnlock()
 					return nil, err

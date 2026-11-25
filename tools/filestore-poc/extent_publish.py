@@ -91,7 +91,9 @@ class LocalSnapshot:
         self.mapped = False
         if (
             subprocess.check_output(
-                ["stat", "-f", "-c", "%t", directory], text=True
+                ["stat", "-f", "-L", "-c", "%t", f"/proc/self/fd/{self.file.fileno()}"],
+                pass_fds=(self.file.fileno(),),
+                text=True,
             ).strip()
             == "58465342"
         ):

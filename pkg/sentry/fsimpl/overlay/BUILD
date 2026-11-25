@@ -1,5 +1,5 @@
 load("//pkg/sync/locking:locking.bzl", "declare_mutex", "declare_rwmutex")
-load("//tools:defs.bzl", "go_library")
+load("//tools:defs.bzl", "go_library", "go_test")
 load("//tools/go_generics:defs.bzl", "go_template_instance")
 
 package(default_applicable_licenses = ["//:license"])
@@ -139,5 +139,29 @@ go_library(
         "//pkg/sync/locking",
         "//pkg/usermem",
         "//pkg/waiter",
+    ],
+)
+
+go_test(
+    name = "lazy_filestore_test",
+    size = "small",
+    srcs = ["lazy_filestore_test.go"],
+    deps = [
+        ":overlay",
+        "//pkg/abi/linux",
+        "//pkg/cpuid",
+        "//pkg/fspath",
+        "//pkg/hostarch",
+        "//pkg/sentry/arch",
+        "//pkg/sentry/contexttest",
+        "//pkg/sentry/fsimpl/tmpfs",
+        "//pkg/sentry/kernel/auth",
+        "//pkg/sentry/limits",
+        "//pkg/sentry/memmap",
+        "//pkg/sentry/mm",
+        "//pkg/sentry/pgalloc",
+        "//pkg/sentry/platform",
+        "//pkg/sentry/vfs",
+        "//pkg/usermem",
     ],
 )
