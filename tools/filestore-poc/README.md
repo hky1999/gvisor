@@ -83,7 +83,11 @@ extent relocation, deduplication or defragmentation. The fast path compares
 synced, known written shared extents by logical offset, device and physical
 address. It replays uncertain ranges conservatively. Snapshot identity binds
 the published parent to its retained local manifest and inode. Use the matching
-image directory from the same capture. After a publisher process crash an
+image directory from the same capture. The filestore fingerprint samples the
+file ends. Shared-range reuse relies on the immutability of the published
+parent and the stability of the frozen XFS extents throughout planning.
+Process image files are verified against their capture SHA-256 digests.
+After a publisher process crash an
 uncommitted private staging directory can be reclaimed once no writer holds it.
 
 Run the disk-level oracle on a scratch XFS filesystem:

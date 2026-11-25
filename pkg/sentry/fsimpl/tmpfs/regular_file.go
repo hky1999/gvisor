@@ -342,23 +342,30 @@ func (rf *regularFile) CopyMapping(ctx context.Context, ms memmap.MappingSpace, 
 	return rf.AddMapping(ctx, ms, dstAR, offset, writable)
 }
 
+// hasInheritedPagesLocked reports whether a write to mr would switch backing
+// for any allocated page. The caller must hold rf.dataMu.
+func (rf *regularFile) hasInheritedPagesLocked(mr memmap.MappableRange) bool {
+	for seg := rf.data.LowerBoundSegment(mr.Start); seg.Ok() && seg.Start() < mr.End; seg = seg.NextSegment() {
+		fr := seg.FileRangeOf(seg.Range().Intersect(mr))
+		file, run := rf.inode.fs.mf.ReadBacking(fr)
+		// If the initial local run ends early, the next page is inherited.
+		if file != rf.inode.fs.mf || run.End < fr.End {
+			return true
+		}
+	}
+	return false
+}
+
 // beginBackingChange serializes first writers. Never call Invalidate with
 // dataMu held: an MM may already hold activeMu while entering Translate.
 func (rf *regularFile) beginBackingChange(mr memmap.MappableRange) {
 	rf.mapsMu.Lock()
 	rf.dataMu.Lock()
-	for seg := rf.data.LowerBoundSegment(mr.Start); seg.Ok() && seg.Start() < mr.End; seg = seg.NextSegment() {
-		fr := seg.FileRangeOf(seg.Range().Intersect(mr))
-		for fr.Start < fr.End {
-			file, run := rf.inode.fs.mf.ReadBacking(fr)
-			if file != rf.inode.fs.mf {
-				rf.switching = mr
-				rf.dataMu.Unlock()
-				rf.mappings.Invalidate(mr, memmap.InvalidateOpts{})
-				return
-			}
-			fr.Start = run.End
-		}
+	if rf.hasInheritedPagesLocked(mr) {
+		rf.switching = mr
+		rf.dataMu.Unlock()
+		rf.mappings.Invalidate(mr, memmap.InvalidateOpts{})
+		return
 	}
 	rf.dataMu.Unlock()
 }
@@ -936,13 +943,6 @@ func (rw *regularFileReadWriter) WriteFromBlocks(srcs safemem.BlockSeq) (uint64,
 		end = math.MaxInt64
 	}
 
-	// The common case can write directly from the user's blocks. If
-	// Translate has exposed a G0 alias, leave the MM callback before
-	// acquiring mapsMu or invalidating any mappings.
-	if !rw.revoking && (rw.file.baselineMapped || rw.file.switching.Length() != 0) {
-		return 0, errRevokeBaseline
-	}
-
 	// Check if seals prevent either file growth or all writes.
 	switch {
 	case rw.file.seals&linux.F_SEAL_WRITE != 0: // Write sealed
@@ -976,6 +976,11 @@ func (rw *regularFileReadWriter) WriteFromBlocks(srcs safemem.BlockSeq) (uint64,
 	pgstartaddr := hostarch.Addr(rw.off).RoundDown()
 	pgendaddr, _ := hostarch.Addr(end).RoundUp()
 	pgMR := memmap.MappableRange{uint64(pgstartaddr), uint64(pgendaddr)}
+	// Leave the MM callback before revoking inherited translations. Once
+	// this range is local, aliases elsewhere do not require staging it.
+	if !rw.revoking && (rw.file.switching.Length() != 0 || (rw.file.baselineMapped && rw.file.hasInheritedPagesLocked(pgMR))) {
+		return 0, errRevokeBaseline
+	}
 	fs := rw.file.inode.fs
 	mayHuge := rw.file.huge && fs.mf.HugepagesEnabled()
 

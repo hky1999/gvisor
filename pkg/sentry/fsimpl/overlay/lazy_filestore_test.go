@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"gvisor.dev/gvisor/pkg/abi/linux"
+	"gvisor.dev/gvisor/pkg/context"
 	"gvisor.dev/gvisor/pkg/cpuid"
 	"gvisor.dev/gvisor/pkg/fspath"
 	"gvisor.dev/gvisor/pkg/hostarch"
@@ -38,6 +39,19 @@ import (
 	"gvisor.dev/gvisor/pkg/sentry/vfs"
 	"gvisor.dev/gvisor/pkg/usermem"
 )
+
+// observedWriteSource counts copies into a staging buffer. BytesIO.CopyInTo
+// supplies blocks directly to the file writer.
+type observedWriteSource struct {
+	usermem.BytesIO
+	staged int
+}
+
+func (s *observedWriteSource) CopyIn(ctx context.Context, addr hostarch.Addr, dst []byte, opts usermem.IOOpts) (int, error) {
+	n, err := s.BytesIO.CopyIn(ctx, addr, dst, opts)
+	s.staged += n
+	return n, err
+}
 
 func TestLazyFilestoreSharedPin(t *testing.T) {
 	cpuid.Initialize()
@@ -165,6 +179,33 @@ func TestLazyFilestoreSharedPin(t *testing.T) {
 		t.Fatalf("pin read %q after shared mmap write, want B", pinned[1])
 	}
 	want[1] = 'B'
+
+	// Keep an inherited alias on the second page while writing the local
+	// first page repeatedly. Only a write reaching the second page needs
+	// to revoke that alias.
+	if _, err := ro.CopyIn(ctx, addr+hostarch.PageSize, first[:], usermem.IOOpts{}); err != nil || first[0] != 'A' {
+		t.Fatalf("second inherited page = %q, %v", first, err)
+	}
+	source := observedWriteSource{BytesIO: usermem.BytesIO{Bytes: []byte{'D'}}}
+	src := usermem.BytesIOSequence(source.Bytes)
+	src.IO = &source
+	for i := 0; i < 3; i++ {
+		if n, err := writer.PWrite(ctx, src, 2, vfs.WriteOptions{}); n != 1 || err != nil {
+			t.Fatalf("local pwrite wrote %d: %v", n, err)
+		}
+	}
+	if source.staged != 0 || pinned[2] != 'D' {
+		t.Fatalf("local pwrite staged %d bytes, pin reads %q", source.staged, pinned[2])
+	}
+	want[2] = 'D'
+	cross := []byte{'E', 'F'}
+	if n, err := writer.PWrite(ctx, usermem.BytesIOSequence(cross), hostarch.PageSize-1, vfs.WriteOptions{}); n != 2 || err != nil {
+		t.Fatalf("pwrite across backing transition wrote %d: %v", n, err)
+	}
+	if _, err := ro.CopyIn(ctx, addr+hostarch.PageSize, first[:], usermem.IOOpts{}); err != nil || first[0] != 'F' {
+		t.Fatalf("retained alias after pwrite = %q, %v", first, err)
+	}
+	copy(want[hostarch.PageSize-1:], cross)
 
 	// Release the reader's VMA: the pin survives it. Write across the
 	// pinned local page, full inherited pages, and a final partial page.

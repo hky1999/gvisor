@@ -149,6 +149,7 @@ go_test(
     deps = [
         ":overlay",
         "//pkg/abi/linux",
+        "//pkg/context",
         "//pkg/cpuid",
         "//pkg/fspath",
         "//pkg/hostarch",

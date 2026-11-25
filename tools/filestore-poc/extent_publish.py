@@ -52,7 +52,9 @@ class LocalSnapshot:
         if entry["file"] != "filestore-0":
             raise ValueError("expected one root filestore")
         self.entry = entry
-        self.layer = entry["delta"]["frozen"]
+        self.layer = (entry.get("delta") or {}).get("frozen")
+        if not self.layer:
+            raise ValueError("expected a frozen layer from --filestore-extent-snapshot")
         self.size = entry["size_bytes"]
         self.file = stack.enter_context(
             (directory / entry["file"]).open("rb", buffering=0)
@@ -101,7 +103,9 @@ class LocalSnapshot:
                 self.map = list(mappings(self.file))
                 self.mapped = True
             except OSError as e:
-                if e.errno not in (errno.ENOTTY, errno.EOPNOTSUPP):
+                # EBADR is FIEMAP's response to an unsupported input flag.
+                # A partial extent list also has to be discarded on fallback.
+                if e.errno not in (errno.ENOTTY, errno.EOPNOTSUPP, errno.ENOSYS, errno.EBADR):
                     raise
         self.local_starts = [r[0] for r in self.local]
         self.map_starts = [r[0] for r in self.map]

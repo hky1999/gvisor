@@ -203,6 +203,26 @@ class Generations(unittest.TestCase):
                 fiemap.assert_not_called()
                 self.assertFalse(snapshot.mapped)
 
+    def test_fiemap_fallback_after_partial_query(self):
+        self.owned.add(0)
+        os.pwrite(self.live.fileno(), b"A" * PAGE, 0)
+        for error in (errno.EBADR, errno.EOPNOTSUPP, errno.EIO):
+            def incomplete(file):
+                yield (0, PAGE, 8192, SHARED)
+                raise OSError(error, "injected FIEMAP error")
+
+            with self.subTest(error=error), mock.patch("extent_publish.mappings", incomplete):
+                if error == errno.EIO:
+                    with self.assertRaises(OSError):
+                        self.capture(error)
+                else:
+                    current = self.capture(error)
+                    self.assertFalse(current.mapped)
+                    self.assertEqual(current.map, [])
+                    changes, shared = plan(self.origin.stat().st_size, None, current)
+                    self.assertEqual(changes, [dict(kind="data", offset=0, length=PAGE)])
+                    self.assertEqual(shared, 0)
+
     def test_uncertain_fiemap_replays_dirty_bytes(self):
         self.owned.add(0)
         os.pwrite(self.live.fileno(), b"A" * PAGE, 0)
