@@ -24,6 +24,7 @@ import (
 	"gvisor.dev/gvisor/pkg/abi/linux"
 	"gvisor.dev/gvisor/pkg/context"
 	"gvisor.dev/gvisor/pkg/cpuid"
+	"gvisor.dev/gvisor/pkg/errors/linuxerr"
 	"gvisor.dev/gvisor/pkg/fspath"
 	"gvisor.dev/gvisor/pkg/hostarch"
 	"gvisor.dev/gvisor/pkg/sentry/arch"
@@ -52,6 +53,23 @@ func (s *observedWriteSource) CopyIn(ctx context.Context, addr hostarch.Addr, ds
 	s.staged += n
 	return n, err
 }
+
+// All test I/O goes through the MemoryManager's internal mappings. Keep the
+// platform's user address limits without spawning a ptrace subprocess.
+type internalIOPlatform struct{ platform.Platform }
+
+func (internalIOPlatform) SupportsAddressSpaceIO() bool { return false }
+
+func (internalIOPlatform) NewAddressSpace(platform.AddressSpaceOptions) (platform.AddressSpace, error) {
+	return internalIOAddressSpace{}, nil
+}
+
+// No platform mappings are installed by internal I/O, so MM invalidation and
+// teardown have no host mappings to remove. Any other call is unexpected.
+type internalIOAddressSpace struct{ platform.AddressSpace }
+
+func (internalIOAddressSpace) Unmap(hostarch.Addr, uint64) {}
+func (internalIOAddressSpace) Release()                    {}
 
 func TestLazyFilestoreSharedPin(t *testing.T) {
 	cpuid.Initialize()
@@ -131,9 +149,10 @@ func TestLazyFilestoreSharedPin(t *testing.T) {
 	root := mount(overlay.Name, overlay.FilesystemOptions{UpperRoot: upper, LowerRoots: []vfs.VirtualDentry{mount(tmpfs.Name, nil)}})
 	reader := open(root, linux.O_RDONLY)
 	writer := open(root, linux.O_RDWR)
+	p := internalIOPlatform{platform.FromContext(ctx)}
 	mapFile := func(fd *vfs.FileDescription, perms hostarch.AccessType) (*mm.MemoryManager, hostarch.Addr) {
 		t.Helper()
-		m, err := mm.NewMemoryManager(platform.FromContext(ctx), pgalloc.MemoryFileFromContext(ctx))
+		m, err := mm.NewMemoryManager(p, pgalloc.MemoryFileFromContext(ctx))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -160,6 +179,9 @@ func TestLazyFilestoreSharedPin(t *testing.T) {
 	var first [1]byte
 	if _, err := ro.CopyIn(ctx, addr, first[:], usermem.IOOpts{}); err != nil || first[0] != 'A' {
 		t.Fatalf("inherited read = %q, %v", first, err)
+	}
+	if n, err := ro.CopyOut(ctx, addr, []byte{'X'}, usermem.IOOpts{}); n != 0 || !linuxerr.Equals(linuxerr.EFAULT, err) {
+		t.Fatalf("write to read-only mapping copied %d with %v, want 0 and EFAULT", n, err)
 	}
 	pins, err := ro.Pin(ctx, hostarch.AddrRange{Start: addr, End: addr + hostarch.PageSize}, hostarch.Read, false)
 	defer mm.Unpin(pins)

@@ -151,6 +151,7 @@ go_test(
         "//pkg/abi/linux",
         "//pkg/context",
         "//pkg/cpuid",
+        "//pkg/errors/linuxerr",
         "//pkg/fspath",
         "//pkg/hostarch",
         "//pkg/sentry/arch",
